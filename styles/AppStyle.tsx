@@ -3,6 +3,7 @@ import Colors from '../constants/ColorsConstant';
 import { ColorProperties } from "react-native-reanimated/lib/typescript/Colors";
 
 const screenWidth = Dimensions.get('screen').width;
+const screenHeight = Dimensions.get('screen').height;
 
 export default StyleSheet.create({
    
@@ -10,6 +11,13 @@ export default StyleSheet.create({
         flex: 1,
         alignSelf: 'stretch',
         justifyContent: 'flex-start',
+    },
+
+    containerCenter: {
+        width: screenWidth,
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 
     containerTitle: {
@@ -46,6 +54,13 @@ export default StyleSheet.create({
     linearContenair: {
         flex: 1,
         alignItems: 'center',
+    }, 
+
+    linearContenairMain: {
+        width : screenWidth,
+        height: screenHeight,
+        alignItems: 'center',
+        justifyContent: 'center',
     }, 
     
     btn: {
@@ -262,8 +277,11 @@ export default StyleSheet.create({
 
     statsNumberContainer: {
         width: screenWidth,
+        flexDirection: 'row',
+    },
 
-        flex: 1,
+    statsNicotineContainer: {
+        width: screenWidth,
         flexDirection: 'row',
     },
 
@@ -273,9 +291,25 @@ export default StyleSheet.create({
         padding:10,
     },
 
+    statsNicotineItemContainer: {
+        width: (screenWidth - 20),
+        height:  (screenWidth / 3),
+        padding:10,
+    },
+
     statsNumberItem2Container: {
         alignItems: 'center',
         width: (screenWidth / 3) - 20,
+        height:  (screenWidth / 3) - 20,
+        backgroundColor: Colors.white,
+        borderWidth: 3,
+        borderColor: Colors.blueFb,
+        borderRadius: 10,
+    },
+
+    statsNicotineItem2Container: {
+        alignItems: 'center',
+        width: (screenWidth) - 20,
         height:  (screenWidth / 3) - 20,
         backgroundColor: Colors.white,
         borderWidth: 3,
@@ -291,8 +325,24 @@ export default StyleSheet.create({
         fontSize: 20,
     },
 
+    statItemTitleNicotine: {
+        width: (screenWidth - 20),
+        color: Colors.blueFb,
+        textAlign:'center',
+        padding: 10,
+        fontSize: 20,
+    },
+
     statItemNumber: {
         width: (screenWidth / 3) - 20,
+        color: Colors.blueFb,
+        textAlign:'center',
+        padding: 5,
+        fontSize: 40,
+    },
+
+    statItemNicotine: {
+        width: (screenWidth - 20),
         color: Colors.blueFb,
         textAlign:'center',
         padding: 5,

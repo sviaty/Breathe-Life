@@ -32,9 +32,17 @@ const StatisticsMounthSreen = () => {
     let [countPill, setCountPill] = useState<number>(0);
     let [countCigarette, setCountCigarette] = useState<number>(0);
 
+    let [countNicotine, setCountNicotine] = useState<number>(0);
+    let [countGoudron, setCountGoudron] = useState<number>(0);
+    let [countCarbonne, setCountCarbonne] = useState<number>(0);
+
     const [isLoadCountPatch, setIsLoadCountPatch] = useState<boolean>(true);
     const [isLoadCountPill, setIsLoadCountPill] = useState<boolean>(true);
     const [isLoadCountCigarette, setIsLoadCountCigarette] = useState<boolean>(true);
+
+    const [isLoadCountPatchDetails, setIsLoadCountPatchDetails] = useState<boolean>(true);
+    const [isLoadCountPillDetails, setIsLoadCountPillDetails] = useState<boolean>(true);
+    const [isLoadCountCigaretteDetails, setIsLoadCountCigaretteDetails] = useState<boolean>(true);
 
     const [dataCigaretteTab, setDataCigaretteTab] = useState<Cigarette[]>([]);
 
@@ -43,9 +51,20 @@ const StatisticsMounthSreen = () => {
 
     // UseEffect 
     useEffect(() => {
+
+        countNicotine = 0
+        setCountNicotine(countNicotine)
+
+        countGoudron = 0
+        setCountGoudron(countGoudron)
+
+        countCarbonne = 0
+        setCountCarbonne(countCarbonne)
+
         getStatPatchDayInDatabase()
         getStatPillDayInDatabase()
         getStatCigaretteDayInDatabase()
+
     }, [isFocused])  
 
     /**
@@ -82,11 +101,7 @@ const StatisticsMounthSreen = () => {
 
                         i+=1
                         
-                        //const p = new Cigarette(cigarette.id, cigaretteData.cigaretteName, cigaretteData.cigaretteNicotine, cigaretteData.cigaretteGoudron, cigaretteData.cigaretteCarbone, cigaretteData.cigarettePrice, cigaretteData.isSelected);
-                        //console.log(p);
-    
-                        //dataCigaretteTab.push(p)
-                        //setDataCigaretteTab([...dataCigaretteTab])
+                        getStatPatchInDatabase(patchData.idPatch)
                     }
                 })
 
@@ -102,6 +117,48 @@ const StatisticsMounthSreen = () => {
         } catch (error) {
             console.error("Error get user patchs in firestore database : ")
             console.error(error)
+        }
+    }
+
+    /**
+     * Function getStatPatchInDatabase
+     */
+    const getStatPatchInDatabase = async (idPatch: string) => {
+        //console.log(idPatch);
+        setIsLoadCountPatchDetails(true)
+
+        try {
+            const q = query(
+                collection(db, "patchs"), 
+                //where("idUser", "==", userSelector.userId),
+            );
+
+            const patchList = await getDocs(q);
+            //console.log(patchList.size);
+    
+            if(patchList.size != 0){
+                patchList.forEach((patch) => {
+                    if(idPatch == patch.id){
+                        //console.log(patch.id);
+                        const dataPatch = patch.data()
+                        //console.log(dataPatch)
+
+                        //console.log(countNicotine)
+                        countNicotine = countNicotine + parseInt(dataPatch.patchNicotine)
+
+                        setCountNicotine(countNicotine)
+                        //console.log(countNicotine)
+                    }
+                })
+                setIsLoadCountPatchDetails(false)
+            } else {
+                setIsLoadCountPatchDetails(false)
+            }
+        } catch (error) {
+            console.error("Error get patchs in firestore database : ")
+            console.error(error)
+
+            setIsLoadCountPatchDetails(false)
         }
     }
 
@@ -139,11 +196,7 @@ const StatisticsMounthSreen = () => {
 
                         i+=1
                         
-                        //const p = new Cigarette(cigarette.id, cigaretteData.cigaretteName, cigaretteData.cigaretteNicotine, cigaretteData.cigaretteGoudron, cigaretteData.cigaretteCarbone, cigaretteData.cigarettePrice, cigaretteData.isSelected);
-                        //console.log(p);
-    
-                        //dataCigaretteTab.push(p)
-                        //setDataCigaretteTab([...dataCigaretteTab])
+                        getStatPillInDatabase(pillData.idPill)
                     }
                 })
 
@@ -159,6 +212,47 @@ const StatisticsMounthSreen = () => {
         } catch (error) {
             console.error("Error get user pills in firestore database : ")
             console.error(error)
+        }
+    }
+
+    /**
+     * Function getStatPillInDatabase
+     */
+    const getStatPillInDatabase = async (idPill: string) => {
+        //console.log(idPill);
+
+        setIsLoadCountPillDetails(true)
+
+        try {
+            const q = query(
+                collection(db, "pills"), 
+            );
+
+            const pillList = await getDocs(q);
+            //console.log(patchList.size);
+    
+            if(pillList.size != 0){
+                pillList.forEach((pill) => {
+                    if(idPill == pill.id){
+                        //console.log(patch.id);
+                        const dataPill = pill.data()
+                        //console.log(dataPill)
+
+                        //console.log(countNicotine)
+                        countNicotine = countNicotine + parseFloat(dataPill.pillNicotine)
+                        setCountNicotine(countNicotine)
+                        //console.log(countNicotine)
+                    }
+                })
+                setIsLoadCountPillDetails(false)
+            } else {
+                setIsLoadCountPillDetails(false)
+            }
+        } catch (error) {
+            console.error("Error get patchs in firestore database : ")
+            console.error(error)
+
+            setIsLoadCountPillDetails(false)
         }
     }
 
@@ -198,11 +292,8 @@ const StatisticsMounthSreen = () => {
                     if(cigaretteDateMounth == currentDateMount && cigaretteDateYear == currentDateYear){
                         
                         i += 1
-                        //const p = new Cigarette(cigarette.id, cigaretteData.cigaretteName, cigaretteData.cigaretteNicotine, cigaretteData.cigaretteGoudron, cigaretteData.cigaretteCarbone, cigaretteData.cigarettePrice, cigaretteData.isSelected);
-                        //console.log(p);
-    
-                        //dataCigaretteTab.push(p)
-                        //setDataCigaretteTab([...dataCigaretteTab])
+                        
+                        getStatCigaretteInDatabase(cigaretteData.idCigarette)
                     }
                 });
 
@@ -218,6 +309,55 @@ const StatisticsMounthSreen = () => {
         } catch (error) {
             console.error("Error get user cigarettes in firestore database : ")
             console.error(error)
+        }
+    }
+
+    /**
+     * Function getStatCigaretteInDatabase
+     */
+    const getStatCigaretteInDatabase = async (idCigarette: string) => {
+        //console.log(idCigarette);
+
+        setIsLoadCountCigaretteDetails(true)
+
+        try {
+            const q = query(
+                collection(db, "cigarettes"), 
+            );
+
+            const cigaretteList = await getDocs(q);
+            //console.log(patchList.size);
+    
+            if(cigaretteList.size != 0){
+                cigaretteList.forEach((cigarette) => {
+                    if(idCigarette == cigarette.id){
+                        //console.log(patch.id);
+                        const dataCigarette = cigarette.data()
+                        //console.log(dataCigarette)
+
+                        //console.log(countNicotine)
+                        countNicotine = countNicotine + parseFloat(dataCigarette.cigaretteNicotine)
+                        setCountNicotine(countNicotine)
+                        //console.log(countNicotine)  
+
+                        countGoudron = countGoudron + parseFloat(dataCigarette.cigaretteGoudron)
+                        setCountGoudron(countGoudron)
+
+                        countCarbonne = countCarbonne + parseFloat(dataCigarette.cigaretteCarbone)
+                        setCountCarbonne(countCarbonne)
+
+                    }
+                })
+
+                setIsLoadCountCigaretteDetails(false)
+            } else {
+                setIsLoadCountCigaretteDetails(false)
+            }
+        } catch (error) {
+            console.error("Error get patchs in firestore database : ")
+            console.error(error)
+
+            setIsLoadCountCigaretteDetails(false)
         }
     }
 
@@ -267,6 +407,46 @@ const StatisticsMounthSreen = () => {
                 </View>
 
             </View>
+
+            <View style={AppStyle.statsNicotineContainer}>
+                <View style={AppStyle.statsNicotineItemContainer}>
+                    <View style={AppStyle.statsNicotineItem2Container}>
+                        <Text style={AppStyle.statItemTitleNicotine}> Nicotine </Text>
+                        {isLoadCountPatchDetails == true && isLoadCountPillDetails == true && isLoadCountCigaretteDetails == true ? 
+                        <LoaderComponent text="" step="" color={Colors.blueFb} size={'small'}/>
+                        : 
+                        <Text style={AppStyle.statItemNicotine}> {Math.round(countNicotine * 100) / 100} mg </Text>
+                        }
+                    </View>
+                </View>
+            </View>
+
+            <View style={AppStyle.statsNicotineContainer}>
+                <View style={AppStyle.statsNicotineItemContainer}>
+                    <View style={AppStyle.statsNicotineItem2Container}>
+                        <Text style={AppStyle.statItemTitleNicotine}> Goudron </Text>
+                        {isLoadCountCigaretteDetails == true ? 
+                        <LoaderComponent text="" step="" color={Colors.blueFb} size={'small'}/>
+                        : 
+                        <Text style={AppStyle.statItemNicotine}> {countGoudron} mg </Text>
+                        }
+                    </View>
+                </View>
+            </View>
+
+            <View style={AppStyle.statsNicotineContainer}>
+                <View style={AppStyle.statsNicotineItemContainer}>
+                    <View style={AppStyle.statsNicotineItem2Container}>
+                        <Text style={AppStyle.statItemTitleNicotine}> Monoxyde de carbone </Text>
+                        {isLoadCountCigaretteDetails == true ? 
+                        <LoaderComponent text="" step="" color={Colors.blueFb} size={'small'}/>
+                        : 
+                        <Text style={AppStyle.statItemNicotine}> {countCarbonne} mg </Text>
+                        }
+                    </View>
+                </View>
+            </View>
+
         </LinearGradient>
         </View>
     </SafeAreaProvider>

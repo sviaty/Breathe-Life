@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, TouchableOpacity, Text, View, Pressable } from 'react-native';
-
+import { LinearGradient } from 'expo-linear-gradient';
 import Colors from '../constants/ColorsConstant';
 
 import { NavigationContainer } from '@react-navigation/native';
@@ -14,6 +14,9 @@ import User from '../datas/UserData';
 import SecureStoreClass from '../secures/SecureStore';
 const secureStoreClass = new SecureStoreClass()
 
+// Components
+import LoaderComponent from '../components/LoaderComponent';
+
 import { RootState } from '../redux/Store';
 import { setIsLogin } from '../redux/slices/IsLoginSlice';
 import { setUser } from '../redux/slices/UserSlice';
@@ -21,6 +24,8 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, query, where, doc, getDoc, getDocs } from "firebase/firestore";
+import AppStyle from '../styles/AppStyle';
+import App from '../App';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDtDQYI2sJN-GT9jCfg4YYDrhaiMbalcMk",
@@ -39,6 +44,9 @@ const db = getFirestore(app);
 const MainScreen = () => {
 
     const [loggin, setLoggin] = useState<boolean>(false)
+
+    const [isLoader, setIsLoader] = useState<boolean>(true)
+
     const isLogin = useSelector((state: RootState) => state.isLoginReducer.isLogin);
 
     const userSelector = useSelector((state: RootState) => state.userReducer.user);
@@ -59,6 +67,7 @@ const MainScreen = () => {
         if(token == null){
           //console.log('Le token est null')
           setLoggin(false)
+          setIsLoader(false)
           dispatch(setIsLogin(false));
         } else {
           getUserInDatabase()
@@ -86,6 +95,7 @@ const MainScreen = () => {
               const u = new User(docSnap.id, dataUser.userName, dataUser.userMail, '');
               dispatch(setUser(u));
               setLoggin(true)
+              setIsLoader(false)
               dispatch(setIsLogin(true));
             }
           } catch (error) {
@@ -100,34 +110,52 @@ const MainScreen = () => {
         dispatch(setIsLogin(false));
     }
 
-    return (
-    <NavigationContainer>
-        <Stack.Navigator>
-        {loggin == true ? 
-          <Stack.Screen 
-            name="UserLoginScreen" 
-            component={UserLoginScreen}
-            options={({ navigation }) => ({
-              title: 'Breathe Life',
-              headerRight: () => (
-                <Pressable
-                  onPress={() => handleLogout()}
-                >
-                <Text style={{color: Colors.blueFb}}>Déconnexion</Text>
-                </Pressable>
-              ),
-            })} />
-        : 
-          <Stack.Screen 
-            name="UserNoLoginScreen" 
-            component={UserNoLoginScreen} 
-            options={({ navigation }) => ({
-              title: 'Breathe Life',
-            })} />
-        }
-        </Stack.Navigator>
-    </NavigationContainer>
-  )
+    if(isLoader == true){
+      return (
+        <View style={AppStyle.containerCenter}>
+          <LinearGradient
+            colors={[Colors.colorOrange, Colors.colorOrange2]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={AppStyle.linearContenairMain}>
+
+            <LoaderComponent text="Chargement de l'application" step="" color={Colors.white} size={'large'}/>
+          </LinearGradient>
+        </View>              
+      )
+    } else {
+      return (
+        <NavigationContainer> 
+          <Stack.Navigator>
+          { loggin == true ? 
+            <Stack.Screen 
+              name="UserLoginScreen" 
+              component={UserLoginScreen}
+              options={({ navigation }) => ({
+                title: 'Breathe Life',
+                headerRight: () => (
+                  <Pressable
+                    onPress={() => handleLogout()}
+                  >
+                  <Text style={{color: Colors.blueFb}}>Déconnexion</Text>
+                  </Pressable>
+                ),
+              })} />
+          : 
+            <Stack.Screen 
+              name="UserNoLoginScreen" 
+              component={UserNoLoginScreen} 
+              options={({ navigation }) => ({
+                title: 'Breathe Life',
+              })} />
+          }
+          </Stack.Navigator>    
+        </NavigationContainer>
+      )
+    }
+    
+    
+
 }
 
 export default MainScreen
