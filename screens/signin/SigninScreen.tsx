@@ -107,7 +107,7 @@ const SigninComponent = ({navigation}: {navigation: any}) => {
     return (
         <View style={AppStyle.container}>
         <LinearGradient
-            colors={[Colors.colorOrange, Colors.colorOrange2]}
+            colors={[Colors.white, Colors.white]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={AppStyle.linearContenair}>
@@ -126,12 +126,16 @@ const SigninComponent = ({navigation}: {navigation: any}) => {
                     style={SigninStyle.textInput}
                     placeholder="Enter your mail"
                     value={mail}
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    keyboardType="email-address"
                     onChangeText={setMail} />
 
                 <TextInput 
                     style={SigninStyle.textInput}
                     placeholder="Enter your password"
                     value={pwd}
+                    autoCapitalize="none"
                     onChangeText={setPwd}
                     secureTextEntry={true} />
 
@@ -144,7 +148,7 @@ const SigninComponent = ({navigation}: {navigation: any}) => {
 
                 {isLoader == true ? 
                 <View>
-                <LoaderComponent text="Connection is in progress ..." step={step} color={Colors.white}/>
+                <LoaderComponent text="Connection is in progress ..." step={step} color={Colors.colorOrange}/>
                 </View>
                 : 
                 <Text style={SigninStyle.textError}>{error}</Text>

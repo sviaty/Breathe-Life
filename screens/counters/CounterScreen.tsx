@@ -24,7 +24,7 @@ const SettingCounterComponent = () => {
           borderBottomColor: 'gray',
       },
       tabBarStyle: {
-        backgroundColor: Colors.white,
+        backgroundColor: '#e6e6e6',
       },
     }}>
       <Tab.Screen name="Patchs" component={SettingPatchComponent} />

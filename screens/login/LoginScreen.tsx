@@ -143,7 +143,7 @@ const LoginComponent = () => {
     return (
         <View style={AppStyle.container}>
         <LinearGradient
-            colors={[Colors.colorOrange, Colors.colorOrange2]}
+            colors={[Colors.white, Colors.white]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={AppStyle.linearContenair}>
@@ -156,12 +156,17 @@ const LoginComponent = () => {
                 style={LoginStyle.textInput}
                 placeholder="Enter your mail"
                 value={mail}
+                autoCapitalize="none"
+                autoComplete="email"
+                keyboardType="email-address"
+                autoFocus
                 onChangeText={setMail} />
 
             <TextInput 
                 style={LoginStyle.textInput}
                 placeholder="Enter your password"
                 value={pwd}
+                autoCapitalize="none"
                 onChangeText={setPwd}
                 secureTextEntry={true} />
 

@@ -203,8 +203,8 @@ const SettingPillComponent: React.FunctionComponent<BottomSheetComponentProps>  
         <View style={AppStyle.itemContainerView}>
             
             <View style={ AppStyle.itemPatchContainer }   >
-                <Text>Nom de la pastille : {item.pillName} </Text>
-                <Text>Taux de nicotine : {item.pillNicotine} (mg)</Text>
+                <Text style={ AppStyle.itemPatchText }>Nom de la pastille : {item.pillName} </Text>
+                <Text style={ AppStyle.itemPatchText }>Taux de nicotine : {item.pillNicotine} (mg)</Text>
             </View>
         
             <View style={ AppStyle.itemPatchBtnContainer } >
@@ -238,7 +238,7 @@ const SettingPillComponent: React.FunctionComponent<BottomSheetComponentProps>  
     <SafeAreaProvider>
         <View style={AppStyle.container}>
         <LinearGradient
-            colors={[Colors.colorOrange, Colors.colorOrange2]}
+            colors={[Colors.white, Colors.white]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={AppStyle.linearContenair}>

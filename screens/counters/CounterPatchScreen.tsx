@@ -205,8 +205,8 @@ const SettingPatchComponent: React.FunctionComponent<BottomSheetComponentProps> 
         <View style={AppStyle.itemContainerView}>
             
             <View style={ AppStyle.itemPatchContainer } >
-                <Text>Nom du patch : {item.patchName} </Text>
-                <Text>Taux de nicotine : {item.patchNicotine} (mg/24h)</Text>
+                <Text style={ AppStyle.itemPatchText }>Nom du patch : {item.patchName} </Text>
+                <Text style={ AppStyle.itemPatchText }>Taux de nicotine : {item.patchNicotine} (mg/24h)</Text>
             </View>
             
             <View style={ AppStyle.itemPatchBtnContainer } >
@@ -242,7 +242,7 @@ const SettingPatchComponent: React.FunctionComponent<BottomSheetComponentProps> 
     <SafeAreaProvider>
         <View style={AppStyle.container}>
         <LinearGradient
-            colors={[Colors.colorOrange, Colors.colorOrange2]}
+            colors={[Colors.white, Colors.white]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={AppStyle.linearContenair}>

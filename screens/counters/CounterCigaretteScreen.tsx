@@ -221,11 +221,11 @@ const SettingCigaretteComponent: React.FunctionComponent<BottomSheetComponentPro
         <View style={AppStyle.itemContainerView}>
                     
             <View style={ AppStyle.itemCigContainer }   >
-                <Text>Marque des cigarettes : {item.cigaretteName} </Text>
-                <Text>Taux de nicotine : {item.cigaretteNicotine} (mg)</Text>
-                <Text>Taux de goudron : {item.cigaretteGoudron} (mg)</Text>
-                <Text>Taux de monoxyde de carbone : {item.cigaretteCarbone} (mg)</Text>
-                <Text>Prix du paquet : {item.cigarettePrice} (euros)</Text>
+                <Text style={ AppStyle.itemPatchText }>Marque des cigarettes : {item.cigaretteName} </Text>
+                <Text style={ AppStyle.itemPatchText }>Taux de nicotine : {item.cigaretteNicotine} (mg)</Text>
+                <Text style={ AppStyle.itemPatchText }>Taux de goudron : {item.cigaretteGoudron} (mg)</Text>
+                <Text style={ AppStyle.itemPatchText }>Taux de monoxyde de carbone : {item.cigaretteCarbone} (mg)</Text>
+                <Text style={ AppStyle.itemPatchText }>Prix du paquet : {item.cigarettePrice} (euros)</Text>
             </View>
 
             <View style={ AppStyle.itemPatchBtnContainer } >
@@ -261,7 +261,7 @@ const SettingCigaretteComponent: React.FunctionComponent<BottomSheetComponentPro
 
         <View style={AppStyle.container}>
         <LinearGradient
-            colors={[Colors.colorOrange, Colors.colorOrange2]}
+            colors={[Colors.white, Colors.white]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={AppStyle.linearContenair}>

@@ -264,7 +264,7 @@ const StatisticsDayScreen = () => {
             );
 
             const userCigaretteList = await getDocs(q);
-            //console.log(cigaretteList);
+            //console.log(userCigaretteList.size);
     
             if(userCigaretteList.size != 0){
 
@@ -285,13 +285,20 @@ const StatisticsDayScreen = () => {
                     }
                 });
 
+                if(i == 0){
+                    setIsLoadCountCigaretteDetails(false)
+                }
+
                 setCountCigarette(i)
+
                 setIsLoadCountCigarette(false)
 
             } else {
-                //console.log('cigaretteList size = 0');
+                console.log('cigaretteList size = 0');
                 setCountCigarette(0)
                 setIsLoadCountCigarette(false)
+
+                setIsLoadCountCigaretteDetails(false)
                 
                 dataCigaretteTab.length = 0
                 setDataCigaretteTab([...dataCigaretteTab])
@@ -357,7 +364,7 @@ const StatisticsDayScreen = () => {
 
         <View style={AppStyle.container}>
         <LinearGradient
-            colors={[Colors.colorOrange, Colors.colorOrange2]}
+            colors={[Colors.white, Colors.white]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={AppStyle.linearContenair}>

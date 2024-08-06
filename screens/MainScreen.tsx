@@ -53,28 +53,32 @@ const MainScreen = () => {
 
     // Slice
     useEffect(() => {
-        setLoggin(isLogin)
+      setLoggin(isLogin)
     }, [isLogin])  
+
+    useEffect(() => {
+      setIsLoader(true)
+
+      fetchDataTokenId();
+    }, [])
 
     // Dispatch
     const dispatch = useDispatch();
     // dispatch(setIsLogin(true));
     // console.log('isLogin ' + isLogin)
 
-    useEffect(() => {
-      const fetchDataTokenId = async () => {
-        const token = await secureStoreClass.getToken('tokenId')
-        if(token == null){
-          //console.log('Le token est null')
-          setLoggin(false)
-          setIsLoader(false)
-          dispatch(setIsLogin(false));
-        } else {
-          getUserInDatabase()
-        }
+    const fetchDataTokenId = async () => {
+      const token = await secureStoreClass.getToken('tokenId')
+      if(token == null){
+        //console.log('Le token est null')
+        setLoggin(false)
+        dispatch(setIsLogin(false));
+
+        setIsLoader(false)
+      } else {
+        getUserInDatabase()
       }
-      fetchDataTokenId();
-    },[])
+    }
 
     const getUserInDatabase = async () => {
 
@@ -94,11 +98,15 @@ const MainScreen = () => {
             if(dataUser != null){
               const u = new User(docSnap.id, dataUser.userName, dataUser.userMail, '');
               dispatch(setUser(u));
+
               setLoggin(true)
-              setIsLoader(false)
               dispatch(setIsLogin(true));
+              setIsLoader(false)
             }
           } catch (error) {
+            setLoggin(false)
+            dispatch(setIsLogin(false));
+            setIsLoader(false)
             console.error("Error get data : "+ error);
           }
         }
@@ -107,55 +115,75 @@ const MainScreen = () => {
     const handleLogout = async () => {
         await secureStoreClass.deleteToken('tokenId')
         setLoggin(false)
+        //setIsLoader(false)
         dispatch(setIsLogin(false));
     }
 
     if(isLoader == true){
       return (
-        <View style={AppStyle.containerCenter}>
+        <View style={AppStyle.containerCenter}> 
           <LinearGradient
-            colors={[Colors.colorOrange, Colors.colorOrange2]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={AppStyle.linearContenairMain}>
+              colors={[Colors.colorOrange, Colors.colorOrange2]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={AppStyle.linearContenairMain}>
 
             <LoaderComponent text="Chargement de l'application" step="" color={Colors.white} size={'large'}/>
           </LinearGradient>
-        </View>              
+        </View>
       )
     } else {
-      return (
+
+      if(loggin == true){
+        return (
+
         <NavigationContainer> 
           <Stack.Navigator>
-          { loggin == true ? 
             <Stack.Screen 
               name="UserLoginScreen" 
               component={UserLoginScreen}
               options={({ navigation }) => ({
                 title: 'Breathe Life',
+                headerTintColor: Colors.white,
+                headerStyle: {
+                  backgroundColor: Colors.colorOrange,
+                },
                 headerRight: () => (
                   <Pressable
                     onPress={() => handleLogout()}
                   >
-                  <Text style={{color: Colors.blueFb}}>Déconnexion</Text>
+                  <Text style={{color: Colors.white}}>Déconnexion</Text>
                   </Pressable>
                 ),
               })} />
-          : 
+
+          </Stack.Navigator>    
+        </NavigationContainer>
+         
+        )
+      } else {
+        return (
+        <NavigationContainer> 
+          <Stack.Navigator>
+
             <Stack.Screen 
               name="UserNoLoginScreen" 
               component={UserNoLoginScreen} 
               options={({ navigation }) => ({
                 title: 'Breathe Life',
+                headerTintColor: Colors.white,
+                headerStyle: {
+                  backgroundColor: Colors.colorOrange,
+                },
               })} />
-          }
+
           </Stack.Navigator>    
         </NavigationContainer>
-      )
+        )
+      }
     }
-    
-    
 
+    
 }
 
 export default MainScreen

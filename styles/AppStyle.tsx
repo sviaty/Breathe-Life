@@ -7,6 +7,23 @@ const screenHeight = Dimensions.get('screen').height;
 
 export default StyleSheet.create({
    
+    // Header 
+    headerContenair : {
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: Colors.blueFb,
+    },
+
+    headerTitle: {
+        minWidth: 300,
+        textAlign:'center',
+        backgroundColor: Colors.blueFb,
+        marginTop: 55,
+        color: Colors.white,
+        fontSize: 35,
+        padding: 5,
+    },
+
     container: {
         flex: 1,
         alignSelf: 'stretch',
@@ -34,7 +51,7 @@ export default StyleSheet.create({
 
     textSubTitle: {
         fontSize: 24,
-        color: Colors.white,
+        color: Colors.colorOrange,
         padding: 10,
         marginTop: 5
     },
@@ -134,13 +151,17 @@ export default StyleSheet.create({
         alignItems:'flex-start',
         justifyContent:'center',
         
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.colorOrange,
         borderWidth: 3,
-        borderColor: Colors.blueFb,
+        borderColor: Colors.colorOrange,
         borderRadius: 10,
         paddingLeft: 10,
         marginTop: 10,
         marginLeft: 10
+    },
+
+    itemPatchText: {
+        color: Colors.white,
     },
 
     itemCigContainer: {
@@ -149,9 +170,9 @@ export default StyleSheet.create({
         alignItems:'flex-start',
         justifyContent:'center',
         
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.colorOrange,
         borderWidth: 3,
-        borderColor: Colors.blueFb,
+        borderColor: Colors.colorOrange,
         borderRadius: 10,
         paddingLeft: 10,
         marginTop: 10,
@@ -300,8 +321,8 @@ export default StyleSheet.create({
     statsNumberItem2Container: {
         alignItems: 'center',
         width: (screenWidth / 3) - 20,
-        height:  (screenWidth / 3) - 20,
-        backgroundColor: Colors.white,
+        height:  (screenWidth / 3) - 10,
+        backgroundColor: Colors.blueFb,
         borderWidth: 3,
         borderColor: Colors.blueFb,
         borderRadius: 10,
@@ -310,16 +331,16 @@ export default StyleSheet.create({
     statsNicotineItem2Container: {
         alignItems: 'center',
         width: (screenWidth) - 20,
-        height:  (screenWidth / 3) - 20,
-        backgroundColor: Colors.white,
+        height:  (screenWidth / 3) - 10,
+        backgroundColor: Colors.colorOrange,
         borderWidth: 3,
-        borderColor: Colors.blueFb,
+        borderColor: Colors.colorOrange,
         borderRadius: 10,
     },
 
     statItemTitle: {
         width: (screenWidth / 3) - 20,
-        color: Colors.blueFb,
+        color: Colors.white,
         textAlign:'center',
         padding: 10,
         fontSize: 20,
@@ -327,7 +348,7 @@ export default StyleSheet.create({
 
     statItemTitleNicotine: {
         width: (screenWidth - 20),
-        color: Colors.blueFb,
+        color: Colors.white,
         textAlign:'center',
         padding: 10,
         fontSize: 20,
@@ -335,7 +356,7 @@ export default StyleSheet.create({
 
     statItemNumber: {
         width: (screenWidth / 3) - 20,
-        color: Colors.blueFb,
+        color: Colors.white,
         textAlign:'center',
         padding: 5,
         fontSize: 40,
@@ -343,7 +364,7 @@ export default StyleSheet.create({
 
     statItemNicotine: {
         width: (screenWidth - 20),
-        color: Colors.blueFb,
+        color: Colors.white,
         textAlign:'center',
         padding: 5,
         fontSize: 40,

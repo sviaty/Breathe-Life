@@ -14,33 +14,37 @@ import SigninScreen from './signin/SigninScreen';
 const UserNoLoginScreen = () => {
     
     return (
-        <Tab.Navigator
-        initialRouteName="UserNoLoginScreen"
-        activeColor={Colors.colorOrange}>
 
-        <Tab.Screen
-            name="LogIn"
-            component={LoginScreen}
-            options={{
-                tabBarLabel: 'LogIn',
-                tabBarIcon: ({ color }) => (
-                    <MaterialCommunityIcons name="account-arrow-right" color={color} size={26} />
-                ),
-            }}
-        />
+            <Tab.Navigator
+            initialRouteName="UserNoLoginScreen"
+            activeColor={Colors.colorOrange}>
 
-       <Tab.Screen
-            name="SignIn"
-            component={SigninScreen}
-            options={{
-                tabBarLabel: 'SignIn',
-                tabBarIcon: ({ color }) => (
-                    <MaterialCommunityIcons name="account-arrow-up" color={color} size={26} />
-                ),
-            }}
-        />
+                <Tab.Screen
+                    name="LogIn"
+                    component={LoginScreen}
+                    options={{
+                        title: 'Awesome app',
+                        tabBarLabel: 'LogIn',
+                        tabBarIcon: ({ color }) => (
+                            <MaterialCommunityIcons name="account-arrow-right" color={color} size={26} />
+                        ),
+                    }}
+                />
 
-        </Tab.Navigator>
+            <Tab.Screen
+                    name="SignIn"
+                    component={SigninScreen}
+                    options={{
+                        title: 'Awesome app',
+                        tabBarLabel: 'SignIn',
+                        tabBarIcon: ({ color }) => (
+                            <MaterialCommunityIcons name="account-arrow-up" color={color} size={26} />
+                        ),
+                    }}
+                />
+
+            </Tab.Navigator>
+
 
   )
 }

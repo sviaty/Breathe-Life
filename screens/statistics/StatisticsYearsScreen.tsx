@@ -288,6 +288,10 @@ const StatisticsYearsScreen = () => {
                     }
                 });
 
+                if(i == 0){
+                    setIsLoadCountCigaretteDetails(false)
+                }
+
                 setCountCigarette(i)
                 setIsLoadCountCigarette(false)
 
@@ -357,7 +361,7 @@ const StatisticsYearsScreen = () => {
 
         <View style={AppStyle.container}>
         <LinearGradient
-            colors={[Colors.colorOrange, Colors.colorOrange2]}
+            colors={[Colors.white, Colors.white]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={AppStyle.linearContenair}>
