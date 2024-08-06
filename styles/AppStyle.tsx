@@ -299,6 +299,7 @@ export default StyleSheet.create({
     statsNumberContainer: {
         width: screenWidth,
         flexDirection: 'row',
+        marginTop: 10,
     },
 
     statsNicotineContainer: {
@@ -307,9 +308,11 @@ export default StyleSheet.create({
     },
 
     statsNumberItemContainer: {
+        flex: 1,
         width: (screenWidth / 3),
-        height:  (screenWidth / 3),
-        padding:10,
+        alignItems: 'center',
+        alignContent: 'center',
+        alignSelf: 'center',
     },
 
     statsNicotineItemContainer: {
@@ -321,11 +324,12 @@ export default StyleSheet.create({
     statsNumberItem2Container: {
         alignItems: 'center',
         width: (screenWidth / 3) - 20,
-        height:  (screenWidth / 3) - 10,
+        height:  (screenWidth / 3) - 20,
         backgroundColor: Colors.blueFb,
         borderWidth: 3,
         borderColor: Colors.blueFb,
         borderRadius: 10,
+        margin:5
     },
 
     statsNicotineItem2Container: {
@@ -342,8 +346,9 @@ export default StyleSheet.create({
         width: (screenWidth / 3) - 20,
         color: Colors.white,
         textAlign:'center',
-        padding: 10,
-        fontSize: 20,
+        padding: 5,
+        paddingTop: 10,
+        fontSize: 18,
     },
 
     statItemTitleNicotine: {
@@ -351,14 +356,13 @@ export default StyleSheet.create({
         color: Colors.white,
         textAlign:'center',
         padding: 10,
-        fontSize: 20,
+        fontSize: 18,
     },
 
     statItemNumber: {
         width: (screenWidth / 3) - 20,
         color: Colors.white,
         textAlign:'center',
-        padding: 5,
         fontSize: 40,
     },
 
@@ -366,7 +370,6 @@ export default StyleSheet.create({
         width: (screenWidth - 20),
         color: Colors.white,
         textAlign:'center',
-        padding: 5,
         fontSize: 40,
     }
 })

@@ -372,7 +372,7 @@ const StatisticsYearsScreen = () => {
                     <View style={AppStyle.statsNumberItem2Container}>
                         <Text style={AppStyle.statItemTitle}> Patchs </Text>
                         {isLoadCountPatch == true ? 
-                        <LoaderComponent text="" step="" color={Colors.blueFb} size={'small'}/>
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                         : 
                         <Text style={AppStyle.statItemNumber}> {countPatch} </Text>
                         }
@@ -383,7 +383,7 @@ const StatisticsYearsScreen = () => {
                     <View style={AppStyle.statsNumberItem2Container}>
                         <Text style={AppStyle.statItemTitle}> Pastilles </Text>
                         {isLoadCountPill == true ? 
-                        <LoaderComponent text="" step="" color={Colors.blueFb} size={'small'}/>
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                         : 
                         <Text style={AppStyle.statItemNumber}> {countPill} </Text>
                         }
@@ -394,7 +394,7 @@ const StatisticsYearsScreen = () => {
                     <View style={AppStyle.statsNumberItem2Container}>
                         <Text style={AppStyle.statItemTitle}> Cigarettes </Text>
                         {isLoadCountCigarette == true ? 
-                        <LoaderComponent text="" step="" color={Colors.blueFb} size={'small'}/>
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                         : 
                         <Text style={AppStyle.statItemNumber}> {countCigarette} </Text>
                         }
@@ -408,7 +408,7 @@ const StatisticsYearsScreen = () => {
                     <View style={AppStyle.statsNicotineItem2Container}>
                         <Text style={AppStyle.statItemTitleNicotine}> Nicotine </Text>
                         {isLoadCountPatchDetails == true && isLoadCountPillDetails == true && isLoadCountCigaretteDetails == true ? 
-                        <LoaderComponent text="" step="" color={Colors.blueFb} size={'small'}/>
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                         : 
                         <Text style={AppStyle.statItemNicotine}> {Math.round(countNicotine * 100) / 100} mg </Text>
                         }
@@ -421,7 +421,7 @@ const StatisticsYearsScreen = () => {
                     <View style={AppStyle.statsNicotineItem2Container}>
                         <Text style={AppStyle.statItemTitleNicotine}> Goudron </Text>
                         {isLoadCountCigaretteDetails == true ? 
-                        <LoaderComponent text="" step="" color={Colors.blueFb} size={'small'}/>
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                         : 
                         <Text style={AppStyle.statItemNicotine}> {countGoudron} mg </Text>
                         }
@@ -434,7 +434,7 @@ const StatisticsYearsScreen = () => {
                     <View style={AppStyle.statsNicotineItem2Container}>
                         <Text style={AppStyle.statItemTitleNicotine}> Monoxyde de carbone </Text>
                         {isLoadCountCigaretteDetails == true ? 
-                        <LoaderComponent text="" step="" color={Colors.blueFb} size={'small'}/>
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                         : 
                         <Text style={AppStyle.statItemNicotine}> {countCarbonne} mg </Text>
                         }

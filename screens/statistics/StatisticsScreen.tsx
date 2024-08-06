@@ -20,7 +20,8 @@ const StatCounterComponent = () => {
       screenOptions={{
         tabBarActiveTintColor: 'white',
         tabBarInactiveTintColor: 'black',
-        tabBarLabelStyle: { fontSize: 12 },
+        tabBarAllowFontScaling: true,
+        tabBarLabelStyle: { fontSize: 11 },
         tabBarIndicatorStyle: {
             height: '100%',
             backgroundColor: Colors.blueFb,
