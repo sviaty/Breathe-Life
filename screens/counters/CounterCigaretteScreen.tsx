@@ -1,8 +1,9 @@
+// React & React Native
 import React, { useState , useEffect} from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Pressable, TextInput, FlatList, Alert } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, Alert, Pressable, Keyboard } from 'react-native'
+import { Stack, TextInput, Backdrop } from "@react-native-material/core";
+import PickerSelect from 'react-native-picker-select';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { BottomSheet } from '@rneui/themed';
 
 // Styles & Colors
 import Colors from '../../constants/ColorsConstant';
@@ -14,137 +15,242 @@ import SnackBarComponent from '../../components/SnackBarComponent';
 
 // Datas
 import Cigarette from '../../datas/CigaretteData'
+import User from '../../datas/UserData';
 
 // Redux
 import { RootState } from '../../redux/Store';
+import { setUser } from '../../redux/slices/UserSlice';
 import { useSelector, useDispatch } from 'react-redux';
 
 // FireStore
 import firebaseConfig from '../../firebaseConfig';
-import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, getDoc, getDocs } from "firebase/firestore";
+import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, setDoc, getDoc, getDocs } from "firebase/firestore";
+import UserSettingsStyle from '../../styles/UserSettingsStyle';
+import LoginSigninStyle from '../../styles/LoginSigninStyle';
+import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 const db = getFirestore(firebaseConfig);
 
-//http://additifstabac.free.fr/index.php/cigarettes-pourcentages-additifs-taux-nicotine-goudrons-monoxyde-carbone-co/
-type BottomSheetComponentProps = {};
-const SettingCigaretteComponent: React.FunctionComponent<BottomSheetComponentProps>  = () => {
+/**
+ * http://additifstabac.free.fr/index.php/cigarettes-pourcentages-additifs-taux-nicotine-goudrons-monoxyde-carbone-co/
+ */
+
+const SettingCigaretteComponent = () => {
 
     // UseState
     const [isLoaderGet, setIsLoaderGet] = useState<boolean>(false)
-    const [isLoaderAdd, setIsLoaderAdd] = useState<boolean>(false)
+    const [isBackdropRevealed, setIsBackdropRevealed] = useState<boolean>(true)
+
     const [isLoaderUserAdd, setIsLoaderUserAdd] = useState<boolean>(false)
-    const [isFetching, setIsFetching] = useState<boolean>(false)
+    const [errorAddPill, setErrorAddPill] = useState<string>("")
 
+    const [isLoaderCigAdd, setIsLoaderCigAdd] = useState<boolean>(false)
+    const [errorAddCigUser, setErrorAddCigUser] = useState<string>("")
+    
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
-    const [isVisible, setIsVisible] = useState<boolean>(false);
+    const [textSnackBar, setTextSnackBar] = useState<string>("")
 
-    const [cigaretteName, setCigaretteName] = useState<string>('');
-    const [cigaretteNicotine, setCigaretteNicotine] = useState<string>('');
-    const [cigaretteGoudron, setCigaretteGoudron] = useState<string>('');
-    const [cigaretteCarbone, setCigaretteCarbone] = useState<string>('');
-    const [cigarettePrice, setCigarettePrice] = useState<string>('');
+    let [userCig, setUserCig] = useState<string>("");
 
-    const [dataCigaretteTab, setDataCigaretteTab] = useState<Cigarette[]>([]);
+    const c = new Cigarette("","",0,0,0,0)
+    let [userCigSelected, setUserCigSelected] = useState<Cigarette>(c);
 
-    const [cigaretteAdd, setCigaretteAdd] = useState<Cigarette>(new Cigarette('', '', '', '', '', 0, false));
+    let [dataCigTab, setDataCigTab] = useState<Cigarette[]>([]);
+    let [dataCigTabItem, setDataCigTabItem] = useState<any[]>([]);
 
+    const [cigName, setCigName] = useState<string>("")
+    const [errorCigName, setErrorCigName] = useState<string>("")
+
+    const [cigNicotine, setCigNicotine] = useState<string>("")
+    const [errorCigNicotine, setErrorCigNicotine] = useState<string>("")
+
+    const [cigGoudron, setCigGoudron] = useState<string>("")
+    const [errorCigGoudron, setErrorCigGoudron] = useState<string>("")
+
+    const [cigCarbonne, setCigCarbonne] = useState<string>("")
+    const [errorCigCarbonne, setErrorCigCarbonne] = useState<string>("")
+
+    const [cigPaquetNbr, setCigPaquetNbr] = useState<string>("")
+    const [errorCigPaquetNbr, setErrorCigPaquetNbr] = useState<string>("")
+
+    const [cigPaquetPrice, setCigPaquetPrice] = useState<string>("")
+    const [errorCigPaquetPrice, setErrorCigPrice] = useState<string>("")
+    
     // UseSelector
     const userSelector = useSelector((state: RootState) => state.userReducer.user);
 
+    // Dispatch
+    const dispatch = useDispatch();
+
     // UseEffect 
     useEffect(() => {
-        getCigaretteInDatabase()
+        getCigList()
     }, [])  
-    
+
     /**
-     * Function getCigaretteInDatabase
+     * Function getCigist
      */
-     const getCigaretteInDatabase = async () => {
-
+    const getCigList = async () => {
+        // Show loader
         setIsLoaderGet(true)
-        dataCigaretteTab.length = 0
-        setDataCigaretteTab([...dataCigaretteTab])
-        //console.log(dataCigaretteTab)
-        
-        try {
-            //console.log(userSelector.userId);
-            const q = query(collection(db, "cigarettes"), where("idUser", "==", userSelector.userId));
-    
-            const cigaretteList = await getDocs(q);
-            //console.log(patchList);
-    
-            cigaretteList.forEach((cigarette) => {
-                //console.log(patch.id, " => ", patch.data());
-                const cigaretteData = cigarette.data()
 
-                const p = new Cigarette(cigarette.id, cigaretteData.cigaretteName, cigaretteData.cigaretteNicotine, cigaretteData.cigaretteGoudron, cigaretteData.cigaretteCarbone, cigaretteData.cigarettePrice, cigaretteData.isSelected);
+        dataCigTabItem = []
+        setDataCigTabItem([...dataCigTabItem])
+
+        dataCigTab = []
+        setDataCigTab([...dataCigTab])
+        //console.log(dataPatchTab)
+        
+        const q = query(collection(db, "cigarettes"));
+        
+        await getDocs(q).then((cigList) => {
+            //console.log(pillList.size);
+            cigList.forEach((cig) => {
+                const cigData = cig.data()
+                //console.log(patchData);
+
+                const c = new Cigarette(
+                    cig.id, 
+                    cigData.cigaretteName, 
+                    cigData.cigaretteNicotine,
+                    cigData.cigaretteGoudron,
+                    cigData.cigaretteCarbone,
+                    cigData.cigarettePrice,
+                );
                 //console.log(p);
 
-                dataCigaretteTab.push(p)
-                setDataCigaretteTab([...dataCigaretteTab])
+                const cItem = { label: cigData.cigaretteName, value: cig.id }
+                //console.log(pItem);
+
+                dataCigTabItem.push(cItem)
+                setDataCigTabItem([...dataCigTabItem])
+
+                dataCigTab.push(c)
+                setDataCigTab([...dataCigTab])
             });
 
-            setIsLoaderGet(false)
-            setIsFetching(false)
+            getCigUserList()
 
-        } catch (error) {
+        }).catch((error) => {
+            setIsLoaderGet(false)
             console.error("Error get cigarette in firestore database : ")
             console.error(error)
-        }
-    }
-
-    const handleAddCigarette = () => {
-        if(cigaretteName.length > 0){
-            if(cigaretteNicotine.length > 0){
-                addCigaretteInDatabase()
-            } else {
-
-            }
-        } else {
-
-        }
+        })
     }
 
     /**
-     * Function addCigaretteInDatabase
+     * Function getCigist
      */
-    const addCigaretteInDatabase = async () => {
+    const getCigUserList = async () => {
+        const q = query(collection(db, "cigarettesUser"), where("idUser", "==", userSelector.userId));
+        
+        await getDocs(q).then((cigList) => {
+            //console.log(pillList.size);
+            cigList.forEach((cig) => {
+                const cigData = cig.data()
+                //console.log(patchData);
 
-        setIsLoaderAdd(true)
+                const c = new Cigarette(
+                    cig.id, 
+                    cigData.cigaretteName, 
+                    cigData.cigaretteNicotine,
+                    cigData.cigaretteGoudron,
+                    cigData.cigaretteCarbone,
+                    cigData.cigarettePrice,
+                );
+                //console.log(p);
 
-        try {
-            const docRef = await addDoc(collection(db, "cigarettes"), {
-                idUser: userSelector.userId,
-                cigaretteName: cigaretteName,
-                cigaretteNicotine: cigaretteNicotine,
-                cigaretteGoudron: cigaretteGoudron,
-                cigaretteCarbone: cigaretteCarbone,
-                cigarettePrice: cigarettePrice,
-                isSelected: false
+                const cItem = { label: cigData.cigaretteName, value: cig.id }
+                //console.log(pItem);
+
+                dataCigTabItem.push(cItem)
+                setDataCigTabItem([...dataCigTabItem])
+
+                dataCigTab.push(c)
+                setDataCigTab([...dataCigTab])
             });
 
-            //console.log("Pill add with ID: "+ docRef.id);
+            // Call after load cig list
+            changeCigSelectedFomUserIdCig()
 
-            setCigaretteName('')
-            setCigaretteNicotine('')
-            setCigaretteGoudron('')
-            setCigaretteCarbone('')
-            setCigarettePrice('')
-        
-            setIsLoaderAdd(false)
-            setIsVisible(false)
+            // Hide loader
+            setIsLoaderGet(false)
 
-            getCigaretteInDatabase()
-
-        } catch (error) {
-            console.error("Error add cigarette in firestore database : ");
+        }).catch((error) => {
+            setIsLoaderGet(false)
+            console.error("Error get cigarette user in firestore database : ")
             console.error(error)
+        })
+    }
+
+    /**
+     * Function changeCigSelectedFomUserIdCig
+     */
+    const changeCigSelectedFomUserIdCig = () => {
+        //console.log("changeCigSelectedFomUserIdCig")
+        setUserCig("")
+        if(userSelector.idCigarette != "undefined"){
+            setUserCig(userSelector.idCigarette)
+            dataCigTab.forEach((cig) => {
+                if(cig.idCigarette == userSelector.idCigarette){
+                    setUserCigSelected(cig)
+                    //console.log(cig)
+                }
+            })
         }
     }
 
     /**
-     * handleAddUserCigarette
+     * Function handlePickerSelect
      */
-    const handleAddUserCigarette = (cigarette: Cigarette) => {
+    const handlePickerSelect = (idCig: string) => {
+        setUserCig(idCig)
+        console.log(idCig)
+
+        if(idCig != ""){
+            //console.log('IS NOT undefined')
+            dataCigTab.forEach((cig) => {
+                if(cig.idCigarette == idCig){
+                    setUserCigSelected(cig)
+                    //console.log(patch)
+                }
+            })
+    
+            setUserIdCig(idCig)
+        } else {
+            //console.log('IS undefined')
+        }
+    }
+
+    /**
+     * Function setUserIdCig
+     * @param idCig 
+     */
+     const setUserIdCig = async (idCig: string) => {
+
+        const userDoc = doc(db, "users", userSelector.userId)
+        
+        await setDoc(userDoc, {
+            userName: userSelector.userName,
+            userMail: userSelector.userMail,
+            idPatch: userSelector.idPatch,
+            idPill: userSelector.idPill,
+            idCigarette: idCig,
+        }).then((value) => {
+            //console.log(value);
+
+            const u = new User(userSelector.userId, userSelector.userName, userSelector.userMail, userSelector.userToken, userSelector.idPatch, userSelector.idPill, idCig);
+            dispatch(setUser(u));
+        }).catch((error) => {
+            console.error("Error set user in firestore database : ")
+            console.error(error)
+        })
+    }
+
+    /**
+     * Function handleAddUserPill
+     */
+    const handleAddUserCig = () => {
+
         Alert.alert(
             'Etes vous sure de vouloir fumer cette cigarette ?', 
             '', 
@@ -159,212 +265,372 @@ const SettingCigaretteComponent: React.FunctionComponent<BottomSheetComponentPro
             {
                 text: 'OK', onPress: () => {
                     //console.log('OK Pressed')
-                    setCigaretteAdd(cigarette)
-                    addUserCigaretteInDatabase(cigarette)
+                    addUserCig()
                 },
             }
             ]);
+        
     }
 
     /**
-     * Function addCigaretteInDatabase
+     * Function addUserCig
      */
-    const addUserCigaretteInDatabase = async (cigarette: Cigarette) => {
-        
-        //setIsLoaderGet(true)
+    const addUserCig = async () => {
         setIsLoaderUserAdd(true)
+        setErrorAddPill("")
 
-        try {
+        const dateTime = serverTimestamp()
+        const pillDoc = collection(db, "userCigarettes")
 
-            const dateTime = serverTimestamp()
-            const docRef = await addDoc(collection(db, "userCigarettes"), {
-                idUser: userSelector.userId,
-                idCigarette: cigarette.idCigarette,
-                dateTime: dateTime
-            });
-
-            //console.log("Patch add with ID: "+ docRef.id);
-
+        await addDoc(pillDoc, {
+            idUser: userSelector.userId,
+            idCigarette: userCig,
+            dateTime: dateTime
+        }).then((value) => {
             setIsLoaderUserAdd(false)
+            setTextSnackBar('Consomation de la cigarette : '+userCigSelected.cigaretteName)
             setIsSnackBar(true)
-
-        } catch (error) {
-            console.error("Error add user cigarette in firestore database : ");
+        }).catch((error) => {
+            setIsLoaderUserAdd(false)
+            setErrorAddPill("addUserPill error : " + error.message)
             console.error(error)
+        })
+    }
+
+    const handleAddCig = () => {
+        setIsLoaderCigAdd(true)
+
+        setErrorCigName("")
+        setErrorCigNicotine("")
+        setErrorCigGoudron("")
+        setErrorCigCarbonne("")
+        setErrorCigPaquetNbr("")
+        setErrorCigPrice("")
+        
+        if(isDataCorrect()){
+            createNewCigUser()
         }
     }
 
     /**
-     * Function handleShowAddCigarette
+     * Function isDataCorrect
+     * @returns boolean
      */
-    const handleShowAddCigarette = () => {
-        setIsVisible(true)
+    const isDataCorrect = (): boolean => {
+        if(cigName.length == 0){
+            setIsLoaderCigAdd(false)
+            setErrorCigName("Le nom de la marque est vide")
+            return false
+        }
+
+        if(cigNicotine.length == 0){
+            setIsLoaderCigAdd(false)
+            setErrorCigNicotine("Le taux de nicotine est obligatoire")
+            return false
+        }
+
+        if(cigGoudron.length == 0){
+            setIsLoaderCigAdd(false)
+            setErrorCigGoudron("Le taux de goudron est obligatoire")
+            return false
+        }
+
+        if(cigCarbonne.length == 0){
+            setIsLoaderCigAdd(false)
+            setErrorCigCarbonne("Le monoxyde de carbonne est obligatoire")
+            return false
+        }
+
+        if(cigPaquetNbr.length == 0){
+            setIsLoaderCigAdd(false)
+            setErrorCigPaquetNbr("Le nombre de cigarette par paquet est obligatoire")
+            return false
+        }
+
+        if(cigPaquetPrice.length == 0){
+            setIsLoaderCigAdd(false)
+            setErrorCigPrice("Le prix du paquet est obligatoire")
+            return false
+        }
+
+        return true 
     }
 
     /**
-     * Function handleHideAddCigarette
+     * Function createNewCigUser
      */
-    const handleHideAddCigarette = () => {
-        setIsVisible(false)
-    }
+    const createNewCigUser = async () => {
+
+        const nicotine = parseFloat(parseFloat(cigNicotine.replace(",", ".")).toFixed(1))
+        const price = parseFloat(parseFloat(cigPaquetPrice.replace(",", ".")).toFixed(2))
+
+        await addDoc(collection(db, "cigarettesUser"), {
+            cigaretteName: cigName,
+            cigaretteNicotine: nicotine,
+            cigaretteGoudron: parseInt(cigGoudron),
+            cigaretteCarbone: parseInt(cigCarbonne),
+            cigaretteNbr: parseInt(cigPaquetNbr),
+            cigarettePrice: price,
+            idUser: userSelector.userId
+        }).then((value) => {
+            setIsLoaderCigAdd(false)
+            setTextSnackBar('Ajout de la marque de cigarette : '+ cigName)
+            setIsSnackBar(true)
+            handleOpenCloseBackdrop()
+
+            setCigName("")
+            setCigNicotine("")
+            setCigGoudron("")
+            setCigCarbonne("")
+            setCigPaquetNbr("")
+            setCigPaquetPrice("")
+
+            getCigList()
+
+        }).catch((error) => {
+            setIsLoaderCigAdd(false)
+            setErrorAddCigUser("Error add cigarette : "+ error)
+            console.error("Error add cig : "+ error);
+        })
+    };
 
     /**
      * Function onRefresh 
      */
     const onRefresh = () => {
-        setIsFetching(true)
-        getCigaretteInDatabase()
+        getCigList()
     }
 
-    // Item
-    const Item = (item: Cigarette) => (
-        <View style={AppStyle.itemContainerView}>
-                    
-            <View style={ AppStyle.itemCigContainer }   >
-                <Text style={ AppStyle.itemPatchText }>Marque des cigarettes : {item.cigaretteName} </Text>
-                <Text style={ AppStyle.itemPatchText }>Taux de nicotine : {item.cigaretteNicotine} (mg)</Text>
-                <Text style={ AppStyle.itemPatchText }>Taux de goudron : {item.cigaretteGoudron} (mg)</Text>
-                <Text style={ AppStyle.itemPatchText }>Taux de monoxyde de carbone : {item.cigaretteCarbone} (mg)</Text>
-                <Text style={ AppStyle.itemPatchText }>Prix du paquet : {item.cigarettePrice} (euros)</Text>
-            </View>
+    const handleOpenCloseBackdrop = () => {
+        handleKeyboardHide()
+        //console.log(isBackdropRevealed)
+        setIsBackdropRevealed(isBackdropRevealed => !isBackdropRevealed)
+    }
 
-            <View style={ AppStyle.itemPatchBtnContainer } >
-            {isLoaderUserAdd == true ? 
-                    JSON.stringify(item) === JSON.stringify(cigaretteAdd) ? 
-                    <View style={AppStyle.viewLoaderContainerCig}>
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+    const handleKeyboardHide = () => {
+        Keyboard.dismiss()
+    }
+
+    const backLayerView = () => {
+        return (
+            <SafeAreaProvider >
+                <View style={AppStyle.container}>
+                    { isLoaderGet == true ? 
+                    <View>
+                        <LoaderComponent text="Chargement des cigarettes" step="" color={Colors.blueFb} size="large"/>
                     </View>
                     : 
-                    <TouchableOpacity
-                        onPress={() => handleAddUserCigarette(item)}
-                        activeOpacity={0.6}
-                        style={ AppStyle.btnAddCig }>
-                        <Text style={AppStyle.btnAddText}> + </Text>
-                    </TouchableOpacity>
-                :
-                <TouchableOpacity
-                    onPress={() => handleAddUserCigarette(item)}
-                    activeOpacity={0.6}
-                    style={ AppStyle.btnAddCig }>
-                    <Text style={AppStyle.btnAddText}> + </Text>
-                </TouchableOpacity>
-                }
+                    <View style={AppStyle.viewContenair}>
+                        
+                        <View style={AppStyle.selectAddCig}>
+                            <View  style={AppStyle.pikerSelectCig}>
+                            <PickerSelect
+                                onValueChange={(cig) => handlePickerSelect(cig) }
+                                style={pickerSelectStyles}
+                                placeholder={{
+                                    label: "Selectionner une marque de cigarette",
+                                    value: "",
+                                    color: Colors.colorOrange
+                                }}
+                                value={userCig}
+                                items={dataCigTabItem}
+                            />
+                            </View>
+                            <View  style={AppStyle.btnAddCigContainer}>
+                                <TouchableOpacity
+                                    onPress={() => handleOpenCloseBackdrop()}
+                                    activeOpacity={0.6}
+                                    style={ AppStyle.btnAddCig2 }>
+                                    <Text style={AppStyle.btnAddCigText2}> + </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+        
+                        { userCig != "" ?
+                        <View style={AppStyle.itemContainerView2}>
+                                        
+                            <View style={ AppStyle.itemPatchContainer2 } >
+                                <Text style={ AppStyle.itemPatchText2 }>Marque des cigarettes : {userCigSelected.cigaretteName} </Text>
+                                <Text style={ AppStyle.itemPatchText2 }>Taux de nicotine : {userCigSelected.cigaretteNicotine} (mg)</Text>
+                                <Text style={ AppStyle.itemPatchText2 }>Taux de goudron : {userCigSelected.cigaretteGoudron} (mg)</Text>
+                                <Text style={ AppStyle.itemPatchText2 }>Taux de monoxyde de carbone : {userCigSelected.cigaretteCarbone} (mg)</Text>
+                                <Text style={ AppStyle.itemPatchText2 }>Prix du paquet : {userCigSelected.cigarettePrice} (euros)</Text>
+                            </View>
+        
+                            <TouchableOpacity
+                                onPress={() => handleAddUserCig()}
+                                activeOpacity={0.6}
+                                style={ AppStyle.btnAddPatch }>
+                                <Text style={AppStyle.btnAddPatchText}>Fumer une cigarette</Text>
+                            </TouchableOpacity>
+        
+                            { isLoaderUserAdd == true ?
+                            <View>
+                                <LoaderComponent text="Ajout de la cigarette en cours ..." step="" color={Colors.blueFb} size="large"/>
+                            </View>
+                            :
+                            <Text style={AppStyle.textError}>{errorAddPill}</Text>
+                            }
+                        </View>
+                        : null }
+                    </View> 
+                    }
+                </View>
                 
-            </View>
-        </View>
-
-    );
+                <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={5000} message={textSnackBar}/>
+                
+            </SafeAreaProvider>
+        )
+    }
 
     // View JSX
     return (
-    <SafeAreaProvider>
+        <Backdrop
+            revealed={isBackdropRevealed}
+            backLayer={backLayerView()}
+            backLayerContainerStyle={{flex:1, backgroundColor: Colors.background}}
+            frontLayerContainerStyle={{flex:1, backgroundColor: Colors.transparent}} >
 
-        <View style={AppStyle.container}>
-        <LinearGradient
-            colors={[Colors.white, Colors.white]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={AppStyle.linearContenair}>
+            <View style={AppStyle.containerCenter2}>
+                <Pressable 
+                    style={{flex:0.10, alignSelf:'stretch', alignItems: 'center'}}
+                    onPress={() => handleOpenCloseBackdrop()}>
+                </Pressable>
 
-            <TouchableOpacity
-                onPress={() => handleShowAddCigarette()}
-                activeOpacity={0.6}
-                style={ AppStyle.btnAddPatch }>
-                <Text style={AppStyle.btnAddPatchText}>Ajouter une marque de cigarette</Text>
-            </TouchableOpacity>
+                <View style={AppStyle.containerCenter3}>
+                    <View style={AppStyle.containerCenter4}>
+                        <Text style={AppStyle.containerCenter4Text}>Ajout d'une marque de cigarette</Text>
+                    </View>
 
-            {isLoaderGet == true ? 
-            <View>
-              <LoaderComponent text="Chargement des marques de cigarette" step="" color={Colors.white} size={'large'}/>
+                    <View>
+                        <GestureHandlerRootView>
+                        <ScrollView
+                            persistentScrollbar={true}
+                            scrollEnabled={true}
+                            nestedScrollEnabled={true}
+                            automaticallyAdjustKeyboardInsets={true}>
+
+                        <Stack spacing={0} style={AppStyle.stackLogin2}>
+
+                            <TextInput
+                                variant="outlined"
+                                label="Entrer le nom de la marque"
+                                placeholder="Camel Filter"
+                                helperText={errorCigName}
+                                color={Colors.colorOrange}
+                                keyboardType="default"
+                                style={LoginSigninStyle.textInput}
+                                value={cigName}
+                                onChangeText={setCigName} />
+
+                            <TextInput
+                                variant="outlined"
+                                label="Entrer le taux de nicotine (mg)"
+                                placeholder="0.8"
+                                helperText={errorCigNicotine}
+                                color={Colors.colorOrange}
+                                keyboardType="decimal-pad"
+                                style={LoginSigninStyle.textInput}
+                                value={cigNicotine}
+                                onChangeText={setCigNicotine} />
+
+                            <TextInput
+                                variant="outlined"
+                                label="Entrer le taux de goudron (mg)"
+                                placeholder="7"
+                                helperText={errorCigGoudron}
+                                color={Colors.colorOrange}
+                                keyboardType="decimal-pad"
+                                style={LoginSigninStyle.textInput}
+                                value={cigGoudron}
+                                onChangeText={setCigGoudron} />
+
+                            <TextInput
+                                variant="outlined"
+                                label="Entrer le taux de monoxyde de carbonne (mg)"
+                                placeholder="9"
+                                helperText={errorCigCarbonne}
+                                color={Colors.colorOrange}
+                                keyboardType="decimal-pad"
+                                style={LoginSigninStyle.textInput}
+                                value={cigCarbonne}
+                                onChangeText={setCigCarbonne} />
+
+                            <TextInput
+                                variant="outlined"
+                                label="Entrer le nombre de cigarette par paquet"
+                                placeholder="20"
+                                helperText={errorCigPaquetNbr}
+                                color={Colors.colorOrange}
+                                keyboardType="number-pad"
+                                style={LoginSigninStyle.textInput}
+                                value={cigPaquetNbr}
+                                onChangeText={setCigPaquetNbr} />
+
+                            <TextInput
+                                variant="outlined"
+                                label="Entrer le prix du paquet (euros)"
+                                placeholder="13"
+                                helperText={errorCigPaquetPrice}
+                                color={Colors.colorOrange}
+                                keyboardType="decimal-pad"
+                                style={LoginSigninStyle.textInput}
+                                value={cigPaquetPrice}
+                                onChangeText={setCigPaquetPrice} />
+
+                            
+
+                            { isLoaderCigAdd == true ?
+                            <View>
+                                <LoaderComponent text="Ajout de la marque de cigarette en cours ..." step="" color={Colors.blueFb} size="large"/>
+                            </View>
+                            :
+                            <View>
+                                <TouchableOpacity
+                                    onPress={() => handleAddCig()}
+                                    activeOpacity={0.6}
+                                    style={AppStyle.btnCigAdd}>
+                                    <Text style={LoginSigninStyle.buttonText}>Ajouter</Text>
+                                </TouchableOpacity>
+
+                                <Text style={AppStyle.textError}>{errorAddCigUser}</Text>
+                            </View>
+                            }
+                            
+                        </Stack>
+                        </ScrollView>
+                        </GestureHandlerRootView>
+                    </View>
+                </View>
             </View>
-            : 
-                dataCigaretteTab.length != 0 ? 
-
-                <FlatList
-                data={dataCigaretteTab}
-                extraData={dataCigaretteTab}
-                onRefresh={() => onRefresh()}
-                refreshing={isFetching}
-                renderItem={ ({item}) => <Item idCigarette={item.idCigarette} cigaretteName={item.cigaretteName} cigaretteNicotine={item.cigaretteNicotine} cigaretteGoudron={item.cigaretteGoudron} cigaretteCarbone={item.cigaretteCarbone} cigarettePrice={item.cigarettePrice} isSelected={item.isSelected} />}
-                keyExtractor={(item) => item.idCigarette } />
-                : 
-
-                <Text style={AppStyle.textNoData}> Vous n'avez pas encore ajouter de marque de cigarette </Text>
-            }
-        </LinearGradient>
-        </View>
-
-        <BottomSheet 
-            modalProps={{}} 
-            isVisible={isVisible}>
-            
-            <Pressable style={AppStyle.modalPressage}>
-                <View style={AppStyle.modalContainer}>
-
-                <View>
-                    <Text style={AppStyle.textSubTitleOrange}>Informations des cigarettes</Text>
-                </View>
-
-                <TextInput 
-                    style={AppStyle.textInputAdd}
-                    placeholder="Entrer la marque des cigarettes"
-                    value={cigaretteName}
-                    onChangeText={setCigaretteName} />
-
-                <TextInput 
-                    style={AppStyle.textInputAdd}
-                    placeholder="Enter le taux de nicotine (mg)"
-                    value={cigaretteNicotine}
-                    onChangeText={setCigaretteNicotine} />
-
-                <TextInput 
-                    style={AppStyle.textInputAdd}
-                    placeholder="Enter le taux de goudron (mg)"
-                    value={cigaretteGoudron}
-                    onChangeText={setCigaretteGoudron} />
-
-                <TextInput 
-                    style={AppStyle.textInputAdd}
-                    placeholder="Enter le taux de monoxyde de carbone (mg)"
-                    value={cigaretteCarbone}
-                    onChangeText={setCigaretteCarbone} />
-
-                <TextInput 
-                    style={AppStyle.textInputAdd}
-                    placeholder="Enter le prix du paquet de 20 cigarettes (euros)"
-                    value={cigarettePrice}
-                    onChangeText={setCigarettePrice} />
-
-                {isLoaderAdd == true ? 
-                <View>
-                    <LoaderComponent text="Ajout de la marque des cigarettes en cours ..." step={''} color={Colors.colorOrange} size={'large'}/>
-                </View>
-                :  
-                <TouchableOpacity
-                    onPress={() => handleAddCigarette()}
-                    activeOpacity={0.6}
-                    style={ AppStyle.btnOrange }>
-                    <Text style={AppStyle.btnText}>Ajouter</Text>
-                </TouchableOpacity>
-                }
-
-                <TouchableOpacity
-                    onPress={() => handleHideAddCigarette()}
-                    activeOpacity={0.6}
-                    style={ AppStyle.btn }>
-                    <Text style={AppStyle.btnText}>Fermer</Text>
-                </TouchableOpacity>
-                </View>
-            </Pressable>
-
-        </BottomSheet>
-
-        <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={3000} message={ "Consommation d'une cigarette "+ cigaretteAdd.cigaretteName}/>
-
-    </SafeAreaProvider>
-  )
+        
+        </Backdrop>
+    )
 }
 
 export default SettingCigaretteComponent
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+
+})
+
+const pickerSelectStyles = StyleSheet.create({
+    inputIOS: {
+        backgroundColor: Colors.white,
+        fontSize: 16,
+        borderWidth: 2,
+        borderColor: 'silver',
+        borderRadius: 5,
+        color: 'black',
+        padding: 15 
+    },
+    inputAndroid: {
+        backgroundColor: Colors.white,
+        fontSize: 16,
+        borderWidth: 2,
+        borderColor: 'silver',
+        borderRadius: 5,
+        color: 'black',
+        padding: 15 
+    }
+});

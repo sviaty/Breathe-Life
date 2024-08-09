@@ -1,12 +1,50 @@
 import { StyleSheet, Dimensions } from "react-native";
 import Colors from '../constants/ColorsConstant';
-import { ColorProperties } from "react-native-reanimated/lib/typescript/Colors";
 
 const screenWidth = Dimensions.get('screen').width;
 const screenHeight = Dimensions.get('screen').height;
 
 export default StyleSheet.create({
    
+    // Button 
+    buttonTouchableOpacity: {
+        width: screenWidth - 20,
+        backgroundColor: Colors.colorOrange,
+        marginTop:10,
+        padding: 15,
+        borderRadius: 5,
+    },
+
+    buttonTouchableOpacityText: {
+        textAlign: 'center',
+        color: Colors.white,
+        textTransform: 'uppercase',
+        fontWeight: 'bold',
+        fontSize: 20,
+    },
+
+    stackLogin: {
+        alignItems: 'center',
+    },
+
+    stackLogin2: {
+        alignItems: 'center',
+    },
+
+    // SubTitle 
+    subTitleContainer : {
+        width: screenWidth,
+        backgroundColor: Colors.blueFb,
+    },
+
+    subTitleText : {
+        color: Colors.white,
+        fontWeight:'bold',
+        fontSize: 20,
+        padding: 15,
+
+    },
+
     // Header 
     headerContenair : {
         alignItems: 'center',
@@ -26,8 +64,46 @@ export default StyleSheet.create({
 
     container: {
         flex: 1,
+       
+    },
+
+    containerCenter2: {
+        flex:1,
+        alignItems: 'center',
+        backgroundColor: 'rgba(52, 52, 52, 0.8)',
+    },
+
+    containerCenter3 : {
+        flex:1,
+        alignItems: 'center',
         alignSelf: 'stretch',
-        justifyContent: 'flex-start',
+        borderTopEndRadius: 20,
+        borderTopStartRadius: 20,
+        backgroundColor: Colors.background,
+    },
+
+    containerCenter4: {
+        alignSelf: 'stretch',
+        backgroundColor: Colors.blueFb,
+        borderTopEndRadius: 20,
+        borderTopStartRadius: 20,
+    },
+
+    btnCigAdd: {
+        width: screenWidth - 20,
+        backgroundColor: Colors.colorOrange,
+        marginTop:15,
+        marginBottom:15,
+        padding: 15,
+        borderRadius: 5,
+    },
+      
+
+    containerCenter4Text: {
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: 'bold',
+        padding:20,
     },
 
     containerCenter: {
@@ -145,9 +221,22 @@ export default StyleSheet.create({
         width: screenWidth,
     },
 
+    itemContainerView2: {
+        alignItems: 'center',
+    },
+
+    itemPatchContainer2: {
+        width: screenWidth - 20,
+        backgroundColor: Colors.colorOrange,
+        borderWidth: 2,
+        borderColor: Colors.colorOrange,
+        borderRadius: 5,
+        padding: 15,
+        marginTop: 10,
+    },
+
     itemPatchContainer: {
-        width: screenWidth - 90,
-        height: 60,
+        width: screenWidth - 20,
         alignItems:'flex-start',
         justifyContent:'center',
         
@@ -160,7 +249,14 @@ export default StyleSheet.create({
         marginLeft: 10
     },
 
+    
+
     itemPatchText: {
+        color: Colors.white,
+    },
+
+    itemPatchText2: {
+        fontSize: 20,
         color: Colors.white,
     },
 
@@ -237,6 +333,7 @@ export default StyleSheet.create({
         marginLeft: 10
     },
 
+   
     btnAddText: {
         color: Colors.white,
         fontSize: 30,
@@ -247,8 +344,8 @@ export default StyleSheet.create({
         width: screenWidth - 20,
         backgroundColor: Colors.blueFb,
         padding: 15,
-        borderRadius: 10,
-        marginTop: 20
+        borderRadius:5,
+        marginTop: 10
     },
 
     btnAddPatchText: {
@@ -256,6 +353,12 @@ export default StyleSheet.create({
         color: Colors.white,
         fontSize: 20,
         fontWeight: 'bold'
+    },
+
+    textError: {
+        fontSize: 18,
+        margin: 15,
+        color: Colors.colorRed
     },
 
    
@@ -371,5 +474,49 @@ export default StyleSheet.create({
         color: Colors.white,
         textAlign:'center',
         fontSize: 40,
+    },
+
+    pickerSelect: {
+        width: screenWidth - 20,
+        marginTop:15,
+    },
+
+    selectAddCig: {
+        width: screenWidth - 20,
+        flexDirection: 'row',
+        marginTop: 15,
+    },
+
+    pikerSelectCig: {
+        flex: 0.8,
+        height: 55
+    },
+
+    btnAddCigContainer: {
+        flex: 0.2,
+        height: 55,
+    },
+
+    btnAddCig2: {
+        height: 53,
+        alignItems:'center',
+        justifyContent:'center',
+        backgroundColor: Colors.blueFb,
+        borderRadius: 5,
+        marginLeft: 10
+    },
+
+    btnAddCigText2: {
+        textAlign: 'center',
+        alignItems:'center',
+        justifyContent:'center',
+        color: Colors.white,
+        fontSize: 25,
+        fontWeight: 'bold'
+    },
+
+
+    viewContenair: {
+        alignItems: 'center'
     }
 })

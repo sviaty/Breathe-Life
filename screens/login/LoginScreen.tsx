@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native'
+import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native'
+import { Stack, TextInput, Backdrop, BackdropSubheader } from "@react-native-material/core";
 import { LinearGradient } from 'expo-linear-gradient';
 
 import SecureStoreClass from '../../secures/SecureStore';
@@ -12,23 +13,12 @@ import LoginStyle from '../../styles/LoginSigninStyle';
 import Colors from '../../constants/ColorsConstant';
 import LoaderComponent from '../../components/LoaderComponent';
 
-import { initializeApp } from "firebase/app";
+// FireStore
+import firebaseConfig from '../../firebaseConfig';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, collection, query, where, doc, getDoc, getDocs } from "firebase/firestore";
+import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, getDoc, getDocs } from "firebase/firestore";
+const db = getFirestore(firebaseConfig);
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDtDQYI2sJN-GT9jCfg4YYDrhaiMbalcMk",
-  authDomain: "testing-firebase-ec361.firebaseapp.com",
-  databaseURL: "https://testing-firebase-ec361-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "testing-firebase-ec361",
-  storageBucket: "testing-firebase-ec361.appspot.com",
-  messagingSenderId: "939968442007",
-  appId: "1:939968442007:web:2114a3275d29bd3664c3d2",
-  measurementId: "G-FEVR7B56CS"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app); 
 
 import { RootState } from '../../redux/Store';
 import { setIsLogin } from '../../redux/slices/IsLoginSlice';
@@ -36,166 +26,226 @@ import { setUser } from '../../redux/slices/UserSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import SnackBarComponent from '../../components/SnackBarComponent';
 
+/**
+ * LoginScreen
+ * @returns 
+ */
+const LoginScreen = () => {
 
-const LoginComponent = () => {
-
+    // UseState
     const [isLoader, setIsLoader] = useState<boolean>(false)
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
 
-    const [userState, setUserState] = useState<User>(new User('', '', '', ''))
+    const [userState, setUserState] = useState<User>(new User("", "", "", "", "", "", ""))
 
+    const [mail, setMail] = useState<string>('');
+    const [pwd, setPwd] = useState<string>('');
+    const [step, setStep] = useState<string>('');
+    const [error, setError] = useState<string>('');
+    const [errorMail, setErrorMail] = useState<string>('');
+    const [errorPwd, setErrorPwd] = useState<string>('');
+
+    // Selector
     const isLogin = useSelector((state: RootState) => state.isLoginReducer.isLogin);
     const userSelector = useSelector((state: RootState) => state.userReducer.user);
 
     // Dispatch
     const dispatch = useDispatch();
 
-    const [mail, setMail] = useState<string>('');
-    const [pwd, setPwd] = useState<string>('');
-
-    const [step, setStep] = useState<string>('');
-    const [error, setError] = useState<string>('');
-
+    /**
+     * Function handleLogIn
+     */
     const handleLogIn = () => {
-      setIsLoader(true)
+        setIsLoader(true)
 
-      if(mail.length > 0){
-          if(pwd.length > 0){
-            setError('')
-            loginUser()
-          } else {
+        setError("")
+        setErrorMail("")
+        setErrorPwd("")
+
+        if (isDataCorrect()) {
+            loginUserAuth()
+        }
+    }
+
+    /**
+     * Function isDataCorrect
+     * @returns boolean
+     */
+    const isDataCorrect = (): boolean => {
+        setStep("Vérification des données")
+
+        if (mail.length == 0) {
             setIsLoader(false)
-            setError("Password is empty")
-            //console.error("Password is empty");
             dispatch(setIsLogin(false));
-          }
-      } else {
-        setIsLoader(false)
-        setError("Mail is empty")
-        //console.error("Mail is empty");
-        dispatch(setIsLogin(false));
-      }
+            setErrorMail("L'e-mail est vide")
+            return false
+        }
+
+        if (pwd.length == 0) {
+            setIsLoader(false)
+            dispatch(setIsLogin(false));
+            setErrorPwd("Le mot de passe est vide")
+            return false
+        }
+
+        return true
     }
 
-    const loginUser = () => {
-      setStep('Auth user')
-      const auth = getAuth();
-      signInWithEmailAndPassword(auth, mail, pwd)
-        .then(async (userCredential) => {
+    /**
+     * Function loginUserAuth
+     */
+    const loginUserAuth = () => {
+        setStep("Identification de l'utilisateur")
 
-          const userDataAuth = userCredential.user;
+        const auth = getAuth();
 
-          //console.log(userDataAuth)
+        signInWithEmailAndPassword(auth, mail, pwd)
+            .then(async (userCredential) => {
 
-          userDataAuth.getIdToken().then(token => { 
-            secureStoreClass.saveToken('tokenId', token)
-            setStep('Token is save')
-          })
-    
-          getUserInDatabase()
-        })
-        .catch((error) => {
-          console.log(error)
-          const errorCode = error.code;
-          const errorMessage = error.message;
-    
-          setIsLoader(false)
-          setError(error.message)
-          //console.error(error.message);
-          dispatch(setIsLogin(false));
-        });
-      };
+                const userDataAuth = userCredential.user;
+                //console.log(userDataAuth)
 
+                setStep("Enregistrement du token")
+                userDataAuth.getIdToken().then(token => {
+                    secureStoreClass.saveToken('tokenId', token)
+                })
+
+                getUserInDatabase()
+            })
+            .catch((error) => {
+                //console.log(error)
+
+                setIsLoader(false)
+                dispatch(setIsLogin(false));
+
+                displayErrorUserAuth(error)
+            }
+            );
+    };
+
+    /**
+     * Function displayErrorUserAuth
+     * @param error 
+     */
+    const displayErrorUserAuth = (error: any) => {
+         //console.log(error.code)
+
+        switch (error.code) {
+            case "auth/invalid-credential": {
+                setError("L'e-mail ou le mot de passe n'est pas bon.")
+                break;
+            }
+            default: {
+                setError(error.message)
+                break;
+            }
+        }
+    }
+
+    /**
+     * Function getUserInDatabase
+     */
     const getUserInDatabase = async () => {
-      try {
-        setStep('Get user data in database')
+        setStep('Récupération des données utilisateur')
+        try {
 
-        //const q = doc(db, "users", mail);
-        const q = query(collection(db, "users"), where("userMail", "==", mail));
+            const q = query(collection(db, "users"), where("userMail", "==", mail));
+            const userList = await getDocs(q);
 
-        const snapshot = await getDocs(q);
+            userList.forEach((doc) => {
+                //console.log(doc.id, " => ", doc.data());
+                const dataUser = doc.data()
 
-        snapshot.forEach((doc) => {
-          //console.log(doc.id, " => ", doc.data());
-          const dataUser = doc.data()
-          
-          secureStoreClass.saveToken('userId', doc.id)
-          
-          const u = new User(doc.id, dataUser.userName, dataUser.userMail, '');
-          setUserState(u)
-          dispatch(setUser(u));
+                secureStoreClass.saveToken('userId', doc.id)
 
-          //setStep('Bonjour : '+ userSelector.userName)
-        });
+                const u = new User(doc.id, dataUser.userName, dataUser.userMail, "", dataUser.idPatch, dataUser.idPill, dataUser.idCigarette);
+                dispatch(setUser(u));
 
-        //console.log('User is logged');
-        setIsSnackBar(true)
-        dispatch(setIsLogin(true));
-  
-      } catch (error) {
-        setIsLoader(false)
-        setError("Error add data : "+ error)
-        //console.error("Error add data : "+ error);
-        dispatch(setIsLogin(false));
-      }
+                //
+            });
+
+            setStep("Vous êtes connecté")
+            //console.log('User is logged');
+
+            setIsSnackBar(true)
+            dispatch(setIsLogin(true));
+
+        } catch (error) {
+            setIsLoader(false)
+            dispatch(setIsLogin(false));
+
+            setError("Error add data : " + error)
+            console.error("Error add data : " + error);
+        }
     }
 
+    /**
+     * View JSX
+     */
     return (
         <View style={AppStyle.container}>
-        <LinearGradient
-            colors={[Colors.white, Colors.white]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={AppStyle.linearContenair}>
 
-            <View>
-                <Text style={AppStyle.textSubTitle}>Login Page</Text>
+            <View style={AppStyle.subTitleContainer}>
+                <Text style={AppStyle.subTitleText}>Connexion</Text>
             </View>
 
-            <TextInput 
-                style={LoginStyle.textInput}
-                placeholder="Enter your mail"
-                value={mail}
-                autoCapitalize="none"
-                autoComplete="email"
-                keyboardType="email-address"
-                autoFocus
-                onChangeText={setMail} />
+            <Stack spacing={0} style={AppStyle.stackLogin}>
 
-            <TextInput 
-                style={LoginStyle.textInput}
-                placeholder="Enter your password"
-                value={pwd}
-                autoCapitalize="none"
-                onChangeText={setPwd}
-                secureTextEntry={true} />
+                <TextInput
+                    variant="outlined"
+                    label="Entrer votre mail"
+                    placeholder="e-mail@gmail.com"
+                    helperText={errorMail}
+                    color={Colors.colorOrange}
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    keyboardType="email-address"
+                    autoFocus
+                    style={LoginStyle.textInput}
+                    value={mail}
+                    onChangeText={setMail} />
 
-            <TouchableOpacity
-                onPress={handleLogIn}
-                activeOpacity={0.6}
-                style={LoginStyle.btnLogin}>
-                <Text style={LoginStyle.buttonText}>Login</Text>
-            </TouchableOpacity>
+                <TextInput
+                    variant="outlined"
+                    label="Entrer votre mot de passe"
+                    placeholder="Mot de passe"
+                    helperText={errorPwd}
+                    color={Colors.colorOrange}
+                    autoCapitalize="none"
+                    style={LoginStyle.textInput}
+                    value={pwd}
+                    onChangeText={setPwd}
+                    secureTextEntry={true} />
 
-            {isLoader == true ? 
-            <View>
-              <LoaderComponent text="Connection is in progress ..." step={step} color={Colors.white}/>
-            </View>
-            : 
-            <Text style={LoginStyle.textError}>{error}</Text>
+                <View style={LoginStyle.textConditionContenair}>
+                    <Text>En cliquant sur connexion, vous acceptez notre condition générale d'utilisation.</Text>
+                </View>
+
+                <TouchableOpacity
+                    onPress={handleLogIn}
+                    activeOpacity={0.6}
+                    style={LoginStyle.btnLogin}>
+                    <Text style={LoginStyle.buttonText}>Connexion</Text>
+                </TouchableOpacity>
+
+            </Stack>
+
+            {isLoader == true ?
+                <View>
+                    <LoaderComponent text="Connection en cours ..." step={step} color={Colors.blueFb} size={'large'} />
+                </View>
+                :
+                <Text style={LoginStyle.textError}>{error}</Text>
             }
 
-
-        </LinearGradient>
-          
-        <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={3000} message={'User is logged'}/>
+            <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={3000} message={'User is logged'} />
 
         </View>
-    ) 
+    )
 }
 
-export default LoginComponent
+export default LoginScreen
 
 const styles = StyleSheet.create({
-    
+
 })

@@ -1,8 +1,8 @@
+// React & React Native
 import React, { useState , useEffect} from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Pressable, TextInput, FlatList } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
+import PickerSelect from 'react-native-picker-select';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { BottomSheet } from '@rneui/themed';
 
 // Styles & Colors
 import Colors from '../../constants/ColorsConstant';
@@ -14,321 +14,290 @@ import SnackBarComponent from '../../components/SnackBarComponent';
 
 // Datas
 import Patch from '../../datas/PatchData'
+import User from '../../datas/UserData';
 
 // Redux
 import { RootState } from '../../redux/Store';
+import { setUser } from '../../redux/slices/UserSlice';
 import { useSelector, useDispatch } from 'react-redux';
 
 // FireStore
 import firebaseConfig from '../../firebaseConfig';
-import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, getDoc, getDocs } from "firebase/firestore";
+import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, getDoc, setDoc, getDocs } from "firebase/firestore";
+import App from '../../App';
 const db = getFirestore(firebaseConfig);
 
 /**
  * SettingPatchComponent
  */
-type BottomSheetComponentProps = {};
-const SettingPatchComponent: React.FunctionComponent<BottomSheetComponentProps> = () => {
+const SettingPatchComponent = () => {
 
     // UseState
     const [isLoaderGet, setIsLoaderGet] = useState<boolean>(false)
-    const [isLoaderAdd, setIsLoaderAdd] = useState<boolean>(false)
+
     const [isLoaderUserAdd, setIsLoaderUserAdd] = useState<boolean>(false)
-    const [isFetching, setIsFetching] = useState<boolean>(false)
-
+    const [errorAddPatch, setErrorAddPatch] = useState<string>("")
+    
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
-    const [isVisible, setIsVisible] = useState<boolean>(false);
 
-    const [patchName, setPatchName] = useState<string>('');
-    const [patchNicotine, setPatchNicotine] = useState<string>('');
+    let [userPatch, setUserPatch] = useState<string>("");
 
-    const [dataPatchTab, setDataPatchTab] = useState<Patch[]>([]);
+    const p = new Patch("","",0)
+    let [userPatchSelected, setUserPatchSelected] = useState<Patch>(p);
 
-    const [patchAdd, setPatchAdd] = useState<Patch>(new Patch('','','', false));
+    let [dataPatchTab, setDataPatchTab] = useState<Patch[]>([]);
+    let [dataPatchTabItem, setDataPatchTabItem] = useState<any[]>([]);
 
     // UseSelector
     const userSelector = useSelector((state: RootState) => state.userReducer.user);
 
+    // Dispatch
+    const dispatch = useDispatch();
+
     // UseEffect 
     useEffect(() => {
-        getPatchInDatabase()
+        //console.log('useEffect')
+        getPatchList()
     },[])
 
     /**
-     * Function getPatchInDatabase
+     * Function getPatchList
      */
-    const getPatchInDatabase = async () => {
-
+    const getPatchList = async () => {
+        // Show loader
         setIsLoaderGet(true)
-        dataPatchTab.length = 0
+
+        dataPatchTabItem = []
+        setDataPatchTabItem([...dataPatchTabItem])
+
+        dataPatchTab = []
         setDataPatchTab([...dataPatchTab])
         //console.log(dataPatchTab)
         
-        try {
-            //console.log(userSelector.userId);
-            const q = query(collection(db, "patchs"), where("idUser", "==", userSelector.userId));
-    
-            const patchList = await getDocs(q);
-            //console.log(patchList);
-    
-            patchList.forEach((patch) => {
-                //console.log(patch.id, " => ", patch.data());
-                const patchData = patch.data()
+        const q = query(collection(db, "patchs"));
 
-                const p = new Patch(patch.id, patchData.patchName, patchData.patchNicotine, patchData.isSelected);
+        const patchList = 
+        await getDocs(q).then((patchList) => {
+            //console.log(patchList.size);
+
+            patchList.forEach((patch) => {
+                const patchData = patch.data()
+                //console.log(patchData);
+
+                const p = new Patch(patch.id, patchData.patchName, patchData.patchNicotine);
                 //console.log(p);
+
+                const pItem = { label: patchData.patchName, value: patch.id }
+                //console.log(pItem);
+
+                dataPatchTabItem.push(pItem)
+                setDataPatchTabItem([...dataPatchTabItem])
 
                 dataPatchTab.push(p)
                 setDataPatchTab([...dataPatchTab])
             });
 
-            setIsFetching(false)
-            setIsLoaderGet(false)
-            
+            // Call after load patch list
+            changePatchSelectedFomUserIdPatch()
 
-        } catch (error) {
+            // Hide loader
+            setIsLoaderGet(false)
+
+        }).catch((error) => {
+            setIsLoaderGet(false)
             console.error("Error get patch in firestore database : ")
             console.error(error)
+        }) 
+    }
+
+    /**
+     * Function changePatchSelectedFomUserIdPatch
+     */
+    const changePatchSelectedFomUserIdPatch = () => {
+        //console.log("changePatchSelectedFomUserIdPatch")
+        setUserPatch("")
+        console.log(userSelector.idPatch)
+
+        if(userSelector.idPatch != "undefined"){
+            setUserPatch(userSelector.idPatch)
+            dataPatchTab.forEach((patch) => {
+                if(patch.idPatch == userSelector.idPatch){
+                    setUserPatchSelected(patch)
+                    //console.log(patch)
+                }
+            })
         }
     }
 
     /**
-     * Function handleAddPatch
-     */
-    const handleAddPatch = () => {
-        if(patchName.length > 0){
-            if(patchNicotine.length > 0){
-                addPatchInDatabase()
-            } else {
-
-            }
-        } else {
-
-        }
-    }
-
-    /**
-     * Function addPatchInDatabase
-     */
-    const addPatchInDatabase = async () => {
-        
-        setIsLoaderAdd(true)
-
-        try {
-            const docRef = await addDoc(collection(db, "patchs"), {
-                idUser: userSelector.userId,
-                patchName: patchName,
-                patchNicotine: patchNicotine,
-                isSelected: false
-            });
-
-            //console.log("Patch add with ID: "+ docRef.id);
-
-            setPatchName('')
-            setPatchNicotine('')
-
-            setIsLoaderAdd(false)
-            setIsVisible(false)
-
-            getPatchInDatabase()
-
-        } catch (error) {
-            console.error("Error add patch in firestore database : ");
-            console.error(error)
-        }
-    }
-
-    /**
-     * handleAddUserPatch
-     */
-    const handleAddUserPatch = (patch: Patch) => {
-        setPatchAdd(patch)
-        addUserPatchInDatabase(patch)
-    }
-
-    /**
-     * Function addPatchInDatabase
-     */
-    const addUserPatchInDatabase = async (patch: Patch) => {
-        
-        //setIsLoaderGet(true)
-        setIsLoaderUserAdd(true)
-
-        try {
-
-            const dateTime = serverTimestamp()
-            const docRef = await addDoc(collection(db, "userPatchs"), {
-                idUser: userSelector.userId,
-                idPatch: patch.idPatch,
-                dateTime: dateTime
-            });
-
-            //console.log("Pill user add with ID: "+ docRef.id);
-
-            setIsLoaderUserAdd(false)
-            setIsSnackBar(true)
-            //getPatchInDatabase()
-
-        } catch (error) {
-            console.error("Error add user patch in firestore database : ");
-            console.error(error)
-        }
-    }
-
-    /**
-     * Function handleShowAddPatch
-     */
-     const handleShowAddPatch = () => {
-        setIsVisible(true)
-    }
-
-     /**
      * Function handleHideAddPatch
      */
-     const handleHideAddPatch = () => {
-        setIsVisible(false)
+    const handlePickerSelect = (idPatch: string) => {
+        setUserPatch(idPatch)
+        //console.log(idPatch)
+
+        if(idPatch != ""){
+            //console.log('IS NOT undefined')
+            dataPatchTab.forEach((patch) => {
+                if(patch.idPatch == idPatch){
+                    setUserPatchSelected(patch)
+                    //console.log(patch)
+                }
+            })
+    
+            setUserIdPatch(idPatch)
+        } else {
+            //console.log('IS undefined')
+        }
+        
     }
 
+    /**
+     * Function setUserIdPatch
+     * @param idPatch 
+     */
+    const setUserIdPatch = async (idPatch: string) => {
+
+        const userDoc = doc(db, "users", userSelector.userId)
+        
+        await setDoc(userDoc, {
+            userName: userSelector.userName,
+            userMail: userSelector.userMail,
+            idPatch: idPatch,
+            idPill: userSelector.idPill,
+            idCigarette: userSelector.idCigarette,
+        }).then((value) => {
+            //console.log(value);
+
+            const u = new User(userSelector.userId, userSelector.userName, userSelector.userMail, userSelector.userToken, idPatch, userSelector.idPill, userSelector.idCigarette);
+            dispatch(setUser(u));
+
+        }).catch((error) => {
+            console.error("Error set user in firestore database : ")
+            console.error(error)
+        })
+    }
+
+    /**
+     * Function handleAddUserPatch
+     */
+    const handleAddUserPatch = () => {
+        addUserPatch()
+    }
+
+    /**
+     * Function addUserPatch
+     */
+    const addUserPatch = async () => {
+        setIsLoaderUserAdd(true)
+        setErrorAddPatch("")
+
+        const dateTime = serverTimestamp()
+        const patchDoc = collection(db, "userPatchs")
+
+        await addDoc(patchDoc, {
+            idUser: userSelector.userId,
+            idPatch: userPatch,
+            dateTime: dateTime
+        }).then((value) => {
+            setIsLoaderUserAdd(false)
+            setIsSnackBar(true)
+        }).catch((error) => {
+            setIsLoaderUserAdd(false)
+            setErrorAddPatch("addUserPatch error : " + error.message)
+            console.error(error)
+        })
+    }
 
     /**
      * Function onRefresh 
      */
     const onRefresh = () => {
-        setIsFetching(true)
-        getPatchInDatabase()
+        getPatchList()
     }
-
-
-    // Item
-    const Item = (item: Patch) => (
-        
-        <View style={AppStyle.itemContainerView}>
-            
-            <View style={ AppStyle.itemPatchContainer } >
-                <Text style={ AppStyle.itemPatchText }>Nom du patch : {item.patchName} </Text>
-                <Text style={ AppStyle.itemPatchText }>Taux de nicotine : {item.patchNicotine} (mg/24h)</Text>
-            </View>
-            
-            <View style={ AppStyle.itemPatchBtnContainer } >
-                {isLoaderUserAdd == true ? 
-                    JSON.stringify(item) === JSON.stringify(patchAdd) ? 
-                    <View style={AppStyle.viewLoaderContainer}>
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                    </View>
-                    : 
-                    <TouchableOpacity
-                        onPress={() => handleAddUserPatch(item)}
-                        activeOpacity={0.6}
-                        style={ AppStyle.btnAdd }>
-                        <Text style={AppStyle.btnAddText}> + </Text>
-                    </TouchableOpacity>
-                :
-                <TouchableOpacity
-                    onPress={() => handleAddUserPatch(item)}
-                    activeOpacity={0.6}
-                    style={ AppStyle.btnAdd }>
-                    <Text style={AppStyle.btnAddText}> + </Text>
-                </TouchableOpacity>
-                }
-                
-            </View>
-        </View>
-            
-        
-    );
 
     // View JSX
     return (
-    <SafeAreaProvider>
-        <View style={AppStyle.container}>
-        <LinearGradient
-            colors={[Colors.white, Colors.white]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={AppStyle.linearContenair}>
-
-            <TouchableOpacity
-                onPress={() => handleShowAddPatch()}
-                activeOpacity={0.6}
-                style={ AppStyle.btnAddPatch }>
-                <Text style={AppStyle.btnAddPatchText}>Ajouter un patch</Text>
-            </TouchableOpacity>
-
-            {isLoaderGet == true ? 
-            <View>
-              <LoaderComponent text="Chargement des patchs" step={''} color={Colors.white} size={'large'}/>
-            </View>
-            : 
-                dataPatchTab.length != 0 ? 
-
-                <FlatList
-                data={dataPatchTab}
-                extraData={dataPatchTab}
-                onRefresh={() => onRefresh()}
-                refreshing={isFetching}
-                renderItem={ ({item}) => <Item idPatch={item.idPatch} patchName={item.patchName} patchNicotine={item.patchNicotine} isSelected={item.isSelected} />}
-                keyExtractor={(item) => item.idPatch } />
-
+        <SafeAreaProvider>
+            <View style={AppStyle.container}>
+                { isLoaderGet == true ? 
+                <View>
+                    <LoaderComponent text="Chargement des patchs" step="" color={Colors.blueFb} size="large"/>
+                </View>
                 : 
+                <View style={AppStyle.viewContenair}>
+                    
+                    <View style={AppStyle.pickerSelect}>
+                        <PickerSelect
+                            onValueChange={(patch) => handlePickerSelect(patch) }
+                            style={pickerSelectStyles}
+                            placeholder={{
+                                label: "Selectionner un patch",
+                                value: "",
+                                color: Colors.colorOrange
+                            }}
+                            value={userPatch}
+                            items={dataPatchTabItem}
+                        />
+                    </View>
 
-                <Text style={AppStyle.textNoData}> Vous n'avez pas encore ajouter de patch </Text>
-            }
+                    { userPatch != "" ?
+                    <View style={AppStyle.itemContainerView2}>
+                                    
+                        <View style={ AppStyle.itemPatchContainer2 } >
+                            <Text style={ AppStyle.itemPatchText2 }>Nom du patch : {userPatchSelected.patchName} </Text>
+                            <Text style={ AppStyle.itemPatchText2 }>Taux de nicotine :  {userPatchSelected.patchNicotine} (mg) </Text>
+                        </View>
 
-        </LinearGradient>
+                        <TouchableOpacity
+                            onPress={() => handleAddUserPatch()}
+                            activeOpacity={0.6}
+                            style={ AppStyle.btnAddPatch }>
+                            <Text style={AppStyle.btnAddPatchText}>Appliquer le patch</Text>
+                        </TouchableOpacity>
 
-        </View>
-
-        <BottomSheet 
-        modalProps={{}} 
-        isVisible={isVisible}>
-            <Pressable style={AppStyle.modalPressage}>
-            <View style={AppStyle.modalContainer}>
-
-            <View>
-                <Text style={AppStyle.textSubTitleOrange}>Informations du patch</Text>
+                        { isLoaderUserAdd == true ?
+                        <View>
+                            <LoaderComponent text="Ajout du patch en cours ..." step="" color={Colors.blueFb} size="large"/>
+                        </View>
+                        :
+                        <Text style={AppStyle.textError}>{errorAddPatch}</Text>
+                        }
+                    </View>
+                    : null }
+                </View> 
+                }
             </View>
-
-            <TextInput 
-                style={AppStyle.textInputAdd}
-                placeholder="Entrer le nom de la marque de votre patch"
-                value={patchName}
-                onChangeText={setPatchName} />
-
-            <TextInput 
-                style={AppStyle.textInputAdd}
-                placeholder="Enter le taux de nicotine du patch (mg/24h)"
-                value={patchNicotine}
-                onChangeText={setPatchNicotine} />
-
-            {isLoaderAdd == true ? 
-            <View>
-              <LoaderComponent text="Ajout du patch en cours ..." step={''} color={Colors.colorOrange} size={'large'}/>
-            </View>
-            : 
-            <TouchableOpacity
-                onPress={() => handleAddPatch()}
-                activeOpacity={0.6}
-                style={ AppStyle.btnOrange }>
-                <Text style={AppStyle.btnText}>Ajouter</Text>
-            </TouchableOpacity>
-            }
-
-            <TouchableOpacity
-                onPress={() => handleHideAddPatch()}
-                activeOpacity={0.6}
-                style={ AppStyle.btn }>
-                <Text style={AppStyle.btnText}>Fermer</Text>
-            </TouchableOpacity>
-            </View>
-        </Pressable>
-        </BottomSheet>
-
-        <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={3000} message={ 'Application du patch : '+patchAdd.patchName}/>
-
-    </SafeAreaProvider>
-  )
+            
+            <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={3000} message={ 'Application du patch : '+userPatchSelected.patchName}/>
+            
+        </SafeAreaProvider>
+    )
 }
 
 export default SettingPatchComponent
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+   
+})
+
+const pickerSelectStyles = StyleSheet.create({
+    inputIOS: {
+        backgroundColor: Colors.white,
+        fontSize: 16,
+        borderWidth: 2,
+        borderColor: 'silver',
+        borderRadius: 5,
+        color: 'black',
+        padding: 15 
+    },
+    inputAndroid: {
+        backgroundColor: Colors.white,
+        fontSize: 16,
+        borderWidth: 2,
+        borderColor: 'silver',
+        borderRadius: 5,
+        color: 'black',
+        padding: 15 
+    }
+});

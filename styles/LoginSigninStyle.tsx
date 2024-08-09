@@ -7,32 +7,34 @@ const screenHeight = Dimensions.get('screen').height;
 export default StyleSheet.create({
     textInput: {
         width: screenWidth - 20,
-        height: 50,
-        backgroundColor: Colors.white,
-        borderColor: Colors.colorOrange,
-        borderWidth: 2,
-        borderRadius: 10,
-        marginTop:10,
-        paddingStart:5
+        marginTop:15,
     },
     
     btnLogin: {
         width: screenWidth - 20,
-        backgroundColor: Colors.blueFb,
-        marginTop:10,
+        backgroundColor: Colors.colorOrange,
+        marginTop:15,
         padding: 15,
-        borderRadius: 10,
+        borderRadius: 5,
     },
       
     buttonText: {
         textAlign: 'center',
         color: Colors.white,
+        textTransform: 'uppercase',
+        fontWeight: 'bold',
         fontSize: 20,
     },
 
     textError: {
         fontSize: 18,
-        margin: 10,
-        color: Colors.colorOrange
+        margin: 15,
+        color: Colors.colorRed
+    },
+
+    textConditionContenair: {
+        width: screenWidth - 20,
+        marginTop:10,
+        marginStart:5
     }
 })

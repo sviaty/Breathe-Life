@@ -16,7 +16,7 @@ return(
         : null }
         
         { props.step != '' ?
-        <Text style={styles.textLoader}> {props.step} </Text>
+        <Text style={{ color: props.color, fontSize: 16, textAlign: 'center', marginTop:10}}> {props.step} </Text>
         : null }
     </View>
   )

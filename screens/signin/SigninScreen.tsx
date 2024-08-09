@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native'
-
-import { LinearGradient } from 'expo-linear-gradient';
+import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native'
+import { Stack, TextInput, Backdrop, BackdropSubheader } from "@react-native-material/core";
 
 import AppStyle from '../../styles/AppStyle';
 import SigninStyle from '../../styles/LoginSigninStyle';
@@ -31,66 +30,148 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 //const analytics = getAnalytics(app);
 
+/**
+ * SigninScreen
+ * @param param0 
+ * @returns 
+ */
+const SigninScreen = ({navigation}: {navigation: any}) => {
 
-const SigninComponent = ({navigation}: {navigation: any}) => {
+    // UseState
     const [isLoader, setIsLoader] = useState<boolean>(false)
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
 
     const [name, setName] = useState<string>("");
     const [mail, setMail] = useState<string>("");
     const [pwd, setPwd] = useState<string>("");
+    const [pwdCopy, setPwdCopy] = useState<string>("");
 
     const [step, setStep] = useState<string>('');
     const [error, setError] = useState<string>('');
 
+    const [errorName, setErrorName] = useState<string>('');
+    const [errorMail, setErrorMail] = useState<string>('');
+    const [errorPwd, setErrorPwd] = useState<string>('');
+    const [errorPwdCopy, setErrorPwdCopy] = useState<string>('');
+
+    /**
+     * Function handleSignIn
+     */
     const handleSignIn = () => {
         setIsLoader(true)
 
-        if(mail.length > 0){
-            if(pwd.length > 0){
-                setError('')
-                createUser()
-            } else {
-                setIsLoader(false)
-                setError('Password is empty')
-                //console.error("Password is empty");
-            }
-        } else {
-            setIsLoader(false)
-            setError('Mail is empty')
-            //console.error("Mail is empty");
+        setErrorName("")
+        setErrorMail("")
+        setErrorPwd("")
+        setErrorPwdCopy("")
+        setError("")
+        
+        if(isDataCorrect()){
+            createUserAuth()
         }
     }
 
-    const createUser = () => {
-        setStep('Auth user')
+    /**
+     * Function isDataCorrect
+     * @returns boolean
+     */
+    const isDataCorrect = (): boolean => {
+        setStep("Vérification des données")
+
+        if(name.length == 0){
+            setIsLoader(false)
+            setErrorName("Le nom est vide")
+            return false
+        }
+
+        if(mail.length == 0){
+            setIsLoader(false)
+            setErrorMail("L'e-mail est vide")
+            return false
+        }
+
+        if(pwd.length == 0){
+            setIsLoader(false)
+            setErrorPwd("Le mot de passe est vide")
+            return false
+        }
+
+        if(pwdCopy.length == 0){
+            setIsLoader(false)
+            setErrorPwdCopy("Le mot de passe re-copié est vide")
+            return false
+        } else {
+            if(pwd != pwdCopy){
+                setIsLoader(false)
+                setErrorPwdCopy("Le mot de passe est mal recopié")
+                return false
+            }
+        }
+
+        return true 
+    }
+
+    /**
+     * Function createUserAuth
+     */
+    const createUserAuth = () => {
+        setStep("Création des identifiants de l'utilisateur")
+
         createUserWithEmailAndPassword(auth, mail, pwd)
             .then((userCredential) => {
                 const user = userCredential.user;
-                console.log(user)
+                //console.log(user)
                 
-                addUserInDatabase()
+                addUserInFireStore()
             })
             .catch((error) => {
                 setIsLoader(false)
-                console.log(error)
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                setError(error.message)
+                
+                displayErrorUserAuth(error)
             }
         );
     };
 
-    const addUserInDatabase = async () => {
+    /**
+     * Function displayErrorUserAuth
+     * @param error 
+     */
+    const displayErrorUserAuth = (error: any) => {
+        //console.log(error.code)
+        
+        switch (error.code) {
+            case "auth/email-already-in-use": {
+                setError("L' e-mail est déjà utilisé par un utilisateur.")
+                setErrorMail("L' e-mail est déjà utilisé par un utilisateur.")
+                break;
+            }
+            case "auth/weak-password": {
+                setError("Le mot de passe doit contenir au minimum 6 charactères.")
+                setErrorPwd("Le mot de passe doit contenir au minimum 6 charactères.")
+                break;
+            }
+            default: {
+                setError(error.message)
+                break;
+            }
+        }
+    }
+
+    /**
+     * 
+     */
+    const addUserInFireStore = async () => {
+        setStep('Ajout des données utilisateur')
         try {
-            setStep('Add user data in database')
             const docRef = await addDoc(collection(db, "users"), {
                 userName: name,
-                userMail: mail
+                userMail: mail,
+                idPatch: "",
+                idPill: "",
+                idCigarette: ""
             });
-        
-            //console.log("User add with ID: "+ docRef.id);
-            //console.log('User is signed');
+
+            setIsLoader(false)
 
             // display snack bar
             setIsSnackBar(true)
@@ -99,70 +180,97 @@ const SigninComponent = ({navigation}: {navigation: any}) => {
 
         } catch (error) {
             setIsLoader(false)
+
             setError("Error add data : "+ error)
             console.error("Error add data : "+ error);
         }
     };
 
+    /**
+     * View JSX
+     */
     return (
         <View style={AppStyle.container}>
-        <LinearGradient
-            colors={[Colors.white, Colors.white]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={AppStyle.linearContenair}>
+  
+            <View style={AppStyle.subTitleContainer}>
+                <Text style={AppStyle.subTitleText}>Inscription</Text>
+            </View>
 
-                <View>
-                    <Text style={AppStyle.textSubTitle}>Signin Page</Text>
-                </View>
+            <Stack spacing={0} style={AppStyle.stackLogin} removeClippedSubviews={true}>
 
                 <TextInput 
+                    variant="outlined"
+                    label="Entrer votre nom"
+                    placeholder="John"
+                    helperText={errorName}
+                    color={Colors.colorOrange}
+                    keyboardType="default"
                     style={SigninStyle.textInput}
-                    placeholder="Enter your name"
                     value={name}
                     onChangeText={setName} />
 
                 <TextInput 
-                    style={SigninStyle.textInput}
-                    placeholder="Enter your mail"
-                    value={mail}
+                    variant="outlined"
+                    label="Entrer votre mail"
+                    placeholder="e-mail@gmail.com"
+                    helperText={errorMail}
+                    color={Colors.colorOrange}
                     autoCapitalize="none"
                     autoComplete="email"
                     keyboardType="email-address"
+                    style={SigninStyle.textInput}
+                    value={mail}
                     onChangeText={setMail} />
 
                 <TextInput 
-                    style={SigninStyle.textInput}
-                    placeholder="Enter your password"
-                    value={pwd}
+                    variant="outlined"
+                    label="Entrer votre mot de passe"
+                    placeholder="Mot de passe"
+                    helperText={errorPwd}
+                    color={Colors.colorOrange}
                     autoCapitalize="none"
+                    style={SigninStyle.textInput}
+                    value={pwd}
                     onChangeText={setPwd}
                     secureTextEntry={true} />
+
+                <TextInput 
+                    variant="outlined"
+                    label="Re-copier votre mot de passe"
+                    placeholder="Mot de passe"
+                    helperText={errorPwdCopy}
+                    color={Colors.colorOrange}
+                    autoCapitalize="none"
+                    style={SigninStyle.textInput}
+                    value={pwdCopy}
+                    onChangeText={setPwdCopy}
+                    secureTextEntry={true}
+                    contextMenuHidden={true} />
 
                 <TouchableOpacity
                     onPress={() => handleSignIn()}
                     activeOpacity={0.6}
                     style={SigninStyle.btnLogin}>
-                    <Text style={SigninStyle.buttonText}>Sigin</Text>
+                    <Text style={SigninStyle.buttonText}>Inscription</Text>
                 </TouchableOpacity>
 
-                {isLoader == true ? 
-                <View>
-                <LoaderComponent text="Connection is in progress ..." step={step} color={Colors.colorOrange}/>
-                </View>
-                : 
-                <Text style={SigninStyle.textError}>{error}</Text>
-                }
-            
-        </LinearGradient>
+            </Stack>
 
-        <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={3000} message={'User is signed'}/>
+            {isLoader == true ? 
+            <View>
+                <LoaderComponent text="Inscription en cours ..." step={step} color={Colors.blueFb} size={'large'}/>
+            </View>
+            : 
+            <Text style={SigninStyle.textError}>{error}</Text>
+            }
+            
+            <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={3000} message={'User is signed'}/>
 
         </View>
     )
 }
 
-export default SigninComponent
+export default SigninScreen
 
 const styles = StyleSheet.create({
    

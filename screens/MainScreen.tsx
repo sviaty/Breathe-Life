@@ -96,7 +96,7 @@ const MainScreen = () => {
             //console.log(dataUser);
             
             if(dataUser != null){
-              const u = new User(docSnap.id, dataUser.userName, dataUser.userMail, '');
+              const u = new User(docSnap.id, dataUser.userName, dataUser.userMail, '', dataUser.idPatch, dataUser.idPill, dataUser.idCigarette);
               dispatch(setUser(u));
 
               setLoggin(true)
