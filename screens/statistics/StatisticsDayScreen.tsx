@@ -360,9 +360,9 @@ const StatisticsDayScreen = () => {
     }
 
     return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={AppStyle.container}>
 
-        <View style={AppStyle.container}>
+        <View >
     
 
             <View style={AppStyle.statsNumberContainer}>

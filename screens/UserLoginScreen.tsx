@@ -19,7 +19,7 @@ const UserLoginScreen = () => {
     return (
 
         <Tab.Navigator
-            initialRouteName="SettingCounter"
+            initialRouteName="SettingUser"
             activeColor={Colors.colorOrange}>
                 
             <Tab.Screen

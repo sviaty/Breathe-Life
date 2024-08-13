@@ -102,6 +102,9 @@ const MainScreen = () => {
               setLoggin(true)
               dispatch(setIsLogin(true));
               setIsLoader(false)
+            } else {
+              setLoggin(false)
+              setIsLoader(false)
             }
           } catch (error) {
             setLoggin(false)
@@ -165,7 +168,6 @@ const MainScreen = () => {
         return (
         <NavigationContainer> 
           <Stack.Navigator>
-
             <Stack.Screen 
               name="UserNoLoginScreen" 
               component={UserNoLoginScreen} 

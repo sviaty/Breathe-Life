@@ -342,53 +342,48 @@ const StatisticsGlobalScreen = () => {
     }
 
     return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={AppStyle.container}>
 
-        <View style={AppStyle.container}>
-        <LinearGradient
-            colors={[Colors.white, Colors.white]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={AppStyle.linearContenair}>
+        <View>
 
-        <View style={AppStyle.statsNumberContainer}>
+            <View style={AppStyle.statsNumberContainer}>
 
-            <View style={AppStyle.statsNumberItemContainer}>
-                <View style={AppStyle.statsNumberItem2Container}>
-                    <Text style={AppStyle.statItemTitle}> Patchs </Text>
-                    {isLoadCountPatch == true ? 
-                    <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                    : 
-                    <Text style={AppStyle.statItemNumber}> {countPatch} </Text>
-                    }
+                <View style={AppStyle.statsNumberItemContainer}>
+                    <View style={AppStyle.statsNumberItem2Container}>
+                        <Text style={AppStyle.statItemTitle}> Patchs </Text>
+                        {isLoadCountPatch == true ? 
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                        : 
+                        <Text style={AppStyle.statItemNumber}> {countPatch} </Text>
+                        }
+                    </View>
                 </View>
+
+                <View style={AppStyle.statsNumberItemContainer}>
+                    <View style={AppStyle.statsNumberItem2Container}>
+                        <Text style={AppStyle.statItemTitle}> Pastilles </Text>
+                        {isLoadCountPill == true ? 
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                        : 
+                        <Text style={AppStyle.statItemNumber}> {countPill} </Text>
+                        }
+                    </View>
+                </View>
+
+                <View style={AppStyle.statsNumberItemContainer}>
+                    <View style={AppStyle.statsNumberItem2Container}>
+                        <Text style={AppStyle.statItemTitle}> Cigarettes </Text>
+                        {isLoadCountCigarette == true ? 
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                        : 
+                        <Text style={AppStyle.statItemNumber}> {countCigarette} </Text>
+                        }
+                    </View>
+                </View>
+
             </View>
 
-            <View style={AppStyle.statsNumberItemContainer}>
-                <View style={AppStyle.statsNumberItem2Container}>
-                    <Text style={AppStyle.statItemTitle}> Pastilles </Text>
-                    {isLoadCountPill == true ? 
-                    <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                    : 
-                    <Text style={AppStyle.statItemNumber}> {countPill} </Text>
-                    }
-                </View>
-            </View>
-
-            <View style={AppStyle.statsNumberItemContainer}>
-                <View style={AppStyle.statsNumberItem2Container}>
-                    <Text style={AppStyle.statItemTitle}> Cigarettes </Text>
-                    {isLoadCountCigarette == true ? 
-                    <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                    : 
-                    <Text style={AppStyle.statItemNumber}> {countCigarette} </Text>
-                    }
-                </View>
-            </View>
-
-        </View>
-
-        <View style={AppStyle.statsNicotineContainer}>
+            <View style={AppStyle.statsNicotineContainer}>
                 <View style={AppStyle.statsNicotineItemContainer}>
                     <View style={AppStyle.statsNicotineItem2Container}>
                         <Text style={AppStyle.statItemTitleNicotine}> Nicotine </Text>
@@ -427,8 +422,6 @@ const StatisticsGlobalScreen = () => {
                 </View>
             </View>
 
-
-        </LinearGradient>
         </View>
     </SafeAreaProvider>
   )

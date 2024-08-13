@@ -64,7 +64,6 @@ export default StyleSheet.create({
 
     container: {
         flex: 1,
-       
     },
 
     containerCenter2: {
@@ -82,6 +81,15 @@ export default StyleSheet.create({
         backgroundColor: Colors.background,
     },
 
+    containerCenter3b : {
+        alignContent: 'stretch',
+        alignItems: 'center',
+        alignSelf: 'stretch',
+        borderTopEndRadius: 20,
+        borderTopStartRadius: 20,
+        backgroundColor: Colors.background,
+    },
+
     containerCenter4: {
         alignSelf: 'stretch',
         backgroundColor: Colors.blueFb,
@@ -92,8 +100,8 @@ export default StyleSheet.create({
     btnCigAdd: {
         width: screenWidth - 20,
         backgroundColor: Colors.colorOrange,
-        marginTop:15,
-        marginBottom:15,
+        marginTop:10,
+        marginBottom:10,
         padding: 15,
         borderRadius: 5,
     },
@@ -477,8 +485,21 @@ export default StyleSheet.create({
     },
 
     pickerSelect: {
+        backgroundColor:'white',
+        borderWidth: 2,
+        borderColor: Colors.silver,
+        borderRadius: 5,
         width: screenWidth - 20,
-        marginTop:15,
+        marginTop:10,
+    },
+
+    pickerSelectOrange: {
+        backgroundColor:'white',
+        borderWidth: 2,
+        borderColor: Colors.colorOrange,
+        borderRadius: 5,
+        width: screenWidth - 20,
+        marginTop:10,
     },
 
     selectAddCig: {
@@ -488,8 +509,11 @@ export default StyleSheet.create({
     },
 
     pikerSelectCig: {
+        backgroundColor:'white',
+        borderWidth: 2,
+        borderColor: Colors.colorOrange,
+        borderRadius: 5,
         flex: 0.8,
-        height: 55
     },
 
     btnAddCigContainer: {
@@ -498,10 +522,12 @@ export default StyleSheet.create({
     },
 
     btnAddCig2: {
-        height: 53,
+        height: 55,
         alignItems:'center',
         justifyContent:'center',
         backgroundColor: Colors.blueFb,
+        borderWidth: 2,
+        borderColor: Colors.blueFb,
         borderRadius: 5,
         marginLeft: 10
     },
@@ -518,5 +544,9 @@ export default StyleSheet.create({
 
     viewContenair: {
         alignItems: 'center'
+    },
+
+    textSelectIos: {
+        padding:15
     }
 })

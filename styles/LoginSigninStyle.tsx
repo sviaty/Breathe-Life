@@ -9,6 +9,17 @@ export default StyleSheet.create({
         width: screenWidth - 20,
         marginTop:15,
     },
+
+    bootomTextInput: {
+        backgroundColor: Colors.white,
+        borderColor: Colors.silver,
+        borderWidth: 2,
+        borderRadius: 5,
+        width: screenWidth - 20,
+        marginTop:10,
+        padding:15
+        
+    },
     
     btnLogin: {
         width: screenWidth - 20,

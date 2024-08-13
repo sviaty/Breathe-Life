@@ -1,9 +1,11 @@
 // React & React Native
-import React, { useState , useEffect} from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Alert, Pressable, Keyboard } from 'react-native'
+import React, { useState, useMemo, useCallback, useEffect, useRef} from 'react';
+import { StyleSheet, Platform, Text, View, TouchableOpacity, Alert, Pressable, Keyboard } from 'react-native'
 import { Stack, TextInput, Backdrop } from "@react-native-material/core";
+import { Picker } from '@react-native-picker/picker';
 import PickerSelect from 'react-native-picker-select';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import BottomSheet, { BottomSheetModal, BottomSheetModalProvider, BottomSheetBackdrop, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 
 // Styles & Colors
 import Colors from '../../constants/ColorsConstant';
@@ -49,7 +51,7 @@ const SettingCigaretteComponent = () => {
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
     const [textSnackBar, setTextSnackBar] = useState<string>("")
 
-    let [userCig, setUserCig] = useState<string>("");
+    let [userCig, setUserCig] = useState<string>("7CqNNUDGFhDV5hFgLVx1");
 
     const c = new Cigarette("","",0,0,0,0)
     let [userCigSelected, setUserCigSelected] = useState<Cigarette>(c);
@@ -75,6 +77,8 @@ const SettingCigaretteComponent = () => {
     const [cigPaquetPrice, setCigPaquetPrice] = useState<string>("")
     const [errorCigPaquetPrice, setErrorCigPrice] = useState<string>("")
     
+    
+
     // UseSelector
     const userSelector = useSelector((state: RootState) => state.userReducer.user);
 
@@ -104,6 +108,13 @@ const SettingCigaretteComponent = () => {
         
         await getDocs(q).then((cigList) => {
             //console.log(pillList.size);
+
+            const cItem = { label: "Selectionner une marque de cigarette", value: "Selectionner une marque de cigarette" }
+            //console.log(pItem);
+
+            dataCigTabItem.push(cItem)
+            setDataCigTabItem([...dataCigTabItem])
+
             cigList.forEach((cig) => {
                 const cigData = cig.data()
                 //console.log(patchData);
@@ -204,9 +215,9 @@ const SettingCigaretteComponent = () => {
      */
     const handlePickerSelect = (idCig: string) => {
         setUserCig(idCig)
-        console.log(idCig)
+        //console.log(idCig)
 
-        if(idCig != ""){
+        if(idCig != "Selectionner une marque de cigarette"){
             //console.log('IS NOT undefined')
             dataCigTab.forEach((cig) => {
                 if(cig.idCigarette == idCig){
@@ -217,6 +228,17 @@ const SettingCigaretteComponent = () => {
     
             setUserIdCig(idCig)
         } else {
+
+            const c = new Cigarette(
+                "", 
+                idCig, 
+                0,
+                0,
+                0,
+                0,
+            );
+            setUserCigSelected(c)
+
             //console.log('IS undefined')
         }
     }
@@ -376,7 +398,9 @@ const SettingCigaretteComponent = () => {
             setIsLoaderCigAdd(false)
             setTextSnackBar('Ajout de la marque de cigarette : '+ cigName)
             setIsSnackBar(true)
-            handleOpenCloseBackdrop()
+
+            //handleOpenCloseBackdrop()
+            bottomSheetRefAdd.current?.close()
 
             setCigName("")
             setCigNicotine("")
@@ -394,13 +418,6 @@ const SettingCigaretteComponent = () => {
         })
     };
 
-    /**
-     * Function onRefresh 
-     */
-    const onRefresh = () => {
-        getCigList()
-    }
-
     const handleOpenCloseBackdrop = () => {
         handleKeyboardHide()
         //console.log(isBackdropRevealed)
@@ -411,10 +428,65 @@ const SettingCigaretteComponent = () => {
         Keyboard.dismiss()
     }
 
+    /**
+     * Function onRefresh 
+     */
+    const onRefresh = () => {
+        getCigList()
+    }
+
+    /*
+    <PickerSelect
+        onValueChange={(cig) => handlePickerSelect(cig) }
+        style={pickerSelectStyles}
+        placeholder={{
+            label: "Selectionner une marque de cigarette",
+            value: "",
+            color: Colors.colorOrange
+        }}
+        value={userCig}
+        items={dataCigTabItem}
+
+        https://github.com/maxs15/react-native-modalbox
+    />
+    */
+
     const backLayerView = () => {
-        return (
-            <SafeAreaProvider >
-                <View style={AppStyle.container}>
+
+    }
+
+    const snapPoints = useMemo(() => ['25%', '50%', '80%'], []);
+    const snapPointsAdd = useMemo(() => ['80%'], []);
+    const bottomSheetRef = useRef<BottomSheet>(null);
+
+    const bottomSheetRefAdd = useRef<BottomSheetModal>(null);
+    const snapeToIndexAdd = (index: number) => bottomSheetRefAdd.current?.snapToIndex(index);
+
+	const handleClosePress = () => {
+        bottomSheetRef.current?.close()
+    };
+
+	const handleOpenPress = () => bottomSheetRef.current?.expand();
+	const handleCollapsePress = () => bottomSheetRef.current?.collapse();
+    const snapeToIndex = (index: number) => bottomSheetRef.current?.snapToIndex(index);
+	
+    const renderBackdrop = useCallback( 
+		(props: any) => 
+            <BottomSheetBackdrop appearsOnIndex={0} disappearsOnIndex={-1} {...props} />,
+		[]
+	);
+
+    const renderBackdropAdd = useCallback( 
+		(props: any) => 
+            <BottomSheetBackdrop appearsOnIndex={0} disappearsOnIndex={-1} onPress={ () => handleKeyboardHide()} {...props} />,
+		[]
+	);
+
+    // View JSX
+    return (
+        <SafeAreaProvider style={AppStyle.container}>
+            <GestureHandlerRootView>
+                <View>
                     { isLoaderGet == true ? 
                     <View>
                         <LoaderComponent text="Chargement des cigarettes" step="" color={Colors.blueFb} size="large"/>
@@ -423,22 +495,32 @@ const SettingCigaretteComponent = () => {
                     <View style={AppStyle.viewContenair}>
                         
                         <View style={AppStyle.selectAddCig}>
-                            <View  style={AppStyle.pikerSelectCig}>
-                            <PickerSelect
-                                onValueChange={(cig) => handlePickerSelect(cig) }
-                                style={pickerSelectStyles}
-                                placeholder={{
-                                    label: "Selectionner une marque de cigarette",
-                                    value: "",
-                                    color: Colors.colorOrange
-                                }}
-                                value={userCig}
-                                items={dataCigTabItem}
-                            />
+                            <View style={AppStyle.pikerSelectCig}>
+
+                                { Platform.OS === 'android' ? 
+                                <Picker
+                                    selectedValue={userCig}
+                                    onValueChange={(cig) => handlePickerSelect(cig) }
+                                    placeholder="Selectionner une marque de cigarette"
+                                    mode={'dialog'}
+                                >   
+                                {
+                                dataCigTabItem.map(cigTabItem => <Picker.Item key={cigTabItem.value} label={cigTabItem.label} value={cigTabItem.value}/>)
+                                }          
+                                </Picker>
+                                : null }
+
+                                { Platform.OS === 'ios' ? 
+                                <Pressable 
+                                    onPress={() => snapeToIndex(1)}>
+                                    <Text style={ AppStyle.textSelectIos } > {userCigSelected.cigaretteName} </Text>
+                                </Pressable>
+                                : null }
                             </View>
+
                             <View  style={AppStyle.btnAddCigContainer}>
                                 <TouchableOpacity
-                                    onPress={() => handleOpenCloseBackdrop()}
+                                    onPress={() => snapeToIndexAdd(0)}
                                     activeOpacity={0.6}
                                     style={ AppStyle.btnAddCig2 }>
                                     <Text style={AppStyle.btnAddCigText2}> + </Text>
@@ -446,14 +528,15 @@ const SettingCigaretteComponent = () => {
                             </View>
                         </View>
         
-                        { userCig != "" ?
+                        { userCig != "Selectionner une marque de cigarette" ?
                         <View style={AppStyle.itemContainerView2}>
                                         
                             <View style={ AppStyle.itemPatchContainer2 } >
-                                <Text style={ AppStyle.itemPatchText2 }>Marque des cigarettes : {userCigSelected.cigaretteName} </Text>
-                                <Text style={ AppStyle.itemPatchText2 }>Taux de nicotine : {userCigSelected.cigaretteNicotine} (mg)</Text>
-                                <Text style={ AppStyle.itemPatchText2 }>Taux de goudron : {userCigSelected.cigaretteGoudron} (mg)</Text>
-                                <Text style={ AppStyle.itemPatchText2 }>Taux de monoxyde de carbone : {userCigSelected.cigaretteCarbone} (mg)</Text>
+                                <Text style={ AppStyle.itemPatchText2 }>Marque : {userCigSelected.cigaretteName} </Text>
+                                <Text style={ AppStyle.itemPatchText2 }>Nicotine : {userCigSelected.cigaretteNicotine} (mg)</Text>
+                                <Text style={ AppStyle.itemPatchText2 }>Goudron : {userCigSelected.cigaretteGoudron} (mg)</Text>
+                                <Text style={ AppStyle.itemPatchText2 }>Monoxyde de carbone : {userCigSelected.cigaretteCarbone} (mg)</Text>
+                                <Text style={ AppStyle.itemPatchText2 }>Nombre de cigarette : {userCigSelected.cigarettePrice} / paquet </Text>
                                 <Text style={ AppStyle.itemPatchText2 }>Prix du paquet : {userCigSelected.cigarettePrice} (euros)</Text>
                             </View>
         
@@ -477,15 +560,137 @@ const SettingCigaretteComponent = () => {
                     }
                 </View>
                 
-                <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={5000} message={textSnackBar}/>
-                
-            </SafeAreaProvider>
-        )
-    }
+                <BottomSheet
+                    ref={bottomSheetRef}
+                    index={-1}
+                    snapPoints={snapPoints}
+                    enablePanDownToClose={true}
+                    handleIndicatorStyle={{ backgroundColor: Colors.blueFb }}
+                    backgroundStyle={{ backgroundColor: Colors.background }}
+                    backdropComponent={renderBackdrop}>
 
-    // View JSX
+                    <View style={styles.contentContainer}>
+
+                        <Text style={styles.containerHeadline}> Choisir une marque de cigarette </Text>
+                        
+                        <View style={AppStyle.pickerSelect}>
+                            <Picker
+                                selectedValue={userCig}
+                                onValueChange={(cig) => handlePickerSelect(cig) }
+                                placeholder="Selectionner une marque de cigarette"
+                                mode={'dialog'}
+                            >   
+                            {
+                            dataCigTabItem.map(cigTabItem => <Picker.Item key={cigTabItem.value} label={cigTabItem.label} value={cigTabItem.value}/>)
+                            }          
+                            </Picker>
+                        </View>
+                    </View>
+                </BottomSheet>
+
+
+                <BottomSheet
+                    ref={bottomSheetRefAdd}
+                    index={-1}
+                    snapPoints={snapPointsAdd}
+                    enablePanDownToClose={true}
+                    handleIndicatorStyle={{ backgroundColor: Colors.blueFb }}
+                    backgroundStyle={{ backgroundColor: Colors.background }}
+                    backdropComponent={renderBackdropAdd}>
+
+                    <View style={styles.contentContainer2}>
+
+                        <Text style={styles.containerHeadline}> Ajouter une marque de cigarette </Text>
+                        
+                        <View>
+
+                        <ScrollView
+                            persistentScrollbar={true}
+                            scrollEnabled={true}
+                            nestedScrollEnabled={true}
+                            automaticallyAdjustKeyboardInsets={true}>
+
+                        <Stack spacing={0} style={AppStyle.stackLogin2}>
+
+                            <BottomSheetTextInput
+                                placeholder="Entrer le nom de la marque"
+                                keyboardType="default"
+                                style={LoginSigninStyle.bootomTextInput}
+                                value={cigName}
+                                onChangeText={setCigName} />
+
+                            <BottomSheetTextInput
+                                placeholder="Entrer le taux de nicotine (mg)"
+                                keyboardType="decimal-pad"
+                                style={LoginSigninStyle.bootomTextInput}
+                                value={cigNicotine}
+                                onChangeText={setCigNicotine} />
+
+                            <BottomSheetTextInput
+                                placeholder="Entrer le taux de goudron (mg)"
+                                keyboardType="decimal-pad"
+                                style={LoginSigninStyle.bootomTextInput}
+                                value={cigGoudron}
+                                onChangeText={setCigGoudron} />
+
+                            <BottomSheetTextInput
+                                placeholder="Entrer le taux de monoxyde de carbonne (mg)"
+                                keyboardType="decimal-pad"
+                                style={LoginSigninStyle.bootomTextInput}
+                                value={cigCarbonne}
+                                onChangeText={setCigCarbonne} />
+
+                            <BottomSheetTextInput
+                                placeholder="Entrer le nombre de cigarette par paquet"
+                                keyboardType="number-pad"
+                                style={LoginSigninStyle.bootomTextInput}
+                                value={cigPaquetNbr}
+                                onChangeText={setCigPaquetNbr} />
+
+                            <BottomSheetTextInput
+                                placeholder="Entrer le prix du paquet (euros)"
+                                keyboardType="decimal-pad"
+                                style={LoginSigninStyle.bootomTextInput}
+                                value={cigPaquetPrice}
+                                onChangeText={setCigPaquetPrice} />
+
+                            { isLoaderCigAdd == true ?
+                            <View>
+                                <LoaderComponent text="Ajout de la marque de cigarette en cours ..." step="" color={Colors.blueFb} size="large"/>
+                            </View>
+                            :
+                            <View>
+                                <TouchableOpacity
+                                    onPress={() => handleAddCig()}
+                                    activeOpacity={0.6}
+                                    style={AppStyle.btnCigAdd}>
+                                    <Text style={LoginSigninStyle.buttonText}>Ajouter</Text>
+                                </TouchableOpacity>
+
+                                <Text style={AppStyle.textError}>{errorAddCigUser}</Text>
+                            </View>
+                            }
+                            
+                        </Stack>
+                        </ScrollView>
+
+                        </View>
+                    </View>
+                </BottomSheet>
+
+
+            </GestureHandlerRootView>
+            
+            <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={5000} message={textSnackBar}/>
+            
+        </SafeAreaProvider>
+    )
+
+   
+    /*
     return (
-        <Backdrop
+        
+       <Backdrop
             revealed={isBackdropRevealed}
             backLayer={backLayerView()}
             backLayerContainerStyle={{flex:1, backgroundColor: Colors.background}}
@@ -604,14 +809,34 @@ const SettingCigaretteComponent = () => {
                 </View>
             </View>
         
-        </Backdrop>
+        </Backdrop> 
+        
     )
+    */
 }
 
 export default SettingCigaretteComponent
 
 const styles = StyleSheet.create({
+    container: {
+		flex: 1,
+		alignItems: 'center'
+	},
+    contentContainer: {
+		alignItems: 'center'
+	},
 
+    contentContainer2: {
+        flex:1,
+		alignItems: 'center'
+	},
+
+	containerHeadline: {
+		fontSize: 24,
+		fontWeight: '600',
+		padding: 20,
+		color: Colors.colorOrange
+	}
 })
 
 const pickerSelectStyles = StyleSheet.create({
@@ -620,7 +845,7 @@ const pickerSelectStyles = StyleSheet.create({
         fontSize: 16,
         borderWidth: 2,
         borderColor: 'silver',
-        borderRadius: 5,
+        borderRadius: 10,
         color: 'black',
         padding: 15 
     },
@@ -629,7 +854,7 @@ const pickerSelectStyles = StyleSheet.create({
         fontSize: 16,
         borderWidth: 2,
         borderColor: 'silver',
-        borderRadius: 5,
+        borderRadius: 10,
         color: 'black',
         padding: 15 
     }

@@ -1,8 +1,10 @@
 // React & React Native
-import React, { useState , useEffect} from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
+import React, { useState, useMemo, useCallback, useEffect, useRef} from 'react';
+import { StyleSheet, Platform, Text, View, TouchableOpacity, Pressable } from 'react-native'
+import {Picker} from '@react-native-picker/picker';
 import PickerSelect from 'react-native-picker-select';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 
 // Styles & Colors
 import Colors from '../../constants/ColorsConstant';
@@ -24,6 +26,7 @@ import { useSelector, useDispatch } from 'react-redux';
 // FireStore
 import firebaseConfig from '../../firebaseConfig';
 import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, setDoc, getDoc, getDocs } from "firebase/firestore";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 const db = getFirestore(firebaseConfig);
 
 /**
@@ -76,6 +79,13 @@ const SettingPillComponent = () => {
         
         await getDocs(q).then((pillList) => {
             //console.log(pillList.size);
+
+            const cItem = { label: "Selectionner une pastille", value: "Selectionner une pastille" }
+            //console.log(pItem);
+
+            dataPillTabItem.push(cItem)
+            setDataPillTabItem([...dataPillTabItem])
+
             pillList.forEach((pill) => {
                 const pillData = pill.data()
                 //console.log(patchData);
@@ -128,9 +138,9 @@ const SettingPillComponent = () => {
      */
     const handlePickerSelect = (idPill: string) => {
         setUserPill(idPill)
-        console.log(idPill)
+        //console.log(idPill)
 
-        if(idPill != ""){
+        if(idPill != "Selectionner une pastille"){
             console.log('IS NOT undefined')
             dataPillTab.forEach((pill) => {
                 if(pill.idPill == idPill){
@@ -141,6 +151,8 @@ const SettingPillComponent = () => {
     
             setUserIdPill(idPill)
         } else {
+            const p = new Pill('', idPill, 0)
+            setUserPillSelected(p)
             console.log('IS undefined')
         }
     }
@@ -207,59 +219,124 @@ const SettingPillComponent = () => {
         getPillist()
     }
 
+    /**
+     * <PickerSelect
+        onValueChange={(pill) => handlePickerSelect(pill) }
+        style={pickerSelectStyles}
+        placeholder={{
+            label: "Selectionner une pastille",
+            value: "",
+            color: Colors.colorOrange
+        }}
+        value={userPill}
+        items={dataPillTabItem}
+    />
+    */
+
+    const snapPoints = useMemo(() => ['25%', '50%', '70%'], []);
+    const bottomSheetRef = useRef<BottomSheet>(null);
+
+	const handleClosePress = () => bottomSheetRef.current?.close();
+	const handleOpenPress = () => bottomSheetRef.current?.expand();
+	const handleCollapsePress = () => bottomSheetRef.current?.collapse();
+    const snapeToIndex = (index: number) => bottomSheetRef.current?.snapToIndex(index);
+	const renderBackdrop = useCallback(
+		(props: any) => <BottomSheetBackdrop appearsOnIndex={0} disappearsOnIndex={-1} {...props} />,
+		[]
+	);
+
     // View JSX
     return (
-        <SafeAreaProvider>
-            <View style={AppStyle.container}>
-                { isLoaderGet == true ? 
-                <View>
-                    <LoaderComponent text="Chargement des pastilles" step="" color={Colors.blueFb} size="large"/>
+        <SafeAreaProvider style={AppStyle.container}>
+            <GestureHandlerRootView>
+                <View >
+                    { isLoaderGet == true ? 
+                    <View>
+                        <LoaderComponent text="Chargement des pastilles" step="" color={Colors.blueFb} size="large"/>
+                    </View>
+                    : 
+                    <View style={AppStyle.viewContenair}>
+                        
+                        <View style={AppStyle.pickerSelectOrange}>
+
+                            { Platform.OS === 'android' ? 
+                            <Picker
+                                selectedValue={userPill}
+                                onValueChange={(pill) => handlePickerSelect(pill) }
+                                placeholder="Selectionner une pastille"
+                                mode={'dialog'}
+                            >   
+                            {
+                            dataPillTabItem.map(item => <Picker.Item key={item.value} label={item.label} value={item.value}/>)
+                            }          
+                            </Picker>
+                            : null }
+
+                            { Platform.OS === 'ios' ? 
+                            <Pressable 
+                                onPress={() => snapeToIndex(1)}>
+                                <Text style={ AppStyle.textSelectIos } > {userPillSelected.pillName} </Text>
+                            </Pressable>
+                            : null }
+                        </View>
+        
+                        { userPill != "Selectionner une pastille" ?
+                        <View style={AppStyle.itemContainerView2}>
+                                        
+                            <View style={ AppStyle.itemPatchContainer2 } >
+                                <Text style={ AppStyle.itemPatchText2 }>Nom de la pastille : {userPillSelected.pillName} </Text>
+                                <Text style={ AppStyle.itemPatchText2 }>Nicotine :  {userPillSelected.pillNicotine} (mg) </Text>
+                            </View>
+        
+                            <TouchableOpacity
+                                onPress={() => handleAddUserPill()}
+                                activeOpacity={0.6}
+                                style={ AppStyle.btnAddPatch }>
+                                <Text style={AppStyle.btnAddPatchText}>Consommer une pastille</Text>
+                            </TouchableOpacity>
+        
+                            { isLoaderUserAdd == true ?
+                            <View>
+                                <LoaderComponent text="Ajout de la pastille en cours ..." step="" color={Colors.blueFb} size="large"/>
+                            </View>
+                            :
+                            <Text style={AppStyle.textError}>{errorAddPill}</Text>
+                            }
+                        </View>
+                        : null }
+                    </View> 
+                    }
                 </View>
-                : 
-                <View style={AppStyle.viewContenair}>
-                    
-                    <View style={AppStyle.pickerSelect}>
-                        <PickerSelect
-                            onValueChange={(pill) => handlePickerSelect(pill) }
-                            style={pickerSelectStyles}
-                            placeholder={{
-                                label: "Selectionner une pastille",
-                                value: "",
-                                color: Colors.colorOrange
-                            }}
-                            value={userPill}
-                            items={dataPillTabItem}
-                        />
-                    </View>
-    
-                    { userPill != "" ?
-                    <View style={AppStyle.itemContainerView2}>
-                                    
-                        <View style={ AppStyle.itemPatchContainer2 } >
-                            <Text style={ AppStyle.itemPatchText2 }>Nom de la pastille : {userPillSelected.pillName} </Text>
-                            <Text style={ AppStyle.itemPatchText2 }>Taux de nicotine :  {userPillSelected.pillNicotine} (mg) </Text>
-                        </View>
-    
-                        <TouchableOpacity
-                            onPress={() => handleAddUserPill()}
-                            activeOpacity={0.6}
-                            style={ AppStyle.btnAddPatch }>
-                            <Text style={AppStyle.btnAddPatchText}>Consommer une pastille</Text>
-                        </TouchableOpacity>
-    
-                        { isLoaderUserAdd == true ?
-                        <View>
-                            <LoaderComponent text="Ajout de la pastille en cours ..." step="" color={Colors.blueFb} size="large"/>
-                        </View>
-                        :
-                        <Text style={AppStyle.textError}>{errorAddPill}</Text>
-                        }
-                    </View>
-                    : null }
-                </View> 
-                }
-            </View>
             
+                <BottomSheet
+                    ref={bottomSheetRef}
+                    index={-1}
+                    snapPoints={snapPoints}
+                    enablePanDownToClose={true}
+                    handleIndicatorStyle={{ backgroundColor: Colors.blueFb }}
+                    backgroundStyle={{ backgroundColor: Colors.white }}
+                    backdropComponent={renderBackdrop}>
+
+                    <View style={styles.contentContainer}>
+
+                        <Text style={styles.containerHeadline}> Choisir une pastille </Text>
+                        
+                        <View style={AppStyle.pickerSelect}>
+                            <Picker
+                                selectedValue={userPill}
+                                onValueChange={(pill) => handlePickerSelect(pill) }
+                                placeholder="Selectionner une pastille"
+                                mode={'dialog'}
+                            >   
+                            {
+                            dataPillTabItem.map(item => <Picker.Item key={item.value} label={item.label} value={item.value}/>)
+                            }          
+                            </Picker>
+                        </View>
+                    </View>
+                </BottomSheet>
+            </GestureHandlerRootView>
+
             <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={3000} message={ 'Consomation de la pastille : '+userPillSelected.pillName}/>
             
         </SafeAreaProvider>
@@ -270,7 +347,19 @@ const SettingPillComponent = () => {
 export default SettingPillComponent
 
 const styles = StyleSheet.create({
-   
+    container: {
+		flex: 1,
+		alignItems: 'center'
+	},
+    contentContainer: {
+		alignItems: 'center'
+	},
+	containerHeadline: {
+		fontSize: 24,
+		fontWeight: '600',
+		padding: 20,
+		color: Colors.colorOrange
+	}
 })
 
 const pickerSelectStyles = StyleSheet.create({

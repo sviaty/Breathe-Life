@@ -12,10 +12,11 @@ import StatisticsWeekSreen from './StatisticsWeekSreen';
 import StatisticsMounthSreen from './StatisticsMounthSreen';
 import StatisticsYearsScreen from './StatisticsYearsScreen';
 import StatisticsGlobalScreen from './StatisticsGlobalScreen';
+import AppStyle from '../../styles/AppStyle';
 
 const StatCounterComponent = () => {
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={AppStyle.container}>
     <Tab.Navigator 
       screenOptions={{
         tabBarActiveTintColor: 'white',

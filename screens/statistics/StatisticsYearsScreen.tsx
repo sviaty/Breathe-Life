@@ -357,14 +357,9 @@ const StatisticsYearsScreen = () => {
     }
 
     return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={AppStyle.container}>
 
-        <View style={AppStyle.container}>
-        <LinearGradient
-            colors={[Colors.white, Colors.white]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={AppStyle.linearContenair}>
+        <View >
 
             <View style={AppStyle.statsNumberContainer}>
 
@@ -442,7 +437,6 @@ const StatisticsYearsScreen = () => {
                 </View>
             </View>
 
-        </LinearGradient>
         </View>
     </SafeAreaProvider>
   )

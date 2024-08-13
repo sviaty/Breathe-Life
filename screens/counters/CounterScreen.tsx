@@ -10,10 +10,11 @@ import Colors from '../../constants/ColorsConstant';
 import SettingPatchComponent from './CounterPatchScreen';
 import SettingPillComponent from './CounterPillScreen';
 import SettingCigaretteComponent from './CounterCigaretteScreen';
+import AppStyle from '../../styles/AppStyle';
 
 const SettingCounterComponent = () => {
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={AppStyle.container}>
     <Tab.Navigator screenOptions={{
       tabBarActiveTintColor: 'white',
       tabBarInactiveTintColor: 'black',
@@ -24,7 +25,7 @@ const SettingCounterComponent = () => {
           borderBottomColor: 'gray',
       },
       tabBarStyle: {
-        backgroundColor: '#e6e6e6',
+        backgroundColor: Colors.white,
       },
     }}>
       <Tab.Screen name="Patchs" component={SettingPatchComponent} />

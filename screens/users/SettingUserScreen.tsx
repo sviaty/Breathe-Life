@@ -82,8 +82,7 @@ const SettingUserScreen = () => {
     }
 
     return (
-        
-        <SafeAreaView>
+        <SafeAreaView style={AppStyle.container}>
             <ScrollView 
                 style={UserSettingsStyle.userScrollView}
                 automaticallyAdjustKeyboardInsets={true}
