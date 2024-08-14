@@ -2,6 +2,7 @@ import React, { useState , useEffect} from 'react';
 import { StyleSheet, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Surface } from "@react-native-material/core";
 import { useIsFocused } from '@react-navigation/native';
 
 // Styles & Colors
@@ -344,82 +345,118 @@ const StatisticsGlobalScreen = () => {
     return (
     <SafeAreaProvider style={AppStyle.container}>
 
-        <View>
+        <View style={styles.statContainer}>
 
-            <View style={AppStyle.statsNumberContainer}>
+            <View style={styles.statDispositifNicotine}>
 
-                <View style={AppStyle.statsNumberItemContainer}>
-                    <View style={AppStyle.statsNumberItem2Container}>
-                        <Text style={AppStyle.statItemTitle}> Patchs </Text>
+                <Surface 
+                    elevation={8}
+                    category="medium"
+                    style={styles.statDispositifNicotineItem}>
+                        
+                    <Text style={styles.statDispositifNicotineTitle}> Patchs </Text>
+                    
+                    <View style={styles.statDispositifNicotineContenair}>
                         {isLoadCountPatch == true ? 
                         <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                         : 
-                        <Text style={AppStyle.statItemNumber}> {countPatch} </Text>
+                        <Text style={styles.statDispositifNicotineCount}> {countPatch} </Text>
                         }
                     </View>
-                </View>
+                </Surface>
 
-                <View style={AppStyle.statsNumberItemContainer}>
-                    <View style={AppStyle.statsNumberItem2Container}>
-                        <Text style={AppStyle.statItemTitle}> Pastilles </Text>
-                        {isLoadCountPill == true ? 
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                        : 
-                        <Text style={AppStyle.statItemNumber}> {countPill} </Text>
-                        }
-                    </View>
-                </View>
-
-                <View style={AppStyle.statsNumberItemContainer}>
-                    <View style={AppStyle.statsNumberItem2Container}>
-                        <Text style={AppStyle.statItemTitle}> Cigarettes </Text>
+                <Surface 
+                    elevation={8}
+                    category="medium"
+                    style={styles.statDepenseItem}>
+                    <Text style={styles.statDispositifNicotineTitle}> Cigarettes </Text>
+                    
+                    <View style={styles.statDispositifNicotineContenair}>
                         {isLoadCountCigarette == true ? 
                         <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                         : 
-                        <Text style={AppStyle.statItemNumber}> {countCigarette} </Text>
+                        <Text style={styles.statDispositifNicotineCount}> {countCigarette} </Text>
                         }
                     </View>
-                </View>
+                </Surface>
+
+                <Surface 
+                    elevation={8}
+                    category="medium"
+                    style={styles.statDispositifNicotineItem}>
+
+                    <Text style={styles.statDispositifNicotineTitle}> Pastilles </Text>
+                    
+                    <View style={styles.statDispositifNicotineContenair}>
+                        {isLoadCountPill == true ? 
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                        : 
+                        <Text style={styles.statDispositifNicotineCount}> {countPill} </Text>
+                        }
+                    </View>
+                </Surface>
 
             </View>
 
-            <View style={AppStyle.statsNicotineContainer}>
-                <View style={AppStyle.statsNicotineItemContainer}>
-                    <View style={AppStyle.statsNicotineItem2Container}>
-                        <Text style={AppStyle.statItemTitleNicotine}> Nicotine </Text>
-                        {isLoadCountPatchDetails == true && isLoadCountPillDetails == true && isLoadCountCigaretteDetails == true ? 
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                        : 
-                        <Text style={AppStyle.statItemNicotine}> {Math.round(countNicotine * 100) / 100} mg </Text>
-                        }
-                    </View>
-                </View>
-            </View>
+            <View style={styles.statDispositifNicotine}>
 
-            <View style={AppStyle.statsNicotineContainer}>
-                <View style={AppStyle.statsNicotineItemContainer}>
-                    <View style={AppStyle.statsNicotineItem2Container}>
-                        <Text style={AppStyle.statItemTitleNicotine}> Goudron </Text>
-                        {isLoadCountCigaretteDetails == true ? 
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                        : 
-                        <Text style={AppStyle.statItemNicotine}> {countGoudron} mg </Text>
-                        }
-                    </View>
-                </View>
-            </View>
+                <Surface 
+                    elevation={8}
+                    category="medium"
+                    style={styles.statCigaretteItem}>
 
-            <View style={AppStyle.statsNicotineContainer}>
-                <View style={AppStyle.statsNicotineItemContainer}>
-                    <View style={AppStyle.statsNicotineItem2Container}>
-                        <Text style={AppStyle.statItemTitleNicotine}> Monoxyde de carbone </Text>
-                        {isLoadCountCigaretteDetails == true ? 
+                    <Text style={styles.statDispositifNicotineTitle}> Nicotine </Text>
+                    
+                    <View style={styles.statDispositifNicotineContenair}>
+                    { isLoadCountPatchDetails == true && isLoadCountPillDetails == true && isLoadCountCigaretteDetails == true ? 
                         <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                         : 
-                        <Text style={AppStyle.statItemNicotine}> {countCarbonne} mg </Text>
+                        <View>
+                            <Text style={styles.statDispositifNicotineCount}> {Math.round(countNicotine * 100) / 100} </Text>
+                            <Text style={styles.statUnitCount}> mg </Text>
+                        </View>
                         }
                     </View>
-                </View>
+                </Surface>
+
+                <Surface 
+                    elevation={8}
+                    category="medium"
+                    style={styles.statCigaretteItem}>
+
+                    <Text style={styles.statDispositifNicotineTitle}> Goudron </Text>
+                    
+                    <View style={styles.statDispositifNicotineContenair}>
+                    { isLoadCountPatchDetails == true && isLoadCountPillDetails == true && isLoadCountCigaretteDetails == true ? 
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                        : 
+                        <View>
+                        <Text style={styles.statDispositifNicotineCount}> {countGoudron} </Text>
+                            <Text style={styles.statUnitCount}> mg </Text>
+                        </View>
+                        }
+                    </View>
+                </Surface>
+
+                <Surface 
+                    elevation={8}
+                    category="medium"
+                    style={styles.statCigaretteItem}>
+
+                    <Text style={styles.statDispositifNicotineTitle}> Carbone </Text>
+                    
+                    <View style={styles.statDispositifNicotineContenair}>
+                    { isLoadCountPatchDetails == true && isLoadCountPillDetails == true && isLoadCountCigaretteDetails == true ? 
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                        : 
+                        <View>
+                            <Text style={styles.statDispositifNicotineCount}> {countCarbonne} </Text>
+                            <Text style={styles.statUnitCount}> mg </Text>
+                        </View>
+                        
+                        }
+                    </View>
+                </Surface>
             </View>
 
         </View>
@@ -429,4 +466,74 @@ const StatisticsGlobalScreen = () => {
 
 export default StatisticsGlobalScreen
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    statContainer: {
+        margin:5
+    },
+
+    statDispositifNicotine: {
+        flexDirection: "row"
+    },
+
+    statCigaretteItem: {
+        flex: 1,
+        backgroundColor: Colors.colorOrange,
+        height: 120,
+        borderRadius: 10,
+        margin:8
+    },
+
+    statDispositifNicotineItem: {
+        flex: 1,
+        height: 120,
+        backgroundColor: Colors.blueFb,
+    
+        borderRadius: 10,
+        margin:8
+    },
+
+    statDepenseItem: {
+        flex: 1,
+        height: 120,
+        backgroundColor: Colors.red,
+    
+        borderRadius: 10,
+        margin:8
+    },
+
+    statEconomyItem: {
+        flex: 1,
+        height: 120,
+        backgroundColor: Colors.green,
+    
+        borderRadius: 10,
+        margin:8
+    },
+
+    statDispositifNicotineTitle: {
+        color: Colors.white,
+        textAlign:'center',
+        fontWeight: 'bold',
+        fontSize: 20,
+        paddingTop: 10,
+    },
+
+    statDispositifNicotineContenair: {
+        flex:1,
+        justifyContent: 'center',
+    },
+
+    statDispositifNicotineCount: {
+        color: Colors.white,
+        textAlign:'center',
+        verticalAlign: 'auto',
+        fontSize: 35,
+    },
+
+    statUnitCount: {
+        color: Colors.white,
+        textAlign:'center',
+        verticalAlign: 'auto',
+        fontSize: 12,
+    }
+})

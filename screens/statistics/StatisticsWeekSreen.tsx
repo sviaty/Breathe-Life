@@ -2,6 +2,7 @@ import React, { useState , useEffect} from 'react';
 import { StyleSheet, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Surface } from "@react-native-material/core";
 import { useIsFocused } from '@react-navigation/native';
 
 // Styles & Colors
@@ -511,7 +512,11 @@ const StatisticsWeekSreen = () => {
 
             <View style={styles.statDispositifNicotine}>
 
-                <View style={styles.statDispositifNicotineItem}>
+                <Surface 
+                    elevation={8}
+                    category="medium"
+                    style={styles.statDispositifNicotineItem}>
+                        
                     <Text style={styles.statDispositifNicotineTitle}> Patchs </Text>
                     
                     <View style={styles.statDispositifNicotineContenair}>
@@ -521,9 +526,12 @@ const StatisticsWeekSreen = () => {
                         <Text style={styles.statDispositifNicotineCount}> {countPatch} </Text>
                         }
                     </View>
-                </View>
+                </Surface>
 
-                <View style={styles.statDepenseItem}>
+                <Surface 
+                    elevation={8}
+                    category="medium"
+                    style={styles.statDepenseItem}>
                     <Text style={styles.statDispositifNicotineTitle}> Cigarettes </Text>
                     
                     <View style={styles.statDispositifNicotineContenair}>
@@ -533,9 +541,13 @@ const StatisticsWeekSreen = () => {
                         <Text style={styles.statDispositifNicotineCount}> {countCigarette} </Text>
                         }
                     </View>
-                </View>
+                </Surface>
 
-                <View style={styles.statDispositifNicotineItem}>
+                <Surface 
+                    elevation={8}
+                    category="medium"
+                    style={styles.statDispositifNicotineItem}>
+
                     <Text style={styles.statDispositifNicotineTitle}> Pastilles </Text>
                     
                     <View style={styles.statDispositifNicotineContenair}>
@@ -545,12 +557,17 @@ const StatisticsWeekSreen = () => {
                         <Text style={styles.statDispositifNicotineCount}> {countPill} </Text>
                         }
                     </View>
-                </View>
+                </Surface>
 
             </View>
 
             <View style={styles.statDispositifNicotine}>
-                <View style={styles.statCigaretteItem}>
+
+                <Surface 
+                    elevation={8}
+                    category="medium"
+                    style={styles.statCigaretteItem}>
+
                     <Text style={styles.statDispositifNicotineTitle}> Nicotine </Text>
                     
                     <View style={styles.statDispositifNicotineContenair}>
@@ -563,9 +580,13 @@ const StatisticsWeekSreen = () => {
                         </View>
                         }
                     </View>
-                </View>
+                </Surface>
 
-                <View style={styles.statCigaretteItem}>
+                <Surface 
+                    elevation={8}
+                    category="medium"
+                    style={styles.statCigaretteItem}>
+
                     <Text style={styles.statDispositifNicotineTitle}> Goudron </Text>
                     
                     <View style={styles.statDispositifNicotineContenair}>
@@ -578,9 +599,13 @@ const StatisticsWeekSreen = () => {
                         </View>
                         }
                     </View>
-                </View>
+                </Surface>
 
-                <View style={styles.statCigaretteItem}>
+                <Surface 
+                    elevation={8}
+                    category="medium"
+                    style={styles.statCigaretteItem}>
+
                     <Text style={styles.statDispositifNicotineTitle}> Carbone </Text>
                     
                     <View style={styles.statDispositifNicotineContenair}>
@@ -594,12 +619,14 @@ const StatisticsWeekSreen = () => {
                         
                         }
                     </View>
-                </View>
+                </Surface>
             </View>
 
             <View style={styles.statDispositifNicotine}>
-
-                <View style={styles.statDepenseItem}>
+                <Surface 
+                    elevation={8}
+                    category="medium"
+                    style={styles.statDepenseItem}>
                     <Text style={styles.statDispositifNicotineTitle}> Dépense </Text>
                     
                     <View style={styles.statDispositifNicotineContenair}>
@@ -609,9 +636,12 @@ const StatisticsWeekSreen = () => {
                         <Text style={styles.statDispositifNicotineCount}> {countPriceDepense} € </Text>
                         }
                     </View>
-                </View>
+                </Surface>
 
-                <View style={styles.statEconomyItem}>
+                <Surface 
+                    elevation={8}
+                    category="medium"
+                    style={styles.statEconomyItem}>
                     <Text style={styles.statDispositifNicotineTitle}> Economie </Text>
                     
                     <View style={styles.statDispositifNicotineContenair}>
@@ -621,7 +651,7 @@ const StatisticsWeekSreen = () => {
                         <Text style={styles.statDispositifNicotineCount}> {countPriceEconomy} € </Text>
                         }
                     </View>
-                </View>
+                </Surface>
 
             </View>
 
@@ -680,6 +710,7 @@ const styles = StyleSheet.create({
     statDispositifNicotineTitle: {
         color: Colors.white,
         textAlign:'center',
+        fontWeight: 'bold',
         fontSize: 20,
         paddingTop: 10,
     },

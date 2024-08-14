@@ -4,6 +4,7 @@ import { StyleSheet, Platform,  Text, View, TouchableOpacity, Pressable, Keyboar
 import { Stack, TextInput, Backdrop } from "@react-native-material/core";
 import {Picker} from '@react-native-picker/picker';
 import PickerSelect from 'react-native-picker-select';
+import { Surface } from "@react-native-material/core";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 
@@ -284,7 +285,11 @@ const SettingPatchComponent = () => {
                     : 
                     <View style={AppStyle.viewContenair}>
                         
-                        <View style={AppStyle.pickerSelectOrange}>
+                        <Surface 
+                            elevation={8}
+                            category="medium"
+                            style={ AppStyle.pickerSelectOrange } >   
+
                             { Platform.OS === 'android' ? 
                             <Picker
                                 selectedValue={userPatch}
@@ -304,22 +309,33 @@ const SettingPatchComponent = () => {
                                 <Text style={ AppStyle.textSelectIos } > {userPatchSelected.patchName} </Text>
                             </Pressable>
                             : null }
-                        </View>
+                        </Surface>
 
                         { userPatch != "Selectionner un patch" ?
                         <View style={AppStyle.itemContainerView2}>
-                                        
-                            <View style={ AppStyle.itemPatchContainer2 } >
+
+                            <Surface 
+                                elevation={8}
+                                category="medium"
+                                style={ AppStyle.itemPatchContainer2 } >  
+
                                 <Text style={ AppStyle.itemPatchText2 }>Nom du patch : {userPatchSelected.patchName} </Text>
                                 <Text style={ AppStyle.itemPatchText2 }>Nicotine :  {userPatchSelected.patchNicotine} (mg) </Text>
-                            </View>
 
-                            <TouchableOpacity
-                                onPress={() => handleAddUserPatch()}
-                                activeOpacity={0.6}
-                                style={ AppStyle.btnAddPatch }>
-                                <Text style={AppStyle.btnAddPatchText}>Appliquer un patch</Text>
-                            </TouchableOpacity>
+                            </Surface>
+
+                            <Surface 
+                                elevation={8}
+                                category="medium"
+                                style={ AppStyle.btnAddPatch } > 
+
+                                <TouchableOpacity
+                                    onPress={() => handleAddUserPatch()}
+                                    activeOpacity={0.6}>
+                                    <Text style={AppStyle.btnAddPatchText}>Appliquer un patch</Text>
+                                </TouchableOpacity>
+
+                            </Surface>
 
                             { isLoaderUserAdd == true ?
                             <View>

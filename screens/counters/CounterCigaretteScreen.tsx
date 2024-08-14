@@ -3,6 +3,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef} from 'react';
 import { StyleSheet, Platform, Text, View, TouchableOpacity, Alert, Pressable, Keyboard } from 'react-native'
 import { Stack, TextInput, Backdrop } from "@react-native-material/core";
 import { Picker } from '@react-native-picker/picker';
+import { Surface } from "@react-native-material/core";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetModal, BottomSheetModalProvider, BottomSheetBackdrop, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 
@@ -514,7 +515,11 @@ const SettingCigaretteComponent = () => {
                     <View style={AppStyle.viewContenair}>
                         
                         <View style={AppStyle.selectAddCig}>
-                            <View style={AppStyle.pikerSelectCig}>
+                            
+                            <Surface 
+                                elevation={8}
+                                category="medium"
+                                style={AppStyle.pikerSelectCig}>
 
                                 { Platform.OS === 'android' ? 
                                 <Picker
@@ -535,7 +540,7 @@ const SettingCigaretteComponent = () => {
                                     <Text style={ AppStyle.textSelectIos } > {userCigSelected.cigaretteName} </Text>
                                 </Pressable>
                                 : null }
-                            </View>
+                            </Surface>
 
                             <View  style={AppStyle.btnAddCigContainer}>
                                 <TouchableOpacity
@@ -549,22 +554,33 @@ const SettingCigaretteComponent = () => {
         
                         { userCig != "Selectionner une marque de cigarette" ?
                         <View style={AppStyle.itemContainerView2}>
-                                        
-                            <View style={ AppStyle.itemPatchContainer2 } >
+
+                            <Surface 
+                                elevation={8}
+                                category="medium"
+                                style={ AppStyle.itemPatchContainer2 } >   
+
                                 <Text style={ AppStyle.itemPatchText2 }>Marque : {userCigSelected.cigaretteName} </Text>
                                 <Text style={ AppStyle.itemPatchText2 }>Nicotine : {userCigSelected.cigaretteNicotine} (mg)</Text>
                                 <Text style={ AppStyle.itemPatchText2 }>Goudron : {userCigSelected.cigaretteGoudron} (mg)</Text>
                                 <Text style={ AppStyle.itemPatchText2 }>Monoxyde de carbone : {userCigSelected.cigaretteCarbone} (mg)</Text>
                                 <Text style={ AppStyle.itemPatchText2 }>Nombre de cigarette : {userCigSelected.cigarettePrice} / paquet </Text>
                                 <Text style={ AppStyle.itemPatchText2 }>Prix du paquet : {userCigSelected.cigarettePrice} (euros)</Text>
-                            </View>
+                            </Surface>
         
-                            <TouchableOpacity
-                                onPress={() => handleAddUserCig()}
-                                activeOpacity={0.6}
-                                style={ AppStyle.btnAddPatch }>
-                                <Text style={AppStyle.btnAddPatchText}>Fumer une cigarette</Text>
-                            </TouchableOpacity>
+                            <Surface 
+                                elevation={8}
+                                category="medium" 
+                                style={ AppStyle.btnAddPatch }>   
+
+                                <TouchableOpacity
+                                    onPress={() => handleAddUserCig()}
+                                    activeOpacity={0.6}>
+                                    
+                                    <Text style={AppStyle.btnAddPatchText}>Fumer une cigarette</Text>
+                                </TouchableOpacity>
+
+                            </Surface>
         
                             { isLoaderUserAdd == true ?
                             <View>

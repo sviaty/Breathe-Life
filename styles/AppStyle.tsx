@@ -240,7 +240,7 @@ export default StyleSheet.create({
         borderColor: Colors.colorOrange,
         borderRadius: 5,
         padding: 15,
-        marginTop: 10,
+        marginTop: 16,
     },
 
     itemPatchContainer: {
@@ -353,7 +353,7 @@ export default StyleSheet.create({
         backgroundColor: Colors.blueFb,
         padding: 15,
         borderRadius:5,
-        marginTop: 10
+        marginTop: 18
     },
 
     btnAddPatchText: {
@@ -518,7 +518,7 @@ export default StyleSheet.create({
         borderColor: Colors.colorOrange,
         borderRadius: 5,
         width: screenWidth - 20,
-        marginTop:10,
+        marginTop:16,
     },
 
     selectAddCig: {

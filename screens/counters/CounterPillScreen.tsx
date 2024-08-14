@@ -3,6 +3,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef} from 'react';
 import { StyleSheet, Platform, Text, View, TouchableOpacity, Pressable } from 'react-native'
 import {Picker} from '@react-native-picker/picker';
 import PickerSelect from 'react-native-picker-select';
+import { Surface } from "@react-native-material/core";
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 
@@ -270,7 +271,11 @@ const SettingPillComponent = () => {
                     : 
                     <View style={AppStyle.viewContenair}>
                         
-                        <View style={AppStyle.pickerSelectOrange}>
+
+                        <Surface 
+                            elevation={8}
+                            category="medium"
+                            style={ AppStyle.pickerSelectOrange } >   
 
                             { Platform.OS === 'android' ? 
                             <Picker
@@ -291,22 +296,32 @@ const SettingPillComponent = () => {
                                 <Text style={ AppStyle.textSelectIos } > {userPillSelected.pillName} </Text>
                             </Pressable>
                             : null }
-                        </View>
+                        </Surface>
         
                         { userPill != "Selectionner une pastille" ?
                         <View style={AppStyle.itemContainerView2}>
-                                        
-                            <View style={ AppStyle.itemPatchContainer2 } >
+
+                            <Surface 
+                                elevation={8}
+                                category="medium"
+                                style={ AppStyle.itemPatchContainer2 } >   
+
                                 <Text style={ AppStyle.itemPatchText2 }>Nom de la pastille : {userPillSelected.pillName} </Text>
                                 <Text style={ AppStyle.itemPatchText2 }>Nicotine :  {userPillSelected.pillNicotine} (mg) </Text>
-                            </View>
+                            
+                            </Surface>
         
-                            <TouchableOpacity
-                                onPress={() => handleAddUserPill()}
-                                activeOpacity={0.6}
-                                style={ AppStyle.btnAddPatch }>
-                                <Text style={AppStyle.btnAddPatchText}>Consommer une pastille</Text>
-                            </TouchableOpacity>
+                            <Surface 
+                                elevation={8}
+                                category="medium"
+                                style={ AppStyle.btnAddPatch } >   
+
+                                <TouchableOpacity
+                                    onPress={() => handleAddUserPill()}
+                                    activeOpacity={0.6}>
+                                    <Text style={AppStyle.btnAddPatchText}>Consommer une pastille</Text>
+                                </TouchableOpacity>
+                            </Surface>
         
                             { isLoaderUserAdd == true ?
                             <View>
