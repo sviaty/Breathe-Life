@@ -418,6 +418,10 @@ export default StyleSheet.create({
         flexDirection: 'row',
     },
 
+    statsNicotineContainer2: {
+        flexDirection: 'row',
+    },
+
     statsNumberItemContainer: {
         flex: 1,
         width: (screenWidth / 3),
@@ -428,6 +432,12 @@ export default StyleSheet.create({
 
     statsNicotineItemContainer: {
         width: (screenWidth - 20),
+        height:  (screenWidth / 3),
+        padding:10,
+    },
+
+    statsNicotineItemContainer2: {
+        flex: 0.5,
         height:  (screenWidth / 3),
         padding:10,
     },
@@ -446,6 +456,15 @@ export default StyleSheet.create({
     statsNicotineItem2Container: {
         alignItems: 'center',
         width: (screenWidth) - 20,
+        height:  (screenWidth / 3) - 10,
+        backgroundColor: Colors.colorOrange,
+        borderWidth: 3,
+        borderColor: Colors.colorOrange,
+        borderRadius: 10,
+    },
+
+    statsNicotineItem3Container: {
+        alignItems: 'center',
         height:  (screenWidth / 3) - 10,
         backgroundColor: Colors.colorOrange,
         borderWidth: 3,

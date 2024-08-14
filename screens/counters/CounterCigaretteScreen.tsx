@@ -3,7 +3,6 @@ import React, { useState, useMemo, useCallback, useEffect, useRef} from 'react';
 import { StyleSheet, Platform, Text, View, TouchableOpacity, Alert, Pressable, Keyboard } from 'react-native'
 import { Stack, TextInput, Backdrop } from "@react-native-material/core";
 import { Picker } from '@react-native-picker/picker';
-import PickerSelect from 'react-native-picker-select';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetModal, BottomSheetModalProvider, BottomSheetBackdrop, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 
@@ -53,7 +52,7 @@ const SettingCigaretteComponent = () => {
 
     let [userCig, setUserCig] = useState<string>("7CqNNUDGFhDV5hFgLVx1");
 
-    const c = new Cigarette("","",0,0,0,0)
+    const c = new Cigarette("","",0,0,0,0,0,0)
     let [userCigSelected, setUserCigSelected] = useState<Cigarette>(c);
 
     let [dataCigTab, setDataCigTab] = useState<Cigarette[]>([]);
@@ -78,7 +77,6 @@ const SettingCigaretteComponent = () => {
     const [errorCigPaquetPrice, setErrorCigPrice] = useState<string>("")
     
     
-
     // UseSelector
     const userSelector = useSelector((state: RootState) => state.userReducer.user);
 
@@ -126,6 +124,8 @@ const SettingCigaretteComponent = () => {
                     cigData.cigaretteGoudron,
                     cigData.cigaretteCarbone,
                     cigData.cigarettePrice,
+                    cigData.cigaretteNbr,
+                    cigData.cigarettePriceUnit,
                 );
                 //console.log(p);
 
@@ -167,6 +167,8 @@ const SettingCigaretteComponent = () => {
                     cigData.cigaretteGoudron,
                     cigData.cigaretteCarbone,
                     cigData.cigarettePrice,
+                    cigData.cigaretteNbr,
+                    cigData.cigarettePriceUnit,
                 );
                 //console.log(p);
 
@@ -236,6 +238,8 @@ const SettingCigaretteComponent = () => {
                 0,
                 0,
                 0,
+                0,
+                0
             );
             setUserCigSelected(c)
 
@@ -254,13 +258,26 @@ const SettingCigaretteComponent = () => {
         await setDoc(userDoc, {
             userName: userSelector.userName,
             userMail: userSelector.userMail,
+            userBirthDate: userSelector.userBirthDate, 
+            userSmokeStartDate: userSelector.userSmokeStartDate, 
+            userSmokeAvgNbr: userSelector.userSmokeAvgNbr, 
             idPatch: userSelector.idPatch,
             idPill: userSelector.idPill,
             idCigarette: idCig,
         }).then((value) => {
             //console.log(value);
 
-            const u = new User(userSelector.userId, userSelector.userName, userSelector.userMail, userSelector.userToken, userSelector.idPatch, userSelector.idPill, idCig);
+            const u = new User(
+                userSelector.userId, 
+                userSelector.userName, 
+                userSelector.userMail, 
+                userSelector.userToken, 
+                userSelector.userBirthDate, 
+                userSelector.userSmokeStartDate, 
+                userSelector.userSmokeAvgNbr, 
+                userSelector.idPatch, 
+                userSelector.idPill, 
+                idCig);
             dispatch(setUser(u));
         }).catch((error) => {
             console.error("Error set user in firestore database : ")
@@ -385,6 +402,7 @@ const SettingCigaretteComponent = () => {
 
         const nicotine = parseFloat(parseFloat(cigNicotine.replace(",", ".")).toFixed(1))
         const price = parseFloat(parseFloat(cigPaquetPrice.replace(",", ".")).toFixed(2))
+        const priceUnit = (parseInt(cigPaquetNbr) / price).toFixed(2)
 
         await addDoc(collection(db, "cigarettesUser"), {
             cigaretteName: cigName,
@@ -393,6 +411,7 @@ const SettingCigaretteComponent = () => {
             cigaretteCarbone: parseInt(cigCarbonne),
             cigaretteNbr: parseInt(cigPaquetNbr),
             cigarettePrice: price,
+            cigarettePriceUnit: priceUnit,
             idUser: userSelector.userId
         }).then((value) => {
             setIsLoaderCigAdd(false)

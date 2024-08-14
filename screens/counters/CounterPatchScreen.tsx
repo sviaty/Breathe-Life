@@ -179,13 +179,26 @@ const SettingPatchComponent = () => {
         await setDoc(userDoc, {
             userName: userSelector.userName,
             userMail: userSelector.userMail,
+            userBirthDate: userSelector.userBirthDate, 
+            userSmokeStartDate: userSelector.userSmokeStartDate, 
+            userSmokeAvgNbr: userSelector.userSmokeAvgNbr, 
             idPatch: idPatch,
             idPill: userSelector.idPill,
             idCigarette: userSelector.idCigarette,
         }).then((value) => {
             //console.log(value);
 
-            const u = new User(userSelector.userId, userSelector.userName, userSelector.userMail, userSelector.userToken, idPatch, userSelector.idPill, userSelector.idCigarette);
+            const u = new User(
+                userSelector.userId, 
+                userSelector.userName, 
+                userSelector.userMail, 
+                userSelector.userToken, 
+                userSelector.userBirthDate, 
+                userSelector.userSmokeStartDate, 
+                userSelector.userSmokeAvgNbr, 
+                idPatch, 
+                userSelector.idPill, 
+                userSelector.idCigarette);
             dispatch(setUser(u));
 
         }).catch((error) => {

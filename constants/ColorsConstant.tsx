@@ -7,6 +7,9 @@ export default {
     gray: 'gray',
     silver: 'silver',
 
+    green: '#5dd55d',
+    red: '#FF474C',
+
     transparent: 'transparent',
     background: '#F2F2F3',
     blueFb: '#2196F3',

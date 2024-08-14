@@ -3,11 +3,24 @@ export default class User {
     userName: string
     userMail: string 
     userToken: string
+    userBirthDate: string
+    userSmokeStartDate: string
+    userSmokeAvgNbr: number
     idPatch: string
     idPill: string
     idCigarette: string
 
-    constructor(userId: string, userName: string, userMail: string | null, userToken: string, idPatch: string, idPill: string, idCigarette: string) {
+    constructor(userId: string, 
+      userName: string, 
+      userMail: string | null, 
+      userToken: string, 
+      userBirthDate: string,
+      userSmokeStartDate: string,
+      userSmokeAvgNbr: number,
+      idPatch: string, 
+      idPill: string, 
+      idCigarette: string) {
+
       this.userId = userId
       this.userName = userName
 
@@ -18,6 +31,11 @@ export default class User {
       }
 
       this.userToken = userToken
+
+      this.userBirthDate = userBirthDate
+      this.userSmokeStartDate = userSmokeStartDate
+      this.userSmokeAvgNbr = userSmokeAvgNbr
+
       this.idPatch = idPatch
       this.idPill = idPill
       this.idCigarette = idCigarette

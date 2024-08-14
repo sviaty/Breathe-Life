@@ -36,7 +36,7 @@ const LoginScreen = () => {
     const [isLoader, setIsLoader] = useState<boolean>(false)
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
 
-    const [userState, setUserState] = useState<User>(new User("", "", "", "", "", "", ""))
+    const [userState, setUserState] = useState<User>(new User("", "", "", "", "", "", "","", "", ""))
 
     const [mail, setMail] = useState<string>('');
     const [pwd, setPwd] = useState<string>('');
@@ -158,7 +158,18 @@ const LoginScreen = () => {
 
                 secureStoreClass.saveToken('userId', doc.id)
 
-                const u = new User(doc.id, dataUser.userName, dataUser.userMail, "", dataUser.idPatch, dataUser.idPill, dataUser.idCigarette);
+                const u = new User(
+                    doc.id,
+                    dataUser.userName, 
+                    dataUser.userMail, 
+                    "", 
+                    dataUser.userBirthDate, 
+                    dataUser.userSmokeStartDate, 
+                    dataUser.userSmokeAvgNbr, 
+                    
+                    dataUser.idPatch, 
+                    dataUser.idPill, 
+                    dataUser.idCigarette);
                 dispatch(setUser(u));
 
                 //

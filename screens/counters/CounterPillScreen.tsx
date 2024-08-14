@@ -168,12 +168,25 @@ const SettingPillComponent = () => {
         await setDoc(userDoc, {
             userName: userSelector.userName,
             userMail: userSelector.userMail,
+            userBirthDate: userSelector.userBirthDate, 
+            userSmokeStartDate: userSelector.userSmokeStartDate, 
+            userSmokeAvgNbr: userSelector.userSmokeAvgNbr, 
             idPatch: userSelector.idPatch,
             idPill: idPill,
             idCigarette: userSelector.idCigarette,
         }).then((value) => {
             console.log(value);
-            const u = new User(userSelector.userId, userSelector.userName, userSelector.userMail, userSelector.userToken, userSelector.idPatch, idPill, userSelector.idCigarette);
+            const u = new User(
+                userSelector.userId, 
+                userSelector.userName, 
+                userSelector.userMail, 
+                userSelector.userToken, 
+                userSelector.userBirthDate, 
+                userSelector.userSmokeStartDate, 
+                userSelector.userSmokeAvgNbr, 
+                userSelector.idPatch, 
+                idPill, 
+                userSelector.idCigarette);
             dispatch(setUser(u));
         }).catch((error) => {
             console.error("Error set user in firestore database : ")

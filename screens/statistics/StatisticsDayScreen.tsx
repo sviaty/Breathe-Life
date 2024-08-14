@@ -13,14 +13,20 @@ import LoaderComponent from '../../components/LoaderComponent';
 
 // Datas
 import Cigarette from '../../datas/CigaretteData'
+import User from '../../datas/UserData';
 
 // Redux
 import { RootState } from '../../redux/Store';
+import { setUser } from '../../redux/slices/UserSlice';
 import { useSelector, useDispatch } from 'react-redux';
 
 // FireStore
 import firebaseConfig from '../../firebaseConfig';
-import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, getDoc, getDocs, and, orderBy} from "firebase/firestore";
+import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, setDoc, getDoc, getDocs } from "firebase/firestore";
+import UserSettingsStyle from '../../styles/UserSettingsStyle';
+import LoginSigninStyle from '../../styles/LoginSigninStyle';
+import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
+import { Flex } from '@react-native-material/core';
 const db = getFirestore(firebaseConfig);
 
 const StatisticsDayScreen = () => {
@@ -34,6 +40,10 @@ const StatisticsDayScreen = () => {
     let [countNicotine, setCountNicotine] = useState<number>(0);
     let [countGoudron, setCountGoudron] = useState<number>(0);
     let [countCarbonne, setCountCarbonne] = useState<number>(0);
+    let [countPriceDepense, setCountPriceDepense] = useState<number>(0);
+    let [countPriceEconomy, setCountPriceEconomy] = useState<number>(0);
+
+    let [userSmokePrice, setUserSmokePrice] = useState<number>(0);
 
     const [isLoadCountPatch, setIsLoadCountPatch] = useState<boolean>(true);
     const [isLoadCountPill, setIsLoadCountPill] = useState<boolean>(true);
@@ -42,11 +52,15 @@ const StatisticsDayScreen = () => {
     const [isLoadCountPatchDetails, setIsLoadCountPatchDetails] = useState<boolean>(true);
     const [isLoadCountPillDetails, setIsLoadCountPillDetails] = useState<boolean>(true);
     const [isLoadCountCigaretteDetails, setIsLoadCountCigaretteDetails] = useState<boolean>(true);
+    const [isLoadCountPriceEconomy, setIsLoadCountPriceEconomy] = useState<boolean>(true);
 
     const [dataCigaretteTab, setDataCigaretteTab] = useState<Cigarette[]>([]);
 
     // UseSelector
     const userSelector = useSelector((state: RootState) => state.userReducer.user);
+
+    // Dispatch
+    const dispatch = useDispatch();
 
     // UseEffect 
     useEffect(() => {
@@ -59,10 +73,18 @@ const StatisticsDayScreen = () => {
         countCarbonne = 0
         setCountCarbonne(countCarbonne)
 
+        countPriceDepense = 0
+        setCountPriceDepense(countPriceDepense)
+
+        userSmokePrice = userSelector.userSmokeAvgNbr * 0.65
+        setUserSmokePrice(userSmokePrice)
+        setCountPriceEconomy(userSmokePrice)
+        //console.log(userSmokePrice)
+
         getStatPatchDayInDatabase()
         getStatPillDayInDatabase()
         getStatCigaretteDayInDatabase()
-
+        
     }, [isFocused])  
 
     /**
@@ -253,17 +275,18 @@ const StatisticsDayScreen = () => {
 
         setCountCigarette(0)
         setIsLoadCountCigarette(true)
+        setIsLoadCountPriceEconomy(true)
 
         dataCigaretteTab.length = 0
         setDataCigaretteTab([...dataCigaretteTab])
 
-        try {
-            const q = query(
-                collection(db, "userCigarettes"), 
-                where("idUser", "==", userSelector.userId),
-            );
+     
+        const q = query(
+            collection(db, "userCigarettes"), 
+            where("idUser", "==", userSelector.userId),
+        );
 
-            const userCigaretteList = await getDocs(q);
+        await getDocs(q).then((userCigaretteList) => {
             //console.log(userCigaretteList.size);
     
             if(userCigaretteList.size != 0){
@@ -281,6 +304,7 @@ const StatisticsDayScreen = () => {
                         i += 1
 
                         getStatCigaretteInDatabase(cigaretteData.idCigarette)
+                        getStatCigaretteUserInDatabase(cigaretteData.idCigarette)
                         
                     }
                 });
@@ -288,6 +312,8 @@ const StatisticsDayScreen = () => {
                 if(i == 0){
                     setIsLoadCountCigaretteDetails(false)
                 }
+
+                setIsLoadCountPriceEconomy(false)
 
                 setCountCigarette(i)
 
@@ -303,11 +329,12 @@ const StatisticsDayScreen = () => {
                 dataCigaretteTab.length = 0
                 setDataCigaretteTab([...dataCigaretteTab])
             }
-
-        } catch (error) {
+        }).catch((error) => {
             console.error("Error get user cigarettes in firestore database : ")
             console.error(error)
-        }
+        }).finally(() => {
+            
+        })
     }
 
     /**
@@ -318,12 +345,11 @@ const StatisticsDayScreen = () => {
 
         setIsLoadCountCigaretteDetails(true)
 
-        try {
-            const q = query(
-                collection(db, "cigarettes"), 
-            );
+        const q = query(
+            collection(db, "cigarettes"), 
+        );
 
-            const cigaretteList = await getDocs(q);
+        await getDocs(q).then((cigaretteList) => {
             //console.log(patchList.size);
     
             if(cigaretteList.size != 0){
@@ -333,10 +359,104 @@ const StatisticsDayScreen = () => {
                         const dataCigarette = cigarette.data()
                         //console.log(dataCigarette)
 
-                        //console.log(countNicotine)
+                        const c = new Cigarette(
+                            cigarette.id, 
+                            dataCigarette.cigaretteName,
+                            dataCigarette.cigaretteNicotine,
+                            dataCigarette.cigaretteGoudron,
+                            dataCigarette.cigaretteCarbone,
+                            dataCigarette.cigarettePrice,
+                            dataCigarette.cigaretteNbr,
+                            dataCigarette.cigarettePriceUnit
+                        )
+                        dataCigaretteTab.push(c)
+                        setDataCigaretteTab([...dataCigaretteTab])
+
+                        countPriceDepense = parseFloat((countPriceDepense + dataCigarette.cigarettePriceUnit).toFixed(2))
+                        setCountPriceDepense(countPriceDepense)
+
+                        countPriceEconomy = parseFloat((userSmokePrice - countPriceDepense).toFixed(2))
+                        if(countPriceEconomy < 0){
+                            setCountPriceEconomy(0)
+                        } else {
+                            setCountPriceEconomy(countPriceEconomy)
+                        }
+                        
                         countNicotine = countNicotine + parseFloat(dataCigarette.cigaretteNicotine)
                         setCountNicotine(countNicotine)
                         //console.log(countNicotine)  
+
+                        countGoudron = countGoudron + parseFloat(dataCigarette.cigaretteGoudron)
+                        setCountGoudron(countGoudron)
+
+                        countCarbonne = countCarbonne + parseFloat(dataCigarette.cigaretteCarbone)
+                        setCountCarbonne(countCarbonne)
+                    }
+                })
+
+                setIsLoadCountCigaretteDetails(false)
+
+            } else {
+                setIsLoadCountCigaretteDetails(false)
+            }
+        }).catch((error) => {
+            console.error("Error get patchs in firestore database : ")
+            console.error(error)
+
+            setIsLoadCountCigaretteDetails(false)
+        }).finally(() => {
+            
+        })  
+    }
+
+    /**
+     * Function getStatCigaretteInDatabase
+     */
+    const getStatCigaretteUserInDatabase = async (idCigarette: string) => {
+        //console.log(idCigarette);
+
+        setIsLoadCountCigaretteDetails(true)
+
+
+        const q = query(
+            collection(db, "cigarettesUser"), 
+        );
+
+        const cigaretteList = await getDocs(q).then((cigaretteList) => {
+        //console.log(patchList.size);
+
+            if(cigaretteList.size != 0){
+                cigaretteList.forEach((cigarette) => {
+                    if(idCigarette == cigarette.id){
+                        //console.log(patch.id);
+                        const dataCigarette = cigarette.data()
+                        //console.log(dataCigarette)
+
+                        const c = new Cigarette(
+                            cigarette.id, 
+                            dataCigarette.cigaretteName,
+                            dataCigarette.cigaretteNicotine,
+                            dataCigarette.cigaretteGoudron,
+                            dataCigarette.cigaretteCarbone,
+                            dataCigarette.cigarettePrice,
+                            dataCigarette.cigaretteNbr,
+                            dataCigarette.cigarettePriceUnit
+                        )
+                        dataCigaretteTab.push(c)
+                        setDataCigaretteTab([...dataCigaretteTab])
+
+                        countPriceDepense = parseFloat((countPriceDepense + dataCigarette.cigarettePriceUnit).toFixed(2))
+                        setCountPriceDepense(countPriceDepense)
+
+                        countPriceEconomy = parseFloat((userSmokePrice - countPriceDepense).toFixed(2))
+                        if(countPriceEconomy < 0){
+                            setCountPriceEconomy(0)
+                        } else {
+                            setCountPriceEconomy(countPriceEconomy)
+                        }
+
+                        countNicotine = countNicotine + parseFloat(dataCigarette.cigaretteNicotine)
+                        setCountNicotine(countNicotine)
 
                         countGoudron = countGoudron + parseFloat(dataCigarette.cigaretteGoudron)
                         setCountGoudron(countGoudron)
@@ -348,97 +468,139 @@ const StatisticsDayScreen = () => {
                 })
 
                 setIsLoadCountCigaretteDetails(false)
+
             } else {
                 setIsLoadCountCigaretteDetails(false)
             }
-        } catch (error) {
+        }).catch((error) => {
             console.error("Error get patchs in firestore database : ")
             console.error(error)
 
             setIsLoadCountCigaretteDetails(false)
-        }
+        }).finally(() => {
+           
+        })  
     }
 
     return (
     <SafeAreaProvider style={AppStyle.container}>
 
-        <View >
-    
+        <View style={styles.statContainer}>
 
-            <View style={AppStyle.statsNumberContainer}>
+            <View style={styles.statDispositifNicotine}>
 
-                <View style={AppStyle.statsNumberItemContainer}>
-                    <View style={AppStyle.statsNumberItem2Container}>
-                        <Text style={AppStyle.statItemTitle}> Patchs </Text>
+                <View style={styles.statDispositifNicotineItem}>
+                    <Text style={styles.statDispositifNicotineTitle}> Patchs </Text>
+                    
+                    <View style={styles.statDispositifNicotineContenair}>
                         {isLoadCountPatch == true ? 
                         <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                         : 
-                        <Text style={AppStyle.statItemNumber}> {countPatch} </Text>
+                        <Text style={styles.statDispositifNicotineCount}> {countPatch} </Text>
                         }
                     </View>
                 </View>
 
-                <View style={AppStyle.statsNumberItemContainer}>
-                    <View style={AppStyle.statsNumberItem2Container}>
-                        <Text style={AppStyle.statItemTitle}> Pastilles </Text>
-                        {isLoadCountPill == true ? 
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                        : 
-                        <Text style={AppStyle.statItemNumber}> {countPill} </Text>
-                        }
-                    </View>
-                </View>
-
-                <View style={AppStyle.statsNumberItemContainer}>
-                    <View style={AppStyle.statsNumberItem2Container}>
-                        <Text style={AppStyle.statItemTitle}> Cigarettes </Text>
+                <View style={styles.statDepenseItem}>
+                    <Text style={styles.statDispositifNicotineTitle}> Cigarettes </Text>
+                    
+                    <View style={styles.statDispositifNicotineContenair}>
                         {isLoadCountCigarette == true ? 
                         <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                         : 
-                        <Text style={AppStyle.statItemNumber}> {countCigarette} </Text>
+                        <Text style={styles.statDispositifNicotineCount}> {countCigarette} </Text>
+                        }
+                    </View>
+                </View>
+
+                <View style={styles.statDispositifNicotineItem}>
+                    <Text style={styles.statDispositifNicotineTitle}> Pastilles </Text>
+                    
+                    <View style={styles.statDispositifNicotineContenair}>
+                        {isLoadCountPill == true ? 
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                        : 
+                        <Text style={styles.statDispositifNicotineCount}> {countPill} </Text>
                         }
                     </View>
                 </View>
 
             </View>
 
-            <View style={AppStyle.statsNicotineContainer}>
-                <View style={AppStyle.statsNicotineItemContainer}>
-                    <View style={AppStyle.statsNicotineItem2Container}>
-                        <Text style={AppStyle.statItemTitleNicotine}> Nicotine </Text>
-                        { isLoadCountPatchDetails == true && isLoadCountPillDetails == true && isLoadCountCigaretteDetails == true ? 
+            <View style={styles.statDispositifNicotine}>
+                <View style={styles.statCigaretteItem}>
+                    <Text style={styles.statDispositifNicotineTitle}> Nicotine </Text>
+                    
+                    <View style={styles.statDispositifNicotineContenair}>
+                    { isLoadCountPatchDetails == true && isLoadCountPillDetails == true && isLoadCountCigaretteDetails == true ? 
                         <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                         : 
-                        <Text style={AppStyle.statItemNicotine}> {Math.round(countNicotine * 100) / 100} mg </Text>
+                        <View>
+                            <Text style={styles.statDispositifNicotineCount}> {Math.round(countNicotine * 100) / 100} </Text>
+                            <Text style={styles.statUnitCount}> mg </Text>
+                        </View>
+                        }
+                    </View>
+                </View>
+
+                <View style={styles.statCigaretteItem}>
+                    <Text style={styles.statDispositifNicotineTitle}> Goudron </Text>
+                    
+                    <View style={styles.statDispositifNicotineContenair}>
+                    { isLoadCountPatchDetails == true && isLoadCountPillDetails == true && isLoadCountCigaretteDetails == true ? 
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                        : 
+                        <View>
+                           <Text style={styles.statDispositifNicotineCount}> {countGoudron} </Text>
+                            <Text style={styles.statUnitCount}> mg </Text>
+                        </View>
+                        }
+                    </View>
+                </View>
+
+                <View style={styles.statCigaretteItem}>
+                    <Text style={styles.statDispositifNicotineTitle}> Carbone </Text>
+                    
+                    <View style={styles.statDispositifNicotineContenair}>
+                    { isLoadCountPatchDetails == true && isLoadCountPillDetails == true && isLoadCountCigaretteDetails == true ? 
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                        : 
+                        <View>
+                            <Text style={styles.statDispositifNicotineCount}> {countCarbonne} </Text>
+                            <Text style={styles.statUnitCount}> mg </Text>
+                        </View>
+                        
                         }
                     </View>
                 </View>
             </View>
 
-            <View style={AppStyle.statsNicotineContainer}>
-                <View style={AppStyle.statsNicotineItemContainer}>
-                    <View style={AppStyle.statsNicotineItem2Container}>
-                        <Text style={AppStyle.statItemTitleNicotine}> Goudron </Text>
-                        {isLoadCountCigaretteDetails == true ? 
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                        : 
-                        <Text style={AppStyle.statItemNicotine}> {countGoudron} mg </Text>
-                        }
-                    </View>
-                </View>
-            </View>
+            <View style={styles.statDispositifNicotine}>
 
-            <View style={AppStyle.statsNicotineContainer}>
-                <View style={AppStyle.statsNicotineItemContainer}>
-                    <View style={AppStyle.statsNicotineItem2Container}>
-                        <Text style={AppStyle.statItemTitleNicotine}> Monoxyde de carbone </Text>
-                        {isLoadCountCigaretteDetails == true ? 
+                <View style={styles.statDepenseItem}>
+                    <Text style={styles.statDispositifNicotineTitle}> Dépense </Text>
+                    
+                    <View style={styles.statDispositifNicotineContenair}>
+                        {isLoadCountPriceEconomy == true ? 
                         <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                         : 
-                        <Text style={AppStyle.statItemNicotine}> {countCarbonne} mg </Text>
+                        <Text style={styles.statDispositifNicotineCount}> {countPriceDepense} € </Text>
                         }
                     </View>
                 </View>
+
+                <View style={styles.statEconomyItem}>
+                    <Text style={styles.statDispositifNicotineTitle}> Economie </Text>
+                    
+                    <View style={styles.statDispositifNicotineContenair}>
+                        {isLoadCountPriceEconomy == true ? 
+                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                        : 
+                        <Text style={styles.statDispositifNicotineCount}> {countPriceEconomy} € </Text>
+                        }
+                    </View>
+                </View>
+
             </View>
 
         </View>
@@ -448,4 +610,74 @@ const StatisticsDayScreen = () => {
 
 export default StatisticsDayScreen
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+
+    statContainer: {
+        margin:5
+    },
+
+    statDispositifNicotine: {
+        flexDirection: "row"
+    },
+
+    statCigaretteItem: {
+        flex: 1,
+        backgroundColor: Colors.colorOrange,
+        height: 120,
+        borderRadius: 10,
+        margin:8
+    },
+
+    statDispositifNicotineItem: {
+        flex: 1,
+        height: 120,
+        backgroundColor: Colors.blueFb,
+    
+        borderRadius: 10,
+        margin:8
+    },
+
+    statDepenseItem: {
+        flex: 1,
+        height: 120,
+        backgroundColor: Colors.red,
+    
+        borderRadius: 10,
+        margin:8
+    },
+
+    statEconomyItem: {
+        flex: 1,
+        height: 120,
+        backgroundColor: Colors.green,
+    
+        borderRadius: 10,
+        margin:8
+    },
+
+    statDispositifNicotineTitle: {
+        color: Colors.white,
+        textAlign:'center',
+        fontSize: 20,
+        paddingTop: 10,
+    },
+
+    statDispositifNicotineContenair: {
+        flex:1,
+        justifyContent: 'center',
+    },
+
+    statDispositifNicotineCount: {
+        color: Colors.white,
+        textAlign:'center',
+        verticalAlign: 'auto',
+        fontSize: 35,
+    },
+
+    statUnitCount: {
+        color: Colors.white,
+        textAlign:'center',
+        verticalAlign: 'auto',
+        fontSize: 12,
+    }
+})
