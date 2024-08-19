@@ -1,34 +1,22 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native'
 import { Stack, TextInput, Backdrop, BackdropSubheader } from "@react-native-material/core";
+import LoaderComponent from '../../components/LoaderComponent';
+import SnackBarComponent from '../../components/SnackBarComponent';
 
+// FireStore
+import firebaseConfig from '../../firebaseConfig';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+const auth = getAuth(firebaseConfig);
+
+// Style
 import AppStyle from '../../styles/AppStyle';
 import SigninStyle from '../../styles/LoginSigninStyle';
 import Colors from '../../constants/ColorsConstant';
-import LoaderComponent from '../../components/LoaderComponent';
 
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
-import { Props } from 'react-native-paper/lib/typescript/core/PaperProvider';
-import SnackBarComponent from '../../components/SnackBarComponent';
+// Api
+import { addUserFireStore } from '../../api/UserApi';
 
-const firebaseConfig = {
-    apiKey: "AIzaSyDtDQYI2sJN-GT9jCfg4YYDrhaiMbalcMk",
-    authDomain: "testing-firebase-ec361.firebaseapp.com",
-    databaseURL: "https://testing-firebase-ec361-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "testing-firebase-ec361",
-    storageBucket: "testing-firebase-ec361.appspot.com",
-    messagingSenderId: "939968442007",
-    appId: "1:939968442007:web:2114a3275d29bd3664c3d2",
-    measurementId: "G-FEVR7B56CS"
-};
-  
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app); 
-const auth = getAuth(app);
-//const analytics = getAnalytics(app);
 
 /**
  * SigninScreen
@@ -122,7 +110,7 @@ const SigninScreen = ({navigation}: {navigation: any}) => {
                 const user = userCredential.user;
                 //console.log(user)
                 
-                addUserInFireStore()
+                addUser()
             })
             .catch((error) => {
                 setIsLoader(false)
@@ -158,18 +146,20 @@ const SigninScreen = ({navigation}: {navigation: any}) => {
     }
 
     /**
-     * 
+     * Function addUser
      */
-    const addUserInFireStore = async () => {
+    const addUser = async () => {
         setStep('Ajout des données utilisateur')
-        try {
-            const docRef = await addDoc(collection(db, "users"), {
-                userName: name,
-                userMail: mail,
-                idPatch: "",
-                idPill: "",
-                idCigarette: ""
-            });
+
+        const userData = {
+            userName: name,
+            userMail: mail,
+            idPatch: "",
+            idPill: "",
+            idCigarette: ""
+        }
+
+        await addUserFireStore(userData).then(() => {
 
             setIsLoader(false)
 
@@ -177,13 +167,14 @@ const SigninScreen = ({navigation}: {navigation: any}) => {
             setIsSnackBar(true)
 
             navigation.navigate('LogIn')
-
-        } catch (error) {
+            
+        }).catch((error) => {
+    
             setIsLoader(false)
 
             setError("Error add data : "+ error)
             console.error("Error add data : "+ error);
-        }
+        }) 
     };
 
     /**

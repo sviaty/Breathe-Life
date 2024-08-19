@@ -1,30 +1,32 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native'
 import { Stack, TextInput, Backdrop, BackdropSubheader } from "@react-native-material/core";
-import { LinearGradient } from 'expo-linear-gradient';
+import SnackBarComponent from '../../components/SnackBarComponent';
 
+// Secure Store
 import SecureStoreClass from '../../secures/SecureStore';
 const secureStoreClass = new SecureStoreClass()
 
+// Data 
 import User from '../../datas/UserData';
 
+// Style
 import AppStyle from '../../styles/AppStyle';
 import LoginStyle from '../../styles/LoginSigninStyle';
 import Colors from '../../constants/ColorsConstant';
 import LoaderComponent from '../../components/LoaderComponent';
 
 // FireStore
-import firebaseConfig from '../../firebaseConfig';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, getDoc, getDocs } from "firebase/firestore";
-const db = getFirestore(firebaseConfig);
 
-
+// Redux
 import { RootState } from '../../redux/Store';
 import { setIsLogin } from '../../redux/slices/IsLoginSlice';
 import { setUser } from '../../redux/slices/UserSlice';
 import { useSelector, useDispatch } from 'react-redux';
-import SnackBarComponent from '../../components/SnackBarComponent';
+
+// Api
+import { getUserFireStore } from '../../api/UserApi';
 
 /**
  * LoginScreen
@@ -36,7 +38,7 @@ const LoginScreen = () => {
     const [isLoader, setIsLoader] = useState<boolean>(false)
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
 
-    const [userState, setUserState] = useState<User>(new User("", "", "", "", "", "", "","", "", ""))
+    const [userState, setUserState] = useState<User>(new User("", "", "", "", "", "", 0,"", "", ""))
 
     const [mail, setMail] = useState<string>('');
     const [pwd, setPwd] = useState<string>('');
@@ -147,13 +149,11 @@ const LoginScreen = () => {
      */
     const getUserInDatabase = async () => {
         setStep('Récupération des données utilisateur')
-        try {
 
-            const q = query(collection(db, "users"), where("userMail", "==", mail));
-            const userList = await getDocs(q);
+        getUserFireStore(mail).then((userList) => {
 
             userList.forEach((doc) => {
-                //console.log(doc.id, " => ", doc.data());
+
                 const dataUser = doc.data()
 
                 secureStoreClass.saveToken('userId', doc.id)
@@ -171,8 +171,6 @@ const LoginScreen = () => {
                     dataUser.idPill, 
                     dataUser.idCigarette);
                 dispatch(setUser(u));
-
-                //
             });
 
             setStep("Vous êtes connecté")
@@ -181,13 +179,13 @@ const LoginScreen = () => {
             setIsSnackBar(true)
             dispatch(setIsLogin(true));
 
-        } catch (error) {
+        }).catch((error) => {
             setIsLoader(false)
             dispatch(setIsLogin(false));
 
             setError("Error add data : " + error)
             console.error("Error add data : " + error);
-        }
+        }) 
     }
 
     /**
