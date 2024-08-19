@@ -1,15 +1,16 @@
 // React & React Native
 import React, { useState, useMemo, useCallback, useEffect, useRef} from 'react';
-import { StyleSheet, Platform, Text, View, TouchableOpacity, Alert, Pressable, Keyboard } from 'react-native'
-import { Stack, TextInput, Backdrop } from "@react-native-material/core";
-import { Picker } from '@react-native-picker/picker';
-import { Surface } from "@react-native-material/core";
+import { StyleSheet, Platform,  Text, View, TouchableOpacity, Pressable, Keyboard, Alert, ScrollView } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import BottomSheet, { BottomSheetModal, BottomSheetModalProvider, BottomSheetBackdrop, BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Surface, Stack } from "@react-native-material/core";
+import { Picker } from '@react-native-picker/picker';
+import BottomSheet, { BottomSheetModal, BottomSheetBackdrop, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 
 // Styles & Colors
 import Colors from '../../constants/ColorsConstant';
 import AppStyle from '../../styles/AppStyle';
+import LoginSigninStyle from '../../styles/LoginSigninStyle';
 
 // Components
 import LoaderComponent from '../../components/LoaderComponent';
@@ -25,12 +26,14 @@ import { setUser } from '../../redux/slices/UserSlice';
 import { useSelector, useDispatch } from 'react-redux';
 
 // FireStore
-import firebaseConfig from '../../firebaseConfig';
-import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, setDoc, getDoc, getDocs } from "firebase/firestore";
-import UserSettingsStyle from '../../styles/UserSettingsStyle';
-import LoginSigninStyle from '../../styles/LoginSigninStyle';
-import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
-const db = getFirestore(firebaseConfig);
+import { serverTimestamp } from "firebase/firestore";
+
+// Api
+import { getCigaretteListFireStore } from '../../api/CigaretteApi';
+import { addCigaretteUserFireStore, getCigaretteUserListFireStore } from '../../api/CigaretteUserApi';
+import { setUserFireStore } from '../../api/UserApi';
+import { setUserCigarettesFireStore } from '../../api/UserCigarettesApi';
+import CigaretteUser from '../../datas/CigaretteUserData';
 
 /**
  * http://additifstabac.free.fr/index.php/cigarettes-pourcentages-additifs-taux-nicotine-goudrons-monoxyde-carbone-co/
@@ -51,7 +54,8 @@ const SettingCigaretteComponent = () => {
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
     const [textSnackBar, setTextSnackBar] = useState<string>("")
 
-    let [userCig, setUserCig] = useState<string>("7CqNNUDGFhDV5hFgLVx1");
+    let [userCig, setUserCig] = useState<string>("Selectionner une marque de cigarette");
+    let [userCigText, setUserCigText] = useState<string>( "Selectionner une marque de cigarette");
 
     const c = new Cigarette("","",0,0,0,0,0,0)
     let [userCigSelected, setUserCigSelected] = useState<Cigarette>(c);
@@ -76,7 +80,6 @@ const SettingCigaretteComponent = () => {
 
     const [cigPaquetPrice, setCigPaquetPrice] = useState<string>("")
     const [errorCigPaquetPrice, setErrorCigPrice] = useState<string>("")
-    
     
     // UseSelector
     const userSelector = useSelector((state: RootState) => state.userReducer.user);
@@ -103,9 +106,7 @@ const SettingCigaretteComponent = () => {
         setDataCigTab([...dataCigTab])
         //console.log(dataPatchTab)
         
-        const q = query(collection(db, "cigarettes"));
-        
-        await getDocs(q).then((cigList) => {
+        await getCigaretteListFireStore().then((cigList) => {
             //console.log(pillList.size);
 
             const cItem = { label: "Selectionner une marque de cigarette", value: "Selectionner une marque de cigarette" }
@@ -144,56 +145,60 @@ const SettingCigaretteComponent = () => {
 
         }).catch((error) => {
             setIsLoaderGet(false)
-            console.error("Error get cigarette in firestore database : ")
-            console.error(error)
-        })
+            console.log("Error get cigarette in firestore database")
+            console.error(error.message)
+        }) 
     }
 
     /**
      * Function getCigist
      */
     const getCigUserList = async () => {
-        const q = query(collection(db, "cigarettesUser"), where("idUser", "==", userSelector.userId));
-        
-        await getDocs(q).then((cigList) => {
-            //console.log(pillList.size);
-            cigList.forEach((cig) => {
-                const cigData = cig.data()
-                //console.log(patchData);
 
-                const c = new Cigarette(
-                    cig.id, 
-                    cigData.cigaretteName, 
-                    cigData.cigaretteNicotine,
-                    cigData.cigaretteGoudron,
-                    cigData.cigaretteCarbone,
-                    cigData.cigarettePrice,
-                    cigData.cigaretteNbr,
-                    cigData.cigarettePriceUnit,
-                );
-                //console.log(p);
+        await getCigaretteUserListFireStore(userSelector.userId).then((cigList) => {
 
-                const cItem = { label: cigData.cigaretteName, value: cig.id }
-                //console.log(pItem);
-
-                dataCigTabItem.push(cItem)
-                setDataCigTabItem([...dataCigTabItem])
-
-                dataCigTab.push(c)
-                setDataCigTab([...dataCigTab])
-            });
-
-            // Call after load cig list
-            changeCigSelectedFomUserIdCig()
-
-            // Hide loader
-            setIsLoaderGet(false)
+            if(cigList.size > 0){
+                cigList.forEach((cig) => {
+                    const cigData = cig.data()
+                    //console.log(patchData);
+    
+                    const c = new Cigarette(
+                        cig.id, 
+                        cigData.cigaretteName, 
+                        cigData.cigaretteNicotine,
+                        cigData.cigaretteGoudron,
+                        cigData.cigaretteCarbone,
+                        cigData.cigarettePrice,
+                        cigData.cigaretteNbr,
+                        cigData.cigarettePriceUnit,
+                    );
+                    //console.log(p);
+    
+                    const cItem = { label: cigData.cigaretteName, value: cig.id }
+                    //console.log(pItem);
+    
+                    dataCigTabItem.push(cItem)
+                    setDataCigTabItem([...dataCigTabItem])
+    
+                    dataCigTab.push(c)
+                    setDataCigTab([...dataCigTab])
+                });
+    
+                // Call after load cig list
+                changeCigSelectedFomUserIdCig()
+    
+                // Hide loader
+                setIsLoaderGet(false)
+            } else {
+                // Hide loader
+                setIsLoaderGet(false)
+            }
 
         }).catch((error) => {
             setIsLoaderGet(false)
-            console.error("Error get cigarette user in firestore database : ")
-            console.error(error)
-        })
+            console.log("Error get cigarette user in firestore database")
+            console.error(error.message)
+        }) 
     }
 
     /**
@@ -202,14 +207,19 @@ const SettingCigaretteComponent = () => {
     const changeCigSelectedFomUserIdCig = () => {
         //console.log("changeCigSelectedFomUserIdCig")
         setUserCig("")
-        if(userSelector.idCigarette != "undefined"){
+        if(userSelector.idCigarette != ""){
             setUserCig(userSelector.idCigarette)
             dataCigTab.forEach((cig) => {
                 if(cig.idCigarette == userSelector.idCigarette){
                     setUserCigSelected(cig)
+                    setUserCigText(cig.cigaretteName)
                     //console.log(cig)
                 }
             })
+        } else {
+            if(Platform.OS === 'ios'){
+                setUserCigText("Selectionner une marque de cigarette")
+            }
         }
     }
 
@@ -225,6 +235,7 @@ const SettingCigaretteComponent = () => {
             dataCigTab.forEach((cig) => {
                 if(cig.idCigarette == idCig){
                     setUserCigSelected(cig)
+                    setUserCigText(cig.cigaretteName)
                     //console.log(patch)
                 }
             })
@@ -243,6 +254,7 @@ const SettingCigaretteComponent = () => {
                 0
             );
             setUserCigSelected(c)
+            setUserCigText("Selectionner une marque de cigarette")
 
             //console.log('IS undefined')
         }
@@ -254,36 +266,26 @@ const SettingCigaretteComponent = () => {
      */
      const setUserIdCig = async (idCig: string) => {
 
-        const userDoc = doc(db, "users", userSelector.userId)
+        const user = new User(
+            userSelector.userId, 
+            userSelector.userName, 
+            userSelector.userMail, 
+            userSelector.userToken, 
+            userSelector.userBirthDate, 
+            userSelector.userSmokeStartDate, 
+            userSelector.userSmokeAvgNbr, 
+            userSelector.idPatch, 
+            userSelector.idPill, 
+            idCig);
         
-        await setDoc(userDoc, {
-            userName: userSelector.userName,
-            userMail: userSelector.userMail,
-            userBirthDate: userSelector.userBirthDate, 
-            userSmokeStartDate: userSelector.userSmokeStartDate, 
-            userSmokeAvgNbr: userSelector.userSmokeAvgNbr, 
-            idPatch: userSelector.idPatch,
-            idPill: userSelector.idPill,
-            idCigarette: idCig,
-        }).then((value) => {
-            //console.log(value);
+        setUserFireStore(user).then((value) => {
+            //console.log(value)
+            dispatch(setUser(user));
 
-            const u = new User(
-                userSelector.userId, 
-                userSelector.userName, 
-                userSelector.userMail, 
-                userSelector.userToken, 
-                userSelector.userBirthDate, 
-                userSelector.userSmokeStartDate, 
-                userSelector.userSmokeAvgNbr, 
-                userSelector.idPatch, 
-                userSelector.idPill, 
-                idCig);
-            dispatch(setUser(u));
         }).catch((error) => {
-            console.error("Error set user in firestore database : ")
-            console.error(error)
-        })
+            console.log("Error set user idCig in firestore database : ")
+            console.error(error.message)
+        }) 
     }
 
     /**
@@ -316,23 +318,25 @@ const SettingCigaretteComponent = () => {
      * Function addUserCig
      */
     const addUserCig = async () => {
+
         setIsLoaderUserAdd(true)
-        setErrorAddPill("")
+        //setErrorAddPill("")
 
-        const dateTime = serverTimestamp()
-        const pillDoc = collection(db, "userCigarettes")
-
-        await addDoc(pillDoc, {
+        const userCigarettesDatas = {
             idUser: userSelector.userId,
             idCigarette: userCig,
-            dateTime: dateTime
-        }).then((value) => {
+            dateTime: serverTimestamp()
+        }
+
+        setUserCigarettesFireStore(userCigarettesDatas).then((value) => {
+            //console.log(value)
             setIsLoaderUserAdd(false)
-            setTextSnackBar('Consomation de la cigarette : '+userCigSelected.cigaretteName)
             setIsSnackBar(true)
         }).catch((error) => {
+
             setIsLoaderUserAdd(false)
-            setErrorAddPill("addUserPill error : " + error.message)
+            //setErrorAddPatch("addUserCigarettes error : " + error.message)
+            console.log("Error addUserCigarettes")
             console.error(error)
         })
     }
@@ -403,18 +407,21 @@ const SettingCigaretteComponent = () => {
 
         const nicotine = parseFloat(parseFloat(cigNicotine.replace(",", ".")).toFixed(1))
         const price = parseFloat(parseFloat(cigPaquetPrice.replace(",", ".")).toFixed(2))
-        const priceUnit = (parseInt(cigPaquetNbr) / price).toFixed(2)
+        const priceUnit = parseFloat((parseInt(cigPaquetNbr) / price).toFixed(2))
 
-        await addDoc(collection(db, "cigarettesUser"), {
-            cigaretteName: cigName,
-            cigaretteNicotine: nicotine,
-            cigaretteGoudron: parseInt(cigGoudron),
-            cigaretteCarbone: parseInt(cigCarbonne),
-            cigaretteNbr: parseInt(cigPaquetNbr),
-            cigarettePrice: price,
-            cigarettePriceUnit: priceUnit,
-            idUser: userSelector.userId
-        }).then((value) => {
+        const cigUser = new CigaretteUser(
+            "",
+            cigName,
+            nicotine,
+            parseInt(cigGoudron),
+            parseInt(cigCarbonne),
+            price,
+            parseInt(cigPaquetNbr),
+            priceUnit,
+            userSelector.userId
+        )
+
+        addCigaretteUserFireStore(cigUser).then((value) => {
             setIsLoaderCigAdd(false)
             setTextSnackBar('Ajout de la marque de cigarette : '+ cigName)
             setIsSnackBar(true)
@@ -452,27 +459,6 @@ const SettingCigaretteComponent = () => {
      * Function onRefresh 
      */
     const onRefresh = () => {
-        getCigList()
-    }
-
-    /*
-    <PickerSelect
-        onValueChange={(cig) => handlePickerSelect(cig) }
-        style={pickerSelectStyles}
-        placeholder={{
-            label: "Selectionner une marque de cigarette",
-            value: "",
-            color: Colors.colorOrange
-        }}
-        value={userCig}
-        items={dataCigTabItem}
-
-        https://github.com/maxs15/react-native-modalbox
-    />
-    */
-
-    const backLayerView = () => {
-
     }
 
     const snapPoints = useMemo(() => ['25%', '50%', '80%'], []);
@@ -482,12 +468,9 @@ const SettingCigaretteComponent = () => {
     const bottomSheetRefAdd = useRef<BottomSheetModal>(null);
     const snapeToIndexAdd = (index: number) => bottomSheetRefAdd.current?.snapToIndex(index);
 
-	const handleClosePress = () => {
-        bottomSheetRef.current?.close()
-    };
-
-	const handleOpenPress = () => bottomSheetRef.current?.expand();
-	const handleCollapsePress = () => bottomSheetRef.current?.collapse();
+	//const handleClosePress = () => {bottomSheetRef.current?.close() };
+	//const handleOpenPress = () => bottomSheetRef.current?.expand();
+	//const handleCollapsePress = () => bottomSheetRef.current?.collapse();
     const snapeToIndex = (index: number) => bottomSheetRef.current?.snapToIndex(index);
 	
     const renderBackdrop = useCallback( 
@@ -537,7 +520,7 @@ const SettingCigaretteComponent = () => {
                                 { Platform.OS === 'ios' ? 
                                 <Pressable 
                                     onPress={() => snapeToIndex(1)}>
-                                    <Text style={ AppStyle.textSelectIos } > {userCigSelected.cigaretteName} </Text>
+                                    <Text style={ AppStyle.textSelectIos } > {userCigText} </Text>
                                 </Pressable>
                                 : null }
                             </Surface>
@@ -552,7 +535,7 @@ const SettingCigaretteComponent = () => {
                             </View>
                         </View>
         
-                        { userCig != "Selectionner une marque de cigarette" ?
+                        { userCigText != "Selectionner une marque de cigarette" ?
                         <View style={AppStyle.itemContainerView2}>
 
                             <Surface 
@@ -720,134 +703,6 @@ const SettingCigaretteComponent = () => {
             
         </SafeAreaProvider>
     )
-
-   
-    /*
-    return (
-        
-       <Backdrop
-            revealed={isBackdropRevealed}
-            backLayer={backLayerView()}
-            backLayerContainerStyle={{flex:1, backgroundColor: Colors.background}}
-            frontLayerContainerStyle={{flex:1, backgroundColor: Colors.transparent}} >
-
-            <View style={AppStyle.containerCenter2}>
-                <Pressable 
-                    style={{flex:0.10, alignSelf:'stretch', alignItems: 'center'}}
-                    onPress={() => handleOpenCloseBackdrop()}>
-                </Pressable>
-
-                <View style={AppStyle.containerCenter3}>
-                    <View style={AppStyle.containerCenter4}>
-                        <Text style={AppStyle.containerCenter4Text}>Ajout d'une marque de cigarette</Text>
-                    </View>
-
-                    <View>
-                        <GestureHandlerRootView>
-                        <ScrollView
-                            persistentScrollbar={true}
-                            scrollEnabled={true}
-                            nestedScrollEnabled={true}
-                            automaticallyAdjustKeyboardInsets={true}>
-
-                        <Stack spacing={0} style={AppStyle.stackLogin2}>
-
-                            <TextInput
-                                variant="outlined"
-                                label="Entrer le nom de la marque"
-                                placeholder="Camel Filter"
-                                helperText={errorCigName}
-                                color={Colors.colorOrange}
-                                keyboardType="default"
-                                style={LoginSigninStyle.textInput}
-                                value={cigName}
-                                onChangeText={setCigName} />
-
-                            <TextInput
-                                variant="outlined"
-                                label="Entrer le taux de nicotine (mg)"
-                                placeholder="0.8"
-                                helperText={errorCigNicotine}
-                                color={Colors.colorOrange}
-                                keyboardType="decimal-pad"
-                                style={LoginSigninStyle.textInput}
-                                value={cigNicotine}
-                                onChangeText={setCigNicotine} />
-
-                            <TextInput
-                                variant="outlined"
-                                label="Entrer le taux de goudron (mg)"
-                                placeholder="7"
-                                helperText={errorCigGoudron}
-                                color={Colors.colorOrange}
-                                keyboardType="decimal-pad"
-                                style={LoginSigninStyle.textInput}
-                                value={cigGoudron}
-                                onChangeText={setCigGoudron} />
-
-                            <TextInput
-                                variant="outlined"
-                                label="Entrer le taux de monoxyde de carbonne (mg)"
-                                placeholder="9"
-                                helperText={errorCigCarbonne}
-                                color={Colors.colorOrange}
-                                keyboardType="decimal-pad"
-                                style={LoginSigninStyle.textInput}
-                                value={cigCarbonne}
-                                onChangeText={setCigCarbonne} />
-
-                            <TextInput
-                                variant="outlined"
-                                label="Entrer le nombre de cigarette par paquet"
-                                placeholder="20"
-                                helperText={errorCigPaquetNbr}
-                                color={Colors.colorOrange}
-                                keyboardType="number-pad"
-                                style={LoginSigninStyle.textInput}
-                                value={cigPaquetNbr}
-                                onChangeText={setCigPaquetNbr} />
-
-                            <TextInput
-                                variant="outlined"
-                                label="Entrer le prix du paquet (euros)"
-                                placeholder="13"
-                                helperText={errorCigPaquetPrice}
-                                color={Colors.colorOrange}
-                                keyboardType="decimal-pad"
-                                style={LoginSigninStyle.textInput}
-                                value={cigPaquetPrice}
-                                onChangeText={setCigPaquetPrice} />
-
-                            
-
-                            { isLoaderCigAdd == true ?
-                            <View>
-                                <LoaderComponent text="Ajout de la marque de cigarette en cours ..." step="" color={Colors.blueFb} size="large"/>
-                            </View>
-                            :
-                            <View>
-                                <TouchableOpacity
-                                    onPress={() => handleAddCig()}
-                                    activeOpacity={0.6}
-                                    style={AppStyle.btnCigAdd}>
-                                    <Text style={LoginSigninStyle.buttonText}>Ajouter</Text>
-                                </TouchableOpacity>
-
-                                <Text style={AppStyle.textError}>{errorAddCigUser}</Text>
-                            </View>
-                            }
-                            
-                        </Stack>
-                        </ScrollView>
-                        </GestureHandlerRootView>
-                    </View>
-                </View>
-            </View>
-        
-        </Backdrop> 
-        
-    )
-    */
 }
 
 export default SettingCigaretteComponent
@@ -873,24 +728,3 @@ const styles = StyleSheet.create({
 		color: Colors.colorOrange
 	}
 })
-
-const pickerSelectStyles = StyleSheet.create({
-    inputIOS: {
-        backgroundColor: Colors.white,
-        fontSize: 16,
-        borderWidth: 2,
-        borderColor: 'silver',
-        borderRadius: 10,
-        color: 'black',
-        padding: 15 
-    },
-    inputAndroid: {
-        backgroundColor: Colors.white,
-        fontSize: 16,
-        borderWidth: 2,
-        borderColor: 'silver',
-        borderRadius: 10,
-        color: 'black',
-        padding: 15 
-    }
-});

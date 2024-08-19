@@ -1,10 +1,10 @@
 // React & React Native
 import React, { useState, useMemo, useCallback, useEffect, useRef} from 'react';
-import { StyleSheet, Platform, Text, View, TouchableOpacity, Pressable } from 'react-native'
-import {Picker} from '@react-native-picker/picker';
-import PickerSelect from 'react-native-picker-select';
-import { Surface } from "@react-native-material/core";
+import { StyleSheet, Platform,  Text, View, TouchableOpacity, Pressable } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Surface } from "@react-native-material/core";
+import { Picker } from '@react-native-picker/picker';
 import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 
 // Styles & Colors
@@ -25,10 +25,12 @@ import { setUser } from '../../redux/slices/UserSlice';
 import { useSelector, useDispatch } from 'react-redux';
 
 // FireStore
-import firebaseConfig from '../../firebaseConfig';
-import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, setDoc, getDoc, getDocs } from "firebase/firestore";
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-const db = getFirestore(firebaseConfig);
+import { serverTimestamp } from "firebase/firestore";
+
+// Api
+import { getPillListFireStore } from '../../api/PillApi';
+import { setUserFireStore } from '../../api/UserApi';
+import { setUserPillsFireStore } from '../../api/UserPillsApi';
 
 /**
  * SettingPillComponent 
@@ -43,7 +45,9 @@ const SettingPillComponent = () => {
      
      const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
  
-     let [userPill, setUserPill] = useState<string>("");
+     let [userPill, setUserPill] = useState<string>("Selectionner une pastille");
+     let [userPillText, setUserPillText] = useState<string>("Selectionner une pastille");
+
  
      const p = new Pill("","",0)
      let [userPillSelected, setUserPillSelected] = useState<Pill>(p);
@@ -76,11 +80,7 @@ const SettingPillComponent = () => {
         setDataPillTab([...dataPillTab])
         //console.log(dataPatchTab)
         
-        const q = query(collection(db, "pills"));
-        
-        await getDocs(q).then((pillList) => {
-            //console.log(pillList.size);
-
+        await getPillListFireStore().then((pillList) => {
             const cItem = { label: "Selectionner une pastille", value: "Selectionner une pastille" }
             //console.log(pItem);
 
@@ -112,9 +112,9 @@ const SettingPillComponent = () => {
 
         }).catch((error) => {
             setIsLoaderGet(false)
-            console.error("Error get pill in firestore database : ")
-            console.error(error)
-        })
+            console.log("Error get pill in firestore database")
+            console.error(error.message)
+        }) 
     }
 
     /**
@@ -122,15 +122,20 @@ const SettingPillComponent = () => {
      */
      const changePillSelectedFomUserIdPill = () => {
         //console.log("changePatchSelectedFomUserIdPatch")
-        setUserPill("")
-        if(userSelector.idPill != "undefined"){
+        setUserPill("Selectionner une pastille")
+        if(userSelector.idPill != ""){
             setUserPill(userSelector.idPill)
             dataPillTab.forEach((pill) => {
                 if(pill.idPill == userSelector.idPill){
                     setUserPillSelected(pill)
+                    setUserPillText(pill.pillName)
                     //console.log(pill)
                 }
             })
+        } else {
+            if(Platform.OS === 'ios'){
+                setUserPillText("Selectionner une pastille")
+            }
         }
     }
 
@@ -146,6 +151,7 @@ const SettingPillComponent = () => {
             dataPillTab.forEach((pill) => {
                 if(pill.idPill == idPill){
                     setUserPillSelected(pill)
+                    setUserPillText(pill.pillName)
                     //console.log(pill)
                 }
             })
@@ -154,7 +160,8 @@ const SettingPillComponent = () => {
         } else {
             const p = new Pill('', idPill, 0)
             setUserPillSelected(p)
-            console.log('IS undefined')
+            setUserPillText("Selectionner une pastille")
+            //console.log('IS undefined')
         }
     }
 
@@ -164,64 +171,52 @@ const SettingPillComponent = () => {
      */
     const setUserIdPill = async (idPill: string) => {
 
-        const userDoc = doc(db, "users", userSelector.userId)
+        const user = new User(
+            userSelector.userId, 
+            userSelector.userName, 
+            userSelector.userMail, 
+            userSelector.userToken, 
+            userSelector.userBirthDate, 
+            userSelector.userSmokeStartDate, 
+            userSelector.userSmokeAvgNbr, 
+            userSelector.idPatch, 
+            idPill, 
+            userSelector.idCigarette);
         
-        await setDoc(userDoc, {
-            userName: userSelector.userName,
-            userMail: userSelector.userMail,
-            userBirthDate: userSelector.userBirthDate, 
-            userSmokeStartDate: userSelector.userSmokeStartDate, 
-            userSmokeAvgNbr: userSelector.userSmokeAvgNbr, 
-            idPatch: userSelector.idPatch,
-            idPill: idPill,
-            idCigarette: userSelector.idCigarette,
-        }).then((value) => {
-            console.log(value);
-            const u = new User(
-                userSelector.userId, 
-                userSelector.userName, 
-                userSelector.userMail, 
-                userSelector.userToken, 
-                userSelector.userBirthDate, 
-                userSelector.userSmokeStartDate, 
-                userSelector.userSmokeAvgNbr, 
-                userSelector.idPatch, 
-                idPill, 
-                userSelector.idCigarette);
-            dispatch(setUser(u));
-        }).catch((error) => {
-            console.error("Error set user in firestore database : ")
-            console.error(error)
-        })
-    }
+        setUserFireStore(user).then((value) => {
+            //console.log(value)
+            dispatch(setUser(user));
 
-    /**
-     * Function handleAddUserPill
-     */
-    const handleAddUserPill = () => {
-        addUserPill()
+        }).catch((error) => {
+            console.log("Error set user idPill in firestore database : ")
+            console.error(error.message)
+        }) 
     }
 
     /**
      * Function addUserPill
      */
      const addUserPill = async () => {
+
         setIsLoaderUserAdd(true)
-        setErrorAddPill("")
+        //setErrorAddPill("")
 
-        const dateTime = serverTimestamp()
-        const pillDoc = collection(db, "userPills")
-
-        await addDoc(pillDoc, {
+        const userPAtchDatas = {
             idUser: userSelector.userId,
             idPill: userPill,
-            dateTime: dateTime
-        }).then((value) => {
+            dateTime: serverTimestamp()
+        }
+
+        setUserPillsFireStore(userPAtchDatas).then((value) => {
+
+            //console.log(value)
             setIsLoaderUserAdd(false)
             setIsSnackBar(true)
         }).catch((error) => {
+
             setIsLoaderUserAdd(false)
-            setErrorAddPill("addUserPill error : " + error.message)
+            //setErrorAddPatch("addUserPatch error : " + error.message)
+            console.log("Error addUserPills")
             console.error(error)
         })
     }
@@ -233,26 +228,12 @@ const SettingPillComponent = () => {
         getPillist()
     }
 
-    /**
-     * <PickerSelect
-        onValueChange={(pill) => handlePickerSelect(pill) }
-        style={pickerSelectStyles}
-        placeholder={{
-            label: "Selectionner une pastille",
-            value: "",
-            color: Colors.colorOrange
-        }}
-        value={userPill}
-        items={dataPillTabItem}
-    />
-    */
-
-    const snapPoints = useMemo(() => ['25%', '50%', '70%'], []);
+    const snapPoints = useMemo(() => ['50%'], []);
     const bottomSheetRef = useRef<BottomSheet>(null);
 
-	const handleClosePress = () => bottomSheetRef.current?.close();
-	const handleOpenPress = () => bottomSheetRef.current?.expand();
-	const handleCollapsePress = () => bottomSheetRef.current?.collapse();
+	//const handleClosePress = () => bottomSheetRef.current?.close();
+	//const handleOpenPress = () => bottomSheetRef.current?.expand();
+	//const handleCollapsePress = () => bottomSheetRef.current?.collapse();
     const snapeToIndex = (index: number) => bottomSheetRef.current?.snapToIndex(index);
 	const renderBackdrop = useCallback(
 		(props: any) => <BottomSheetBackdrop appearsOnIndex={0} disappearsOnIndex={-1} {...props} />,
@@ -292,13 +273,13 @@ const SettingPillComponent = () => {
 
                             { Platform.OS === 'ios' ? 
                             <Pressable 
-                                onPress={() => snapeToIndex(1)}>
-                                <Text style={ AppStyle.textSelectIos } > {userPillSelected.pillName} </Text>
+                                onPress={() => snapeToIndex(0)}>
+                                <Text style={ AppStyle.textSelectIos } > {userPillText} </Text>
                             </Pressable>
                             : null }
                         </Surface>
         
-                        { userPill != "Selectionner une pastille" ?
+                        { userPillText != "Selectionner une pastille" ?
                         <View style={AppStyle.itemContainerView2}>
 
                             <Surface 
@@ -317,7 +298,7 @@ const SettingPillComponent = () => {
                                 style={ AppStyle.btnAddPatch } >   
 
                                 <TouchableOpacity
-                                    onPress={() => handleAddUserPill()}
+                                    onPress={() => addUserPill()}
                                     activeOpacity={0.6}>
                                     <Text style={AppStyle.btnAddPatchText}>Consommer une pastille</Text>
                                 </TouchableOpacity>
@@ -389,24 +370,3 @@ const styles = StyleSheet.create({
 		color: Colors.colorOrange
 	}
 })
-
-const pickerSelectStyles = StyleSheet.create({
-    inputIOS: {
-        backgroundColor: Colors.white,
-        fontSize: 16,
-        borderWidth: 2,
-        borderColor: 'silver',
-        borderRadius: 5,
-        color: 'black',
-        padding: 15 
-    },
-    inputAndroid: {
-        backgroundColor: Colors.white,
-        fontSize: 16,
-        borderWidth: 2,
-        borderColor: 'silver',
-        borderRadius: 5,
-        color: 'black',
-        padding: 15 
-    }
-});

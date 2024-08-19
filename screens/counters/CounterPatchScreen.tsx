@@ -1,11 +1,10 @@
 // React & React Native
 import React, { useState, useMemo, useCallback, useEffect, useRef} from 'react';
-import { StyleSheet, Platform,  Text, View, TouchableOpacity, Pressable, Keyboard, Button } from 'react-native'
-import { Stack, TextInput, Backdrop } from "@react-native-material/core";
-import {Picker} from '@react-native-picker/picker';
-import PickerSelect from 'react-native-picker-select';
-import { Surface } from "@react-native-material/core";
+import { StyleSheet, Platform,  Text, View, TouchableOpacity, Pressable } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Surface } from "@react-native-material/core";
+import { Picker } from '@react-native-picker/picker';
 import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 
 // Styles & Colors
@@ -26,13 +25,12 @@ import { setUser } from '../../redux/slices/UserSlice';
 import { useSelector, useDispatch } from 'react-redux';
 
 // FireStore
-import firebaseConfig from '../../firebaseConfig';
-import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, getDoc, setDoc, getDocs } from "firebase/firestore";
-import App from '../../App';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import PatchBottomSheetScreen from './PatchBottomSheetScreen';
+import { serverTimestamp } from "firebase/firestore";
 
-const db = getFirestore(firebaseConfig);
+// Api
+import { getPatchListFireStore } from '../../api/PatchApi';
+import { setUserFireStore } from '../../api/UserApi';
+import { setUserPatchsFireStore } from '../../api/UserPatchsApi';
 
 /**
  * SettingPatchComponent
@@ -41,14 +39,14 @@ const SettingPatchComponent = () => {
 
     // UseState
     const [isLoaderGet, setIsLoaderGet] = useState<boolean>(false)
-    const [isBackdropRevealed, setIsBackdropRevealed] = useState<boolean>(true)
 
     const [isLoaderUserAdd, setIsLoaderUserAdd] = useState<boolean>(false)
     const [errorAddPatch, setErrorAddPatch] = useState<string>("")
     
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
 
-    let [userPatch, setUserPatch] = useState<string>("");
+    let [userPatch, setUserPatch] = useState<string>("Selectionner un patch");
+    let [userPatchText, setUserPatchText] = useState<string>("Selectionner un patch");
 
     const p = new Patch("","",0)
     let [userPatchSelected, setUserPatchSelected] = useState<Patch>(p);
@@ -66,7 +64,6 @@ const SettingPatchComponent = () => {
     useEffect(() => {
         //console.log('useEffect')
         getPatchList()
-        //bottomSheetRef.current?.close()
     },[])
 
     /**
@@ -82,10 +79,46 @@ const SettingPatchComponent = () => {
         dataPatchTab = []
         setDataPatchTab([...dataPatchTab])
         //console.log(dataPatchTab)
-        
-        const q = query(collection(db, "patchs"));
 
-        const patchList = 
+        getPatchListFireStore().then((patchList) => {
+            //console.log(patchList.size);
+
+            const cItem = { label: "Selectionner un patch", value: "Selectionner un patch" }
+            //console.log(pItem);
+
+            dataPatchTabItem.push(cItem)
+            setDataPatchTabItem([...dataPatchTabItem])
+
+            patchList.forEach((patch:any) => {
+                const patchData = patch.data()
+                //console.log(patchData);
+
+                const p = new Patch(patch.id, patchData.patchName, patchData.patchNicotine);
+                //console.log(p);
+
+                const pItem = { label: patchData.patchName, value: patch.id }
+                //console.log(pItem);
+
+                dataPatchTabItem.push(pItem)
+                setDataPatchTabItem([...dataPatchTabItem])
+
+                dataPatchTab.push(p)
+                setDataPatchTab([...dataPatchTab])
+            });
+
+            // Call after load patch list
+            changePatchSelectedFomUserIdPatch()
+
+            // Hide loader
+            setIsLoaderGet(false)
+
+        }).catch((error) => {
+            setIsLoaderGet(false)
+            console.log("Error get patch in firestore database")
+            console.error(error.message)
+        }) 
+
+        /*
         await getDocs(q).then((patchList) => {
             //console.log(patchList.size);
 
@@ -123,6 +156,7 @@ const SettingPatchComponent = () => {
             console.error("Error get patch in firestore database : ")
             console.error(error)
         }) 
+        */
     }
 
     /**
@@ -130,17 +164,23 @@ const SettingPatchComponent = () => {
      */
     const changePatchSelectedFomUserIdPatch = () => {
         //console.log("changePatchSelectedFomUserIdPatch")
-        setUserPatch("")
-        //console.log(userSelector.idPatch)
+        userPatch = "Selectionner un patch"
+        setUserPatch(userPatch)
 
-        if(userSelector.idPatch != "undefined"){
+        if(userSelector.idPatch != ""){
             setUserPatch(userSelector.idPatch)
             dataPatchTab.forEach((patch) => {
                 if(patch.idPatch == userSelector.idPatch){
                     setUserPatchSelected(patch)
+                    setUserPatchText(patch.patchName)
+
                     //console.log(patch)
                 }
             })
+        } else {
+            if(Platform.OS === 'ios'){
+                setUserPatchText(userPatch)
+            }
         }
     }
 
@@ -156,6 +196,7 @@ const SettingPatchComponent = () => {
             dataPatchTab.forEach((patch) => {
                 if(patch.idPatch == idPatch){
                     setUserPatchSelected(patch)
+                    setUserPatchText(patch.patchName)
                     //console.log(patch)
                 }
             })
@@ -164,6 +205,7 @@ const SettingPatchComponent = () => {
         } else {
             const p = new Patch('', idPatch, 0)
             setUserPatchSelected(p)
+            setUserPatchText("Selectionner un patch")
             //console.log('IS undefined')
         }
         
@@ -175,44 +217,26 @@ const SettingPatchComponent = () => {
      */
     const setUserIdPatch = async (idPatch: string) => {
 
-        const userDoc = doc(db, "users", userSelector.userId)
+        const user = new User(
+            userSelector.userId, 
+            userSelector.userName, 
+            userSelector.userMail, 
+            userSelector.userToken, 
+            userSelector.userBirthDate, 
+            userSelector.userSmokeStartDate, 
+            userSelector.userSmokeAvgNbr, 
+            idPatch, 
+            userSelector.idPill, 
+            userSelector.idCigarette);
         
-        await setDoc(userDoc, {
-            userName: userSelector.userName,
-            userMail: userSelector.userMail,
-            userBirthDate: userSelector.userBirthDate, 
-            userSmokeStartDate: userSelector.userSmokeStartDate, 
-            userSmokeAvgNbr: userSelector.userSmokeAvgNbr, 
-            idPatch: idPatch,
-            idPill: userSelector.idPill,
-            idCigarette: userSelector.idCigarette,
-        }).then((value) => {
-            //console.log(value);
-
-            const u = new User(
-                userSelector.userId, 
-                userSelector.userName, 
-                userSelector.userMail, 
-                userSelector.userToken, 
-                userSelector.userBirthDate, 
-                userSelector.userSmokeStartDate, 
-                userSelector.userSmokeAvgNbr, 
-                idPatch, 
-                userSelector.idPill, 
-                userSelector.idCigarette);
-            dispatch(setUser(u));
+        setUserFireStore(user).then((value) => {
+            //console.log(value)
+            dispatch(setUser(user));
 
         }).catch((error) => {
-            console.error("Error set user in firestore database : ")
-            console.error(error)
-        })
-    }
-
-    /**
-     * Function handleAddUserPatch
-     */
-    const handleAddUserPatch = () => {
-        addUserPatch()
+            console.log("Error set user idPatch in firestore database : ")
+            console.error(error.message)
+        }) 
     }
 
     /**
@@ -220,38 +244,26 @@ const SettingPatchComponent = () => {
      */
     const addUserPatch = async () => {
         setIsLoaderUserAdd(true)
-        setErrorAddPatch("")
+        //setErrorAddPatch("")
 
-        const dateTime = serverTimestamp()
-        const patchDoc = collection(db, "userPatchs")
-
-        await addDoc(patchDoc, {
+        const userPAtchDatas = {
             idUser: userSelector.userId,
             idPatch: userPatch,
-            dateTime: dateTime
-        }).then((value) => {
+            dateTime: serverTimestamp()
+        }
+
+        setUserPatchsFireStore(userPAtchDatas).then((value) => {
+
+            //console.log(value)
             setIsLoaderUserAdd(false)
             setIsSnackBar(true)
         }).catch((error) => {
             setIsLoaderUserAdd(false)
-            setErrorAddPatch("addUserPatch error : " + error.message)
+            //setErrorAddPatch("addUserPatch error : " + error.message)
+            console.log("Error addUserPatchs")
             console.error(error)
         })
     }
-
-    /**
-     * <PickerSelect
-        onValueChange={(patch) => handlePickerSelect(patch) }
-        style={pickerSelectStyles}
-        placeholder={{
-            label: "Selectionner un patch",
-            value: "",
-            color: Colors.colorOrange
-        }}
-        value={userPatch}
-        items={dataPatchTabItem}
-    />
-    */
 
     /**
      * Function onRefresh 
@@ -260,12 +272,12 @@ const SettingPatchComponent = () => {
         getPatchList()
     }
 
-    const snapPoints = useMemo(() => ['25%', '50%', '70%'], []);
+    const snapPoints = useMemo(() => ['50%'], []);
     const bottomSheetRef = useRef<BottomSheet>(null);
 
-	const handleClosePress = () => bottomSheetRef.current?.close();
-	const handleOpenPress = () => bottomSheetRef.current?.expand();
-	const handleCollapsePress = () => bottomSheetRef.current?.collapse();
+	//const handleClosePress = () => bottomSheetRef.current?.close();
+	//const handleOpenPress = () => bottomSheetRef.current?.expand();
+	//const handleCollapsePress = () => bottomSheetRef.current?.collapse();
     const snapeToIndex = (index: number) => bottomSheetRef.current?.snapToIndex(index);
 	const renderBackdrop = useCallback(
 		(props: any) => <BottomSheetBackdrop appearsOnIndex={0} disappearsOnIndex={-1} {...props} />,
@@ -305,13 +317,13 @@ const SettingPatchComponent = () => {
 
                             { Platform.OS === 'ios' ? 
                             <Pressable 
-                                onPress={() => snapeToIndex(1)}>
-                                <Text style={ AppStyle.textSelectIos } > {userPatchSelected.patchName} </Text>
+                                onPress={() => snapeToIndex(0)}>
+                                <Text style={ AppStyle.textSelectIos } > {userPatchText} </Text>
                             </Pressable>
                             : null }
                         </Surface>
 
-                        { userPatch != "Selectionner un patch" ?
+                        { userPatchText != "Selectionner un patch" ?
                         <View style={AppStyle.itemContainerView2}>
 
                             <Surface 
@@ -330,7 +342,7 @@ const SettingPatchComponent = () => {
                                 style={ AppStyle.btnAddPatch } > 
 
                                 <TouchableOpacity
-                                    onPress={() => handleAddUserPatch()}
+                                    onPress={() => addUserPatch()}
                                     activeOpacity={0.6}>
                                     <Text style={AppStyle.btnAddPatchText}>Appliquer un patch</Text>
                                 </TouchableOpacity>
@@ -384,41 +396,6 @@ const SettingPatchComponent = () => {
             
         </SafeAreaProvider>
     )
-
-    /*
-        <Backdrop
-            revealed={isBackdropRevealed}
-            backLayer={backLayerView()}
-            backLayerContainerStyle={{flex:1, backgroundColor: Colors.background}}
-            frontLayerContainerStyle={{flex:1, backgroundColor: Colors.transparent}} >
-
-            <View style={AppStyle.containerCenter2}>
-                <Pressable 
-                    style={{flex: 1, alignSelf:'stretch', alignItems: 'center'}}
-                    onPress={() => handleOpenCloseBackdrop()}>
-                </Pressable>
-
-                <View style={AppStyle.containerCenter3b}>
-                    <View style={AppStyle.containerCenter4}>
-                        <Text style={AppStyle.containerCenter4Text}>Choisir un patch</Text>
-                    </View>
-                   
-                    <View style={AppStyle.pickerSelect}>
-                        <Picker
-                            selectedValue={userPatch}
-                            onValueChange={(patch) => handlePickerSelect(patch) }
-                            mode={'dialog'}
-                        >   
-                        {
-                        dataPatchTabItem.map(item => <Picker.Item key={item.value} label={item.label} value={item.value}/>)
-                        }          
-                        </Picker>
-                    </View>
-                </View>
-            </View>
-        
-        </Backdrop>
-    */
 }
 
 export default SettingPatchComponent
@@ -438,24 +415,3 @@ const styles = StyleSheet.create({
 		color: Colors.colorOrange
 	}
 })
-
-const pickerSelectStyles = StyleSheet.create({
-    inputIOS: {
-        backgroundColor: Colors.white,
-        fontSize: 16,
-        borderWidth: 2,
-        borderColor: 'silver',
-        borderRadius: 5,
-        color: 'black',
-        padding: 15 
-    },
-    inputAndroid: {
-        backgroundColor: Colors.white,
-        fontSize: 16,
-        borderWidth: 2,
-        borderColor: 'silver',
-        borderRadius: 5,
-        color: 'black',
-        padding: 15 
-    }
-});
