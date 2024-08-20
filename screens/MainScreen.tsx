@@ -27,19 +27,9 @@ import { getFirestore, collection, query, where, doc, getDoc, getDocs } from "fi
 import AppStyle from '../styles/AppStyle';
 import App from '../App';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDtDQYI2sJN-GT9jCfg4YYDrhaiMbalcMk",
-  authDomain: "testing-firebase-ec361.firebaseapp.com",
-  databaseURL: "https://testing-firebase-ec361-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "testing-firebase-ec361",
-  storageBucket: "testing-firebase-ec361.appspot.com",
-  messagingSenderId: "939968442007",
-  appId: "1:939968442007:web:2114a3275d29bd3664c3d2",
-  measurementId: "G-FEVR7B56CS"
-};
+import firebaseConfig from '../firebaseConfig';
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app); 
+const db = getFirestore(firebaseConfig); 
 
 const MainScreen = () => {
 

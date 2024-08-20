@@ -1,8 +1,7 @@
 import React, { useState , useEffect} from 'react';
 import { StyleSheet, SafeAreaView, ScrollView, Text, View, Keyboard, TouchableOpacity } from 'react-native'
-import { Stack, TextInput, Backdrop, BackdropSubheader } from "@react-native-material/core";
+import { TextInput, Surface } from "@react-native-material/core";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
-import PickerSelect from 'react-native-picker-select';
 
 // Color
 import Colors from '../../constants/ColorsConstant';
@@ -25,7 +24,17 @@ import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, s
 import LoaderComponent from '../../components/LoaderComponent';
 const db = getFirestore(firebaseConfig);
 
-const SettingUserScreen = () => {
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+
+type RootStackParamList = {
+    UserUpdateInformationsScreen: any;
+    UserInformationsScreen: any;
+    SettingCounter: any;
+  };
+
+type Props = NativeStackScreenProps<RootStackParamList, 'UserUpdateInformationsScreen', 'UserInformationsScreen'>;
+
+const UserUpdateInformationsScreen = ({ navigation }: Props) => {
 
     // UseState
     let [userName, setUserName] = useState<string>('');
@@ -238,7 +247,8 @@ const SettingUserScreen = () => {
 
             setIsLoadSaveUserData(false)
 
-            getDataUser()
+            //getDataUser()
+            navigation.navigate('UserInformationsScreen')
 
         }).catch((error) => {
             console.error("Error set user in firestore database : ")
@@ -247,6 +257,25 @@ const SettingUserScreen = () => {
         })
     }
 
+    /*
+    <TextInput 
+        variant="outlined"
+        label="Entrer la date où vous avez commencé à fumer"
+        placeholder="JJ/MM/AAAA"
+        helperText={errorUserSmokeDate}
+        color={Colors.colorOrange}
+        style={UserSettingsStyle.inputText}
+        value={userSmokeDate.toLocaleDateString()} 
+        showSoftInputOnFocus={false}
+        onPress={ () => showUserSmokeDatePicker()} />
+
+    <DateTimePickerModal
+        isVisible={userSmokeDateVisible}
+        mode="date"
+        onConfirm={handleConfirmUserSmokeDate}
+        onCancel={hideUserSmokeDatePicker} />
+    */
+
     return (
         <SafeAreaView style={AppStyle.container}>
             <ScrollView 
@@ -254,9 +283,6 @@ const SettingUserScreen = () => {
                 automaticallyAdjustKeyboardInsets={true}>
 
                 <View>
-                    <View style={AppStyle.subTitleContainer}>
-                        <Text style={AppStyle.subTitleText}>Vos informations</Text>
-                    </View>
 
                     { isLoadGetUserData == true ? 
                     <View>
@@ -293,23 +319,6 @@ const SettingUserScreen = () => {
                             onCancel={hideUserBirthDatePicker} />
 
                         <TextInput 
-                            variant="outlined"
-                            label="Entrer la date où vous avez commencé à fumer"
-                            placeholder="JJ/MM/AAAA"
-                            helperText={errorUserSmokeDate}
-                            color={Colors.colorOrange}
-                            style={UserSettingsStyle.inputText}
-                            value={userSmokeDate.toLocaleDateString()} 
-                            showSoftInputOnFocus={false}
-                            onPress={ () => showUserSmokeDatePicker()} />
-
-                        <DateTimePickerModal
-                            isVisible={userSmokeDateVisible}
-                            mode="date"
-                            onConfirm={handleConfirmUserSmokeDate}
-                            onCancel={hideUserSmokeDatePicker} />
-
-                        <TextInput 
                             keyboardType='number-pad'
                             variant="outlined"
                             label="Entrer le nombre de cigarette fumer par jours"
@@ -320,12 +329,17 @@ const SettingUserScreen = () => {
                             value={userSomeAvgDay}
                             onChangeText={setUserSomeAvgDay} />
 
-                        <TouchableOpacity
-                            onPress={() => handleSaveUserData()}
-                            activeOpacity={0.6}
-                            style={ AppStyle.btnAddPatch }>
-                            <Text style={AppStyle.btnAddPatchText}>Enregister</Text>
-                        </TouchableOpacity>
+                        <Surface 
+                            elevation={4}
+                            category="medium"
+                            style={AppStyle.btnAddPatch}
+                            > 
+                            <TouchableOpacity
+                                onPress={() => handleSaveUserData()}
+                                activeOpacity={0.6}>
+                                <Text style={AppStyle.btnAddPatchText}>Enregister</Text>
+                            </TouchableOpacity>
+                        </Surface>
 
                         { isLoadSaveUserData == true ?
                         <View>
@@ -342,7 +356,7 @@ const SettingUserScreen = () => {
     )
 }
 
-export default SettingUserScreen
+export default UserUpdateInformationsScreen
 
 const pickerSelectStyles = StyleSheet.create({
     inputIOS: {

@@ -8,10 +8,12 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 const Tab = createMaterialBottomTabNavigator();
 
-import SettingUserScreen from '../screens/users/SettingUserScreen';
+import SettingUserScreen from './users/UserUpdateInformationsScreen';
 import SettingCounterComponent from '../screens/counters/CounterScreen';
 import StatCounterComponent from '../screens/statistics/StatisticsScreen';
 import AppStyle from '../styles/AppStyle';
+import UserInformationsScreen from './users/UserInformationsScreen';
+import UserSettingsScreen from './users/UserSettingsScreen';
 //import AddCounterComponent from '../components/AddCounterComponent';
 
 const UserLoginScreen = () => {
@@ -23,8 +25,8 @@ const UserLoginScreen = () => {
             activeColor={Colors.colorOrange}>
                 
             <Tab.Screen
-                name="SettingUser"
-                component={SettingUserScreen}
+                name="UserSettingsScreen"
+                component={UserSettingsScreen}
                 options={{
                     tabBarLabel: 'Paramètres',
                     tabBarIcon: ({ color }) => (

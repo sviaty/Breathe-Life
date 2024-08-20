@@ -3,7 +3,7 @@ import React from 'react'
 
 // FireStore
 import firebaseConfig from '../firebaseConfig';
-import { getFirestore, collection, query, getDocs, getDoc, addDoc, where, doc} from "firebase/firestore";
+import { getFirestore, collection, query, getDocs, getDoc, addDoc, where, doc, or} from "firebase/firestore";
 
 import CigaretteUser from '../datas/CigaretteUserData';
 const db = getFirestore(firebaseConfig);
@@ -14,7 +14,10 @@ const db = getFirestore(firebaseConfig);
  * @returns 
  */
 export const getCigaretteUserListFireStore = async (userId:string) => {
-    const q = query(collection(db, "cigarettesUser"), where("idUser", "==", userId));
+    const q = query(collection(db, "cigarettesUser"), or(
+        where("idUser", "==", userId),
+        where("idUser", "==", ""),
+    ));
 
     return await getDocs(q).then((cigList) => {
         //console.log(cigList.size);
@@ -55,7 +58,7 @@ export const getCigaretteUserByIdCigFireStore = async (idCigarette:string) => {
 export const addCigaretteUserFireStore = async (
     cigaretteUser: CigaretteUser) => {
 
-    await addDoc(collection(db, "cigarettesUser"), {
+    await addDoc(collection(db, "cigarettes"), {
         cigaretteName: cigaretteUser.cigaretteName,
         cigaretteNicotine: cigaretteUser.cigaretteNicotine,
         cigaretteGoudron: cigaretteUser.cigaretteGoudron,

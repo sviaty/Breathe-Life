@@ -18,7 +18,7 @@ import Cigarette from '../../datas/CigaretteData'
 import { RootState } from '../../redux/Store';
 import { useSelector } from 'react-redux';
 
-// Api
+// API
 import { getPatchByIdPatchFireStore } from '../../api/PatchApi';
 import { getUserPatchsByIdUserFireStore } from '../../api/UserPatchsApi';
 import { getUserPillsByIdUserFireStore } from '../../api/UserPillsApi';
@@ -246,9 +246,7 @@ const StatisticsWeekSreen = () => {
                         
                         i += 1
 
-                        getStatCigaretteInDatabase(cigaretteData.idCigarette)
-                        getStatCigaretteUserInDatabase(cigaretteData.idCigarette)
-                        
+                        getStatCigaretteInDatabase(cigaretteData.idCigarette)                        
                     }
                 });
 
@@ -263,7 +261,7 @@ const StatisticsWeekSreen = () => {
                 setIsLoadCountCigarette(false)
 
             } else {
-                console.log('cigaretteList size = 0');
+                //console.log('cigaretteList size = 0');
                 setCountCigarette(0)
                 setIsLoadCountCigarette(false)
                 setIsLoadCountPriceEconomy(false)
@@ -302,7 +300,8 @@ const StatisticsWeekSreen = () => {
                     dataCigarette.cigaretteCarbone,
                     dataCigarette.cigarettePrice,
                     dataCigarette.cigaretteNbr,
-                    dataCigarette.cigarettePriceUnit
+                    dataCigarette.cigarettePriceUnit,
+                    dataCigarette.idUser
                 )
 
                 dataCigaretteTab.push(c)
@@ -336,63 +335,6 @@ const StatisticsWeekSreen = () => {
             console.log("Error get pill in firestore database : ")
             console.error(error.message)
         }) 
-    }
-
-    /**
-     * Function getStatCigaretteUserInDatabase
-     */
-    const getStatCigaretteUserInDatabase = async (idCigarette: string) => {
-        //console.log(idCigarette);
-        setIsLoadCountCigaretteDetails(true)
-
-        getCigaretteUserByIdCigFireStore(idCigarette).then((cigarette) => {
-            if (cigarette.exists()) {
-                const dataCigarette = cigarette.data()
-                //console.log(dataCigarette)
-    
-                const c = new Cigarette(
-                    cigarette.id, 
-                    dataCigarette.cigaretteName,
-                    dataCigarette.cigaretteNicotine,
-                    dataCigarette.cigaretteGoudron,
-                    dataCigarette.cigaretteCarbone,
-                    dataCigarette.cigarettePrice,
-                    dataCigarette.cigaretteNbr,
-                    dataCigarette.cigarettePriceUnit
-                )
-
-                dataCigaretteTab.push(c)
-                setDataCigaretteTab([...dataCigaretteTab])
-
-                countPriceDepense = parseFloat((countPriceDepense + dataCigarette.cigarettePriceUnit).toFixed(2))
-                setCountPriceDepense(countPriceDepense)
-
-                countPriceEconomy = parseFloat((userSmokePrice - countPriceDepense).toFixed(2))
-                if(countPriceEconomy < 0){
-                    setCountPriceEconomy(0)
-                } else {
-                    setCountPriceEconomy(countPriceEconomy)
-                }
-                
-                countNicotine = countNicotine + parseFloat(dataCigarette.cigaretteNicotine)
-                setCountNicotine(countNicotine)
-                //console.log(countNicotine)  
-
-                countGoudron = countGoudron + parseFloat(dataCigarette.cigaretteGoudron)
-                setCountGoudron(countGoudron)
-
-                countCarbonne = countCarbonne + parseFloat(dataCigarette.cigaretteCarbone)
-                setCountCarbonne(countCarbonne)
-
-                setIsLoadCountCigaretteDetails(false)
-            }
- 
-        }).catch((error) => {
-            setIsLoadCountCigaretteDetails(false)
-            console.log("Error get pill in firestore database : ")
-            console.error(error.message)
-        }) 
-
     }
 
     /**

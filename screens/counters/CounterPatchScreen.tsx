@@ -207,6 +207,8 @@ const SettingPatchComponent = () => {
             setUserPatchSelected(p)
             setUserPatchText("Selectionner un patch")
             //console.log('IS undefined')
+
+            setUserIdPatch('')
         }
         
     }
@@ -298,7 +300,7 @@ const SettingPatchComponent = () => {
                     <View style={AppStyle.viewContenair}>
                         
                         <Surface 
-                            elevation={8}
+                            elevation={4}
                             category="medium"
                             style={ AppStyle.pickerSelectOrange } >   
 
@@ -327,9 +329,9 @@ const SettingPatchComponent = () => {
                         <View style={AppStyle.itemContainerView2}>
 
                             <Surface 
-                                elevation={8}
+                                elevation={4}
                                 category="medium"
-                                style={ AppStyle.itemPatchContainer2 } >  
+                                style={ AppStyle.itemPatchContainerGreen } >  
 
                                 <Text style={ AppStyle.itemPatchText2 }>Nom du patch : {userPatchSelected.patchName} </Text>
                                 <Text style={ AppStyle.itemPatchText2 }>Nicotine :  {userPatchSelected.patchNicotine} (mg) </Text>
@@ -337,7 +339,7 @@ const SettingPatchComponent = () => {
                             </Surface>
 
                             <Surface 
-                                elevation={8}
+                                elevation={4}
                                 category="medium"
                                 style={ AppStyle.btnAddPatch } > 
 

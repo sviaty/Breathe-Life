@@ -1,3 +1,4 @@
+// React & React Native
 import React, { useState , useEffect} from 'react';
 import { StyleSheet, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -255,8 +256,6 @@ const StatisticsDayScreen = () => {
                         i += 1
 
                         getStatCigaretteInDatabase(cigaretteData.idCigarette)
-                        getStatCigaretteUserInDatabase(cigaretteData.idCigarette)
-                        
                     }
                 });
 
@@ -271,7 +270,7 @@ const StatisticsDayScreen = () => {
                 setIsLoadCountCigarette(false)
 
             } else {
-                console.log('cigaretteList size = 0');
+                //console.log('cigaretteList size = 0');
                 setCountCigarette(0)
                 setIsLoadCountCigarette(false)
                 setIsLoadCountPriceEconomy(false)
@@ -308,7 +307,8 @@ const StatisticsDayScreen = () => {
                     dataCigarette.cigaretteCarbone,
                     dataCigarette.cigarettePrice,
                     dataCigarette.cigaretteNbr,
-                    dataCigarette.cigarettePriceUnit
+                    dataCigarette.cigarettePriceUnit,
+                    dataCigarette.idUser
                 )
 
                 dataCigaretteTab.push(c)
@@ -342,64 +342,6 @@ const StatisticsDayScreen = () => {
             console.log("Error get pill in firestore database : ")
             console.error(error.message)
         }) 
-    }
-
-    /**
-     * Function getStatCigaretteInDatabase
-     */
-    const getStatCigaretteUserInDatabase = async (idCigarette: string) => {
-
-        //console.log(idCigarette);
-        setIsLoadCountCigaretteDetails(true)
-
-        getCigaretteUserByIdCigFireStore(idCigarette).then((cigarette) => {
-            if (cigarette.exists()) {
-                const dataCigarette = cigarette.data()
-                //console.log(dataCigarette)
-    
-                const c = new Cigarette(
-                    cigarette.id, 
-                    dataCigarette.cigaretteName,
-                    dataCigarette.cigaretteNicotine,
-                    dataCigarette.cigaretteGoudron,
-                    dataCigarette.cigaretteCarbone,
-                    dataCigarette.cigarettePrice,
-                    dataCigarette.cigaretteNbr,
-                    dataCigarette.cigarettePriceUnit
-                )
-
-                dataCigaretteTab.push(c)
-                setDataCigaretteTab([...dataCigaretteTab])
-
-                countPriceDepense = parseFloat((countPriceDepense + dataCigarette.cigarettePriceUnit).toFixed(2))
-                setCountPriceDepense(countPriceDepense)
-
-                countPriceEconomy = parseFloat((userSmokePrice - countPriceDepense).toFixed(2))
-                if(countPriceEconomy < 0){
-                    setCountPriceEconomy(0)
-                } else {
-                    setCountPriceEconomy(countPriceEconomy)
-                }
-                
-                countNicotine = countNicotine + parseFloat(dataCigarette.cigaretteNicotine)
-                setCountNicotine(countNicotine)
-                //console.log(countNicotine)  
-
-                countGoudron = countGoudron + parseFloat(dataCigarette.cigaretteGoudron)
-                setCountGoudron(countGoudron)
-
-                countCarbonne = countCarbonne + parseFloat(dataCigarette.cigaretteCarbone)
-                setCountCarbonne(countCarbonne)
-
-                setIsLoadCountCigaretteDetails(false)
-            }
- 
-        }).catch((error) => {
-            setIsLoadCountCigaretteDetails(false)
-            console.log("Error get pill in firestore database : ")
-            console.error(error.message)
-        }) 
-
     }
 
     return (

@@ -10,6 +10,11 @@ export default StyleSheet.create({
         marginTop:15,
     },
 
+    textInput2: {
+        width: screenWidth - 20,
+        marginTop:15,
+    },
+
     bootomTextInput: {
         backgroundColor: Colors.white,
         borderColor: Colors.silver,

@@ -209,7 +209,6 @@ const LoginScreen = () => {
                     autoCapitalize="none"
                     autoComplete="email"
                     keyboardType="email-address"
-                    autoFocus
                     style={LoginStyle.textInput}
                     value={mail}
                     onChangeText={setMail} />

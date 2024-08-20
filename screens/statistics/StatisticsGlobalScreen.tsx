@@ -223,8 +223,6 @@ const StatisticsGlobalScreen = () => {
                     i += 1
 
                     getStatCigaretteInDatabase(cigaretteData.idCigarette)
-                    getStatCigaretteUserInDatabase(cigaretteData.idCigarette)
-                        
                 });
 
                 if(i == 0){
@@ -236,7 +234,7 @@ const StatisticsGlobalScreen = () => {
                 setIsLoadCountCigarette(false)
 
             } else {
-                console.log('cigaretteList size = 0');
+                //console.log('cigaretteList size = 0');
                 setCountCigarette(0)
                 setIsLoadCountCigarette(false)
 
@@ -273,7 +271,8 @@ const StatisticsGlobalScreen = () => {
                     dataCigarette.cigaretteCarbone,
                     dataCigarette.cigarettePrice,
                     dataCigarette.cigaretteNbr,
-                    dataCigarette.cigarettePriceUnit
+                    dataCigarette.cigarettePriceUnit,
+                    dataCigarette.idUser
                 )
 
                 dataCigaretteTab.push(c)
@@ -300,51 +299,8 @@ const StatisticsGlobalScreen = () => {
     }
 
     /**
-     * Function getStatCigaretteUserInDatabase
+     * JSX view
      */
-    const getStatCigaretteUserInDatabase = async (idCigarette: string) => {
-        //console.log(idCigarette);
-       setIsLoadCountCigaretteDetails(true)
-
-       getCigaretteUserByIdCigFireStore(idCigarette).then((cigarette) => {
-           if (cigarette.exists()) {
-               const dataCigarette = cigarette.data()
-               //console.log(dataCigarette)
-   
-               const c = new Cigarette(
-                   cigarette.id, 
-                   dataCigarette.cigaretteName,
-                   dataCigarette.cigaretteNicotine,
-                   dataCigarette.cigaretteGoudron,
-                   dataCigarette.cigaretteCarbone,
-                   dataCigarette.cigarettePrice,
-                   dataCigarette.cigaretteNbr,
-                   dataCigarette.cigarettePriceUnit
-               )
-
-               dataCigaretteTab.push(c)
-               setDataCigaretteTab([...dataCigaretteTab])
-               
-               countNicotine = countNicotine + parseFloat(dataCigarette.cigaretteNicotine)
-               setCountNicotine(countNicotine)
-               //console.log(countNicotine)  
-
-               countGoudron = countGoudron + parseFloat(dataCigarette.cigaretteGoudron)
-               setCountGoudron(countGoudron)
-
-               countCarbonne = countCarbonne + parseFloat(dataCigarette.cigaretteCarbone)
-               setCountCarbonne(countCarbonne)
-
-               setIsLoadCountCigaretteDetails(false)
-           }
-
-       }).catch((error) => {
-           setIsLoadCountCigaretteDetails(false)
-           console.log("Error get pill in firestore database : ")
-           console.error(error.message)
-       }) 
-    }
-
     return (
     <SafeAreaProvider style={AppStyle.container}>
 

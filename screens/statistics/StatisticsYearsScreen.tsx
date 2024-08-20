@@ -19,9 +19,7 @@ import Cigarette from '../../datas/CigaretteData'
 import { RootState } from '../../redux/Store';
 import { useSelector, useDispatch } from 'react-redux';
 
-// FireStore
-import firebaseConfig from '../../firebaseConfig';
-import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, getDoc, getDocs, and, orderBy} from "firebase/firestore";
+// API
 import { getUserPatchsByIdUserFireStore } from '../../api/UserPatchsApi';
 import { getPatchByIdPatchFireStore } from '../../api/PatchApi';
 import { getPillByIdPillFireStore } from '../../api/PillApi';
@@ -29,7 +27,6 @@ import { getUserPillsByIdUserFireStore } from '../../api/UserPillsApi';
 import { getUserCigarettesByIdUserFireStore } from '../../api/UserCigarettesApi';
 import { getCigaretteByIdCigFireStore } from '../../api/CigaretteApi';
 import { getCigaretteUserByIdCigFireStore } from '../../api/CigaretteUserApi';
-const db = getFirestore(firebaseConfig);
 
 const StatisticsYearsScreen = () => {
 
@@ -250,8 +247,6 @@ const StatisticsYearsScreen = () => {
                         i += 1
 
                         getStatCigaretteInDatabase(cigaretteData.idCigarette)
-                        getStatCigaretteUserInDatabase(cigaretteData.idCigarette)
-                        
                     }
                 });
 
@@ -304,7 +299,8 @@ const StatisticsYearsScreen = () => {
                     dataCigarette.cigaretteCarbone,
                     dataCigarette.cigarettePrice,
                     dataCigarette.cigaretteNbr,
-                    dataCigarette.cigarettePriceUnit
+                    dataCigarette.cigarettePriceUnit,
+                    dataCigarette.idUser
                 )
 
                 dataCigaretteTab.push(c)
@@ -338,62 +334,6 @@ const StatisticsYearsScreen = () => {
             console.log("Error get pill in firestore database : ")
             console.error(error.message)
         }) 
-    }
-
-    /**
-     * Function getStatCigaretteUserInDatabase
-     */
-    const getStatCigaretteUserInDatabase = async (idCigarette: string) => {
-        //console.log(idCigarette);
-       setIsLoadCountCigaretteDetails(true)
-
-       getCigaretteUserByIdCigFireStore(idCigarette).then((cigarette) => {
-           if (cigarette.exists()) {
-               const dataCigarette = cigarette.data()
-               //console.log(dataCigarette)
-   
-               const c = new Cigarette(
-                   cigarette.id, 
-                   dataCigarette.cigaretteName,
-                   dataCigarette.cigaretteNicotine,
-                   dataCigarette.cigaretteGoudron,
-                   dataCigarette.cigaretteCarbone,
-                   dataCigarette.cigarettePrice,
-                   dataCigarette.cigaretteNbr,
-                   dataCigarette.cigarettePriceUnit
-               )
-
-               dataCigaretteTab.push(c)
-               setDataCigaretteTab([...dataCigaretteTab])
-
-               countPriceDepense = parseFloat((countPriceDepense + dataCigarette.cigarettePriceUnit).toFixed(2))
-               setCountPriceDepense(countPriceDepense)
-
-               countPriceEconomy = parseFloat((userSmokePrice - countPriceDepense).toFixed(2))
-               if(countPriceEconomy < 0){
-                   setCountPriceEconomy(0)
-               } else {
-                   setCountPriceEconomy(countPriceEconomy)
-               }
-               
-               countNicotine = countNicotine + parseFloat(dataCigarette.cigaretteNicotine)
-               setCountNicotine(countNicotine)
-               //console.log(countNicotine)  
-
-               countGoudron = countGoudron + parseFloat(dataCigarette.cigaretteGoudron)
-               setCountGoudron(countGoudron)
-
-               countCarbonne = countCarbonne + parseFloat(dataCigarette.cigaretteCarbone)
-               setCountCarbonne(countCarbonne)
-
-               setIsLoadCountCigaretteDetails(false)
-           }
-
-       }).catch((error) => {
-           setIsLoadCountCigaretteDetails(false)
-           console.log("Error get pill in firestore database : ")
-           console.error(error.message)
-       }) 
     }
 
     return (

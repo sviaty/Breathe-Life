@@ -11,7 +11,8 @@ export default {
     red: '#FF474C',
 
     transparent: 'transparent',
-    background: '#F2F2F3',
+    //background: '#F2F2F3',
+    background: '#eaddfb',
     blueFb: '#2196F3',
     bluedark: '#6666B9',
     colorOrange: '#ff7e5f',

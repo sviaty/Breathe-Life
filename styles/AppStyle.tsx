@@ -99,8 +99,8 @@ export default StyleSheet.create({
 
     btnCigAdd: {
         width: screenWidth - 20,
-        backgroundColor: Colors.colorOrange,
-        marginTop:10,
+        backgroundColor: Colors.blueFb,
+        marginTop:15,
         marginBottom:10,
         padding: 15,
         borderRadius: 5,
@@ -238,6 +238,26 @@ export default StyleSheet.create({
         backgroundColor: Colors.colorOrange,
         borderWidth: 2,
         borderColor: Colors.colorOrange,
+        borderRadius: 5,
+        padding: 15,
+        marginTop: 16,
+    },
+
+    itemPatchContainerRed: {
+        width: screenWidth - 20,
+        backgroundColor: Colors.red,
+        borderWidth: 2,
+        borderColor: Colors.red,
+        borderRadius: 5,
+        padding: 15,
+        marginTop: 16,
+    },
+
+    itemPatchContainerGreen: {
+        width: screenWidth - 20,
+        backgroundColor: Colors.green,
+        borderWidth: 2,
+        borderColor: Colors.green,
         borderRadius: 5,
         padding: 15,
         marginTop: 16,
@@ -537,7 +557,6 @@ export default StyleSheet.create({
 
     btnAddCigContainer: {
         flex: 0.2,
-        height: 55,
     },
 
     btnAddCig2: {

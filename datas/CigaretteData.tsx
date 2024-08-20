@@ -7,7 +7,7 @@ export default class Cigarette {
     cigarettePrice: number
     cigaretteNbr: number
     cigarettePriceUnit: number
-
+    idUser: string
 
     constructor(idCigarette: string, 
       cigaretteName: string, 
@@ -16,7 +16,8 @@ export default class Cigarette {
       cigaretteCarbone: number, 
       cigarettePrice: number,
       cigaretteNbr: number,
-      cigarettePriceUnit: number
+      cigarettePriceUnit: number,
+      idUser: string,
     ) {
       this.idCigarette = idCigarette
       this.cigaretteName = cigaretteName
@@ -26,5 +27,6 @@ export default class Cigarette {
       this.cigarettePrice = cigarettePrice
       this.cigaretteNbr = cigaretteNbr
       this.cigarettePriceUnit = cigarettePriceUnit
+      this.idUser = idUser
     }
 }

@@ -162,6 +162,8 @@ const SettingPillComponent = () => {
             setUserPillSelected(p)
             setUserPillText("Selectionner une pastille")
             //console.log('IS undefined')
+
+            setUserIdPill("")
         }
     }
 
@@ -254,7 +256,7 @@ const SettingPillComponent = () => {
                         
 
                         <Surface 
-                            elevation={8}
+                            elevation={4}
                             category="medium"
                             style={ AppStyle.pickerSelectOrange } >   
 
@@ -283,9 +285,9 @@ const SettingPillComponent = () => {
                         <View style={AppStyle.itemContainerView2}>
 
                             <Surface 
-                                elevation={8}
+                                elevation={4}
                                 category="medium"
-                                style={ AppStyle.itemPatchContainer2 } >   
+                                style={ AppStyle.itemPatchContainerGreen } >   
 
                                 <Text style={ AppStyle.itemPatchText2 }>Nom de la pastille : {userPillSelected.pillName} </Text>
                                 <Text style={ AppStyle.itemPatchText2 }>Nicotine :  {userPillSelected.pillNicotine} (mg) </Text>
@@ -293,7 +295,7 @@ const SettingPillComponent = () => {
                             </Surface>
         
                             <Surface 
-                                elevation={8}
+                                elevation={4}
                                 category="medium"
                                 style={ AppStyle.btnAddPatch } >   
 

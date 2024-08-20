@@ -3,11 +3,14 @@ import React from 'react'
 
 // FireStore
 import firebaseConfig from '../firebaseConfig';
-import { getFirestore, collection, query, getDoc, getDocs, doc } from "firebase/firestore";
+import { getFirestore, collection, query, getDoc, getDocs, doc, where, or } from "firebase/firestore";
 const db = getFirestore(firebaseConfig);
 
-export const getCigaretteListFireStore = async () => {
-    const q = query(collection(db, "cigarettes"));
+export const getCigaretteListFireStore = async (userId:string) => {
+    const q = query(collection(db, "cigarettes"), or(
+        where("idUser", "==", userId),
+        where("idUser", "==", "")
+    ));
 
     return await getDocs(q).then((cigList) => {
         //console.log(cigList.size);
