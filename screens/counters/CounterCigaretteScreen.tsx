@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
 // Style
-import Colors from '../../constants/ColorsConstant';
+import Colors from '../../constants/ColorConstant';
 
 // Navigator
 import { createStackNavigator } from '@react-navigation/stack';
@@ -30,10 +30,11 @@ const CounterCigaretteScreen = () => {
             name="CounterCigaretteAddScreen" 
             component={CounterCigaretteAddScreen}
             options={{ 
-                title: 'Ajouter une marque de cigarette', 
-                headerTintColor: Colors.colorOrange,
+                title: 'Marque de cigarette', 
+                headerTintColor: Colors.white,
                 headerStyle: {
-                    backgroundColor: Colors.white
+                    backgroundColor: Colors.colorOrange,
+                    height: 50
                 }
             }} />
 

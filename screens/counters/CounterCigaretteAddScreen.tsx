@@ -5,7 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Surface, Stack, TextInput } from "@react-native-material/core";
 
 // Styles & Colors
-import Colors from '../../constants/ColorsConstant';
+import Colors from '../../constants/ColorConstant';
 import AppStyle from '../../styles/AppStyle';
 import LoginSigninStyle from '../../styles/LoginSigninStyle';
 
@@ -22,7 +22,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 // Api
 import CigaretteUser from '../../datas/CigaretteUserData';
-import { addCigaretteUserFireStore } from '../../api/CigaretteUserApi';
+import { addCigaretteUserFireStore } from '../../api/CigaretteApi';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -33,7 +33,6 @@ type RootStackParamList = {
   };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CounterCigaretteAddScreen', 'CounterCigaretteListScreen'>;
-
 
 /**
  * http://additifstabac.free.fr/index.php/cigarettes-pourcentages-additifs-taux-nicotine-goudrons-monoxyde-carbone-co/
@@ -159,7 +158,7 @@ const CounterCigaretteAddScreen = ({ navigation }: Props) => {
             userSelector.userId
         )
 
-        addCigaretteUserFireStore(cigUser).then((value) => {
+        addCigaretteUserFireStore(cigUser).then(() => {
             setIsLoaderCigAdd(false)
             setTextSnackBar('Ajout de la marque de cigarette : '+ cigName)
             setIsSnackBar(true)
@@ -197,112 +196,109 @@ const CounterCigaretteAddScreen = ({ navigation }: Props) => {
 
     // View JSX
     return (
-        <SafeAreaProvider style={AppStyle.container}>
+        <SafeAreaProvider style={styles.mainContainer}>
             
-            <View style={styles.contentContainer2}>
-                
-                <View>
-
+            <View>
                 <ScrollView
                     persistentScrollbar={true}
                     scrollEnabled={true}
                     nestedScrollEnabled={true}
                     automaticallyAdjustKeyboardInsets={true}>
 
-                <Stack spacing={0} style={AppStyle.stackLogin2}>
+                    <Stack spacing={0} style={styles.mainContainerView}>
 
-                    <TextInput
-                        variant="outlined"
-                        label="Entrer le nom de la marque"
-                        helperText={errorCigName}
-                        color={Colors.colorOrange}
-                        placeholder="Malboro"
-                        keyboardType="default"
-                        style={LoginSigninStyle.textInput}
-                        value={cigName}
-                        onChangeText={setCigName} />
+                        <TextInput
+                            variant="outlined"
+                            label="Entrer le nom de la marque"
+                            helperText={errorCigName}
+                            color={Colors.blueFb}
+                            placeholder="Malboro"
+                            keyboardType="default"
+                            style={styles.textInput}
+                            value={cigName}
+                            onChangeText={setCigName} />
 
-                    <TextInput
-                        variant="outlined"
-                        label="Entrer le taux de nicotine (mg)"
-                        helperText={errorCigNicotine}
-                        color={Colors.colorOrange}
-                        placeholder="0.8"
-                        keyboardType="decimal-pad"
-                        style={LoginSigninStyle.textInput}
-                        value={cigNicotine}
-                        onChangeText={setCigNicotine} />
+                        <TextInput
+                            variant="outlined"
+                            label="Entrer le taux de nicotine (mg)"
+                            helperText={errorCigNicotine}
+                            color={Colors.blueFb}
+                            placeholder="0.8"
+                            keyboardType="decimal-pad"
+                            style={styles.textInput}
+                            value={cigNicotine}
+                            onChangeText={setCigNicotine} />
 
-                    <TextInput
-                        variant="outlined"
-                        label="Entrer le taux de goudron (mg)"
-                        helperText={errorCigGoudron}
-                        color={Colors.colorOrange}
-                        placeholder="9"
-                        keyboardType="decimal-pad"
-                        style={LoginSigninStyle.textInput}
-                        value={cigGoudron}
-                        onChangeText={setCigGoudron} />
+                        <TextInput
+                            variant="outlined"
+                            label="Entrer le taux de goudron (mg)"
+                            helperText={errorCigGoudron}
+                            color={Colors.blueFb}
+                            placeholder="9"
+                            keyboardType="decimal-pad"
+                            style={styles.textInput}
+                            value={cigGoudron}
+                            onChangeText={setCigGoudron} />
 
-                    <TextInput
-                        variant="outlined"
-                        label="Entrer le taux de monoxyde de carbonne (mg)"
-                        helperText={errorCigCarbonne}
-                        color={Colors.colorOrange}
-                        placeholder="10"
-                        keyboardType="decimal-pad"
-                        style={LoginSigninStyle.textInput}
-                        value={cigCarbonne}
-                        onChangeText={setCigCarbonne} />
+                        <TextInput
+                            variant="outlined"
+                            label="Entrer le taux de monoxyde de carbonne (mg)"
+                            helperText={errorCigCarbonne}
+                            color={Colors.blueFb}
+                            placeholder="10"
+                            keyboardType="decimal-pad"
+                            style={styles.textInput}
+                            value={cigCarbonne}
+                            onChangeText={setCigCarbonne} />
 
-                    <TextInput
-                        variant="outlined"
-                        label="Entrer le nombre de cigarette par paquet"
-                        helperText={errorCigPaquetNbr}
-                        color={Colors.colorOrange}
-                        placeholder="20"
-                        keyboardType="number-pad"
-                        style={LoginSigninStyle.textInput}
-                        value={cigPaquetNbr}
-                        onChangeText={setCigPaquetNbr} />
+                        <TextInput
+                            variant="outlined"
+                            label="Entrer le nombre de cigarette par paquet"
+                            helperText={errorCigPaquetNbr}
+                            color={Colors.blueFb}
+                            placeholder="20"
+                            keyboardType="number-pad"
+                            style={styles.textInput}
+                            value={cigPaquetNbr}
+                            onChangeText={setCigPaquetNbr} />
 
-                    <TextInput
-                        variant="outlined"
-                        label="Entrer le prix du paquet (euros)"
-                        helperText={errorCigPaquetNbr}
-                        color={Colors.colorOrange}
-                        placeholder="14"
-                        keyboardType="decimal-pad"
-                        style={LoginSigninStyle.textInput}
-                        value={cigPaquetPrice}
-                        onChangeText={setCigPaquetPrice} />
+                        <TextInput
+                            variant="outlined"
+                            label="Entrer le prix du paquet (euros)"
+                            helperText={errorCigPaquetNbr}
+                            color={Colors.blueFb}
+                            placeholder="14"
+                            keyboardType="decimal-pad"
+                            style={styles.textInput}
+                            value={cigPaquetPrice}
+                            onChangeText={setCigPaquetPrice} />
 
-                    { isLoaderCigAdd == true ?
-                    <View>
-                        <LoaderComponent text="Ajout de la marque de cigarette en cours ..." step="" color={Colors.blueFb} size="large"/>
-                    </View>
-                    :
-                    <View>
-                        <Surface 
-                            elevation={4}
-                            category="medium"
-                            style={styles.btnAdd}
-                            > 
-                            <TouchableOpacity
-                                onPress={() => handleAddCig()}
-                                activeOpacity={0.6}>
-                                <Text style={LoginSigninStyle.buttonText}>Ajouter</Text>
-                            </TouchableOpacity>
-                        </Surface>
+                        { isLoaderCigAdd == true ?
+                        <View>
+                            <LoaderComponent text="Ajout de la marque de cigarette en cours ..." step="" color={Colors.blueFb} size="large"/>
+                        </View>
+                        :
+                        <View>
+                            <Surface 
+                                elevation={4}
+                                category="medium"
+                                style={ styles.surfaceBtnBlue }> 
 
-                        <Text style={AppStyle.textError}>{errorAddCigUser}</Text>
-                    </View>
-                    }
-                    
-                </Stack>
+                                <TouchableOpacity
+                                    onPress={() => handleAddCig()}
+                                    activeOpacity={0.6}>
+
+                                    <Text style={styles.surfaceBtnBlueText}>Ajouter</Text>
+                                </TouchableOpacity>
+                            </Surface>
+
+                            <Text style={AppStyle.textError}>{errorAddCigUser}</Text>
+                        </View>
+                        }
+                        
+                    </Stack>
+
                 </ScrollView>
-
-                </View>
             </View>
             
             <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={5000} message={textSnackBar}/>
@@ -316,6 +312,40 @@ export default CounterCigaretteAddScreen
 
 const screenWidth = Dimensions.get('screen').width;
 const styles = StyleSheet.create({
+
+    mainContainer: {
+        flex: 1,
+    },
+
+    mainContainerView: {
+        alignItems: 'center',
+        flexDirection: 'column',
+    },
+
+    textInput: {
+        width: screenWidth - 32,
+        marginTop: 16
+    },
+
+    surfaceBtnBlue: {
+        width: screenWidth - 32,
+        backgroundColor: Colors.blueFb,
+        borderWidth: 2,
+        borderColor: Colors.blueFb,
+        borderRadius: 5,
+        padding: 16,
+        marginTop: 16,
+    },
+
+    surfaceBtnBlueText: {
+        textAlign: 'center',
+        color: Colors.white,
+        fontSize: 18,
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+    },
+
+    
     container: {
 		flex: 1,
 		alignItems: 'center'

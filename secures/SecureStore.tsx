@@ -1,10 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 
-export default class SecureStoreClass {
-    constructor() {
-   
-    }
-    
+export default class SecureStoreClass {    
     // Sauvegarder un token
     async saveToken(key: string, value: string) {
         await SecureStore.setItemAsync(key, value);

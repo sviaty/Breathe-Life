@@ -8,7 +8,7 @@ export interface UserStateInterface {
   
 // Define the initial state using that type
 const initialState: UserStateInterface = {
-    user: new User('', '', '', '','','', 0,'','','')
+    user: new User('', '', '', '', '', 0, '', '', '')
 }
 
 const userSlice = createSlice({

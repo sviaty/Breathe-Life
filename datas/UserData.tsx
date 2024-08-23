@@ -4,7 +4,6 @@ export default class User {
     userMail: string 
     userToken: string
     userBirthDate: string
-    userSmokeStartDate: string
     userSmokeAvgNbr: number
     idPatch: string
     idPill: string
@@ -15,7 +14,6 @@ export default class User {
       userMail: string | null, 
       userToken: string, 
       userBirthDate: string,
-      userSmokeStartDate: string,
       userSmokeAvgNbr: number,
       idPatch: string, 
       idPill: string, 
@@ -33,7 +31,6 @@ export default class User {
       this.userToken = userToken
 
       this.userBirthDate = userBirthDate
-      this.userSmokeStartDate = userSmokeStartDate
       this.userSmokeAvgNbr = userSmokeAvgNbr
 
       this.idPatch = idPatch
@@ -41,7 +38,4 @@ export default class User {
       this.idCigarette = idCigarette
     }
 
-    toString() {
-        return this.userId + ', ' + this.userName + ', ' + this.userMail;
-    }
 }

@@ -1,5 +1,5 @@
 import { StyleSheet, Dimensions } from "react-native";
-import Colors from '../constants/ColorsConstant';
+import Colors from '../constants/ColorConstant';
 
 const screenWidth = Dimensions.get('screen').width;
 const screenHeight = Dimensions.get('screen').height;
@@ -258,6 +258,16 @@ export default StyleSheet.create({
         backgroundColor: Colors.green,
         borderWidth: 2,
         borderColor: Colors.green,
+        borderRadius: 5,
+        padding: 15,
+        marginTop: 16,
+    },
+
+    itemPatchContainerOrange : {
+        width: screenWidth - 20,
+        backgroundColor: Colors.colorOrange,
+        borderWidth: 2,
+        borderColor: Colors.colorOrange,
         borderRadius: 5,
         padding: 15,
         marginTop: 16,

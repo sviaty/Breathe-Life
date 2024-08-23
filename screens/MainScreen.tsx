@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, TouchableOpacity, Text, View, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Colors from '../constants/ColorsConstant';
+import Colors from '../constants/ColorConstant';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -28,6 +28,7 @@ import AppStyle from '../styles/AppStyle';
 import App from '../App';
 
 import firebaseConfig from '../firebaseConfig';
+import { deleteSecureStore } from '../helpers/SecureStoreHelper';
 
 const db = getFirestore(firebaseConfig); 
 
@@ -92,7 +93,6 @@ const MainScreen = () => {
                 dataUser.userMail, 
                 '', 
                 dataUser.userBirthDate, 
-                dataUser.userSmokeStartDate, 
                 dataUser.userSmokeAvgNbr, 
                 dataUser.idPatch, 
                 dataUser.idPill, 
@@ -116,7 +116,8 @@ const MainScreen = () => {
     }
 
     const handleLogout = async () => {
-        await secureStoreClass.deleteToken('tokenId')
+        deleteSecureStore('tokenId')
+
         setLoggin(false)
         //setIsLoader(false)
         dispatch(setIsLogin(false));

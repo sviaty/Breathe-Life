@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
 // Style
-import Colors from '../../constants/ColorsConstant';
+import Colors from '../../constants/ColorConstant';
 
 // Navigator
 import { createStackNavigator } from '@react-navigation/stack';
@@ -28,7 +28,9 @@ const UserSettingsScreen = () => {
                 title: 'Vos informations', 
                 headerTintColor: Colors.white,
                 headerStyle: {
-                    backgroundColor: Colors.blueFb
+                    backgroundColor: Colors.blueFb,
+                    height: 50
+                    
                 }
             }}
             />
@@ -40,7 +42,8 @@ const UserSettingsScreen = () => {
                 title: 'Modifier vos informations', 
                 headerTintColor: Colors.white,
                 headerStyle: {
-                    backgroundColor: Colors.blueFb
+                    backgroundColor: Colors.blueFb,
+                    height: 50
                 }
             }}/>
     </Stack.Navigator>

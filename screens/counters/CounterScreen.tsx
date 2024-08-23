@@ -5,7 +5,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 const Tab = createMaterialTopTabNavigator();
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import Colors from '../../constants/ColorsConstant';
+import Colors from '../../constants/ColorConstant';
 
 import SettingPatchComponent from './CounterPatchScreen';
 import SettingPillComponent from './CounterPillScreen';
@@ -30,9 +30,9 @@ const SettingCounterComponent = () => {
             },
             }}>
 
-            <Tab.Screen name="Patchs" component={SettingPatchComponent} />
-            <Tab.Screen name="Pastilles" component={SettingPillComponent} />
-            <Tab.Screen name="Cigarettes" component={CounterCigaretteScreen} />
+            <Tab.Screen name="Patchs" component={SettingPatchComponent} options={{lazy: true}}/>
+            <Tab.Screen name="Pastilles" component={SettingPillComponent} options={{lazy: true}}/>
+            <Tab.Screen name="Cigarettes" component={CounterCigaretteScreen} options={{lazy: true}}/>
 
         </Tab.Navigator>
     </SafeAreaProvider>

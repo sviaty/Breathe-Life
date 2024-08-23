@@ -1,13 +1,16 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-
+// Data
 import User from '../datas/UserData';
 
+// FireStore
 import firebaseConfig from '../firebaseConfig';
-import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, getDoc, setDoc, getDocs } from "firebase/firestore";
+import { getFirestore, collection, query, where, addDoc, doc, setDoc, getDocs, deleteDoc } from "firebase/firestore";
 
 const db = getFirestore(firebaseConfig);
 
+/**
+ * Function addUserFireStore
+ * @param userData 
+ */
 export const addUserFireStore = async (userData:any) => {
 
     await addDoc(collection(db, "users"), userData).then(() => {
@@ -20,6 +23,10 @@ export const addUserFireStore = async (userData:any) => {
     }) 
 }
 
+/**
+ * Function setUserFireStore
+ * @param user 
+ */
 export const setUserFireStore = async (user:User) => {
 
     const userDoc = doc(db, "users", user.userId)
@@ -28,7 +35,6 @@ export const setUserFireStore = async (user:User) => {
         userName: user.userName,
         userMail: user.userMail,
         userBirthDate: user.userBirthDate, 
-        userSmokeStartDate: user.userSmokeStartDate, 
         userSmokeAvgNbr: user.userSmokeAvgNbr, 
         idPatch: user.idPatch,
         idPill: user.idPill,
@@ -41,6 +47,28 @@ export const setUserFireStore = async (user:User) => {
     }) 
 }
 
+/**
+ * Function delUserFireStore
+ * @param idUser 
+ * @returns 
+ */
+export const delUserFireStore = async (idUser: string): Promise<boolean> => {
+
+    const userDoc = doc(db, "users", idUser)
+
+    return await deleteDoc(userDoc).then(() => {
+        return true
+    }).catch((error) => {
+        //console.error(error.message)
+        throw Error(error.message)
+    }) 
+}
+
+/**
+ * Function getUserFireStore
+ * @param userMail  
+ * @returns 
+ */
 export const getUserFireStore = async (userMail:string) => {
 
     const q = query(collection(db, "users"), where("userMail", "==", userMail));
@@ -56,11 +84,3 @@ export const getUserFireStore = async (userMail:string) => {
         throw Error(error.message)
     }) 
 }
-
-const UserApi = () => {
-
-}
-
-export default UserApi
-
-const styles = StyleSheet.create({})

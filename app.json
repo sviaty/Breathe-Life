@@ -12,7 +12,8 @@
       "backgroundColor": "#2196F3"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sviaty.StopClup"
     },
     "android": {
       "adaptiveIcon": {

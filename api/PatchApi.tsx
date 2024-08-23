@@ -1,11 +1,13 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-
 // FireStore
 import firebaseConfig from '../firebaseConfig';
 import { getFirestore, collection, query, getDoc, getDocs, doc } from "firebase/firestore";
+
 const db = getFirestore(firebaseConfig);
 
+/**
+ * Function getPatchListFireStore
+ * @returns 
+ */
 export const getPatchListFireStore = async () => {
     const q = query(collection(db, "patchs"));
 
@@ -24,6 +26,11 @@ export const getPatchListFireStore = async () => {
     }) 
 }
 
+/**
+ * Function getPatchByIdPatchFireStore
+ * @param idPatch 
+ * @returns 
+ */
 export const getPatchByIdPatchFireStore = async (idPatch:string) => {
 
     const docRef = doc(db, "patchs", idPatch);
@@ -39,13 +46,3 @@ export const getPatchByIdPatchFireStore = async (idPatch:string) => {
         throw Error(error.message)
     })
 }
-
-const PatchApi = () => {
-    const getPatchList = async () => {
-
-    }
-}
-
-export default PatchApi
-
-const styles = StyleSheet.create({})

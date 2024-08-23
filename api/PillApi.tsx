@@ -1,11 +1,13 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-
 // FireStore
 import firebaseConfig from '../firebaseConfig';
 import { getFirestore, collection, query, getDoc, getDocs, doc } from "firebase/firestore";
+
 const db = getFirestore(firebaseConfig);
 
+/**
+ * Function getPillListFireStore
+ * @returns  
+ */
 export const getPillListFireStore = async () => {
     const q = query(collection(db, "pills"));
 
@@ -24,6 +26,11 @@ export const getPillListFireStore = async () => {
     }) 
 }
 
+/**
+ * Function getPillByIdPillFireStore
+ * @param idPill 
+ * @returns 
+ */
 export const getPillByIdPillFireStore = async (idPill:string) => {
 
     const docRef = doc(db, "pills", idPill);
@@ -39,11 +46,3 @@ export const getPillByIdPillFireStore = async (idPill:string) => {
         throw Error(error.message)
     })
 }
-
-const PillApi = () => {
-
-}
-
-export default PillApi
-
-const styles = StyleSheet.create({})

@@ -1,11 +1,41 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+// Data
+import CigaretteUser from '../datas/CigaretteUserData';
 
 // FireStore
 import firebaseConfig from '../firebaseConfig';
-import { getFirestore, collection, query, getDoc, getDocs, doc, where, or } from "firebase/firestore";
+import { getFirestore, collection, query, getDoc, getDocs, doc, where, or, deleteDoc, addDoc} from "firebase/firestore";
+
 const db = getFirestore(firebaseConfig);
 
+/**
+ * Function addCigaretteUserFireStore
+ * @param cigaretteUser 
+ */
+export const addCigaretteUserFireStore = async (
+    cigaretteUser: CigaretteUser) => {
+
+    await addDoc(collection(db, "cigarettes"), {
+        cigaretteName: cigaretteUser.cigaretteName,
+        cigaretteNicotine: cigaretteUser.cigaretteNicotine,
+        cigaretteGoudron: cigaretteUser.cigaretteGoudron,
+        cigaretteCarbone: cigaretteUser.cigaretteCarbone,
+        cigaretteNbr: cigaretteUser.cigaretteNbr,
+        cigarettePrice: cigaretteUser.cigarettePrice,
+        cigarettePriceUnit: cigaretteUser.cigarettePriceUnit,
+        idUser: cigaretteUser.idUser,
+    }).then((value) => {
+        return "userCigarettesUser is add"
+    }).catch((error) => {
+        //console.error(error.message)
+        throw Error(error.message)
+    })
+}
+
+/**
+ * Function getCigaretteListFireStore
+ * @param userId 
+ * @returns 
+ */
 export const getCigaretteListFireStore = async (userId:string) => {
     const q = query(collection(db, "cigarettes"), or(
         where("idUser", "==", userId),
@@ -27,6 +57,11 @@ export const getCigaretteListFireStore = async (userId:string) => {
     }) 
 }
 
+/**
+ * Function getCigaretteByIdCigFireStore
+ * @param idCigarette 
+ * @returns 
+ */
 export const getCigaretteByIdCigFireStore = async (idCigarette:string) => {
 
     const docRef = doc(db, "cigarettes", idCigarette);
@@ -40,11 +75,45 @@ export const getCigaretteByIdCigFireStore = async (idCigarette:string) => {
     })
 }
 
+/**
+ * Function delCigaretteByIdUserFireStore
+ * @param idUser 
+ * @returns 
+ */
+export const delCigaretteByIdUserFireStore = async (idUser: string): Promise<boolean> => {
 
-const CigaretteApi = () => {
+    //console.log(idUser)
+    const q = query(
+        collection(db, "cigarettes"), 
+        where("idUser", "==", idUser)
+    );
 
+    return await getDocs(q).then((cigList) => {
+
+        cigList.forEach((cig) => {
+            delCigaretteByIdFireStore(cig.id)
+        })
+
+        return true
+        
+    }).catch((error: any) => {
+        throw Error(error.message)
+    })
 }
 
-export default CigaretteApi
+/**
+ * Function delCigaretteByIdFireStore
+ * @param id 
+ * @returns 
+ */
+export const delCigaretteByIdFireStore = async (id: string): Promise<boolean> => {
 
-const styles = StyleSheet.create({})
+    const cigDoc = doc(db, "cigarettes", id)
+
+    return await deleteDoc(cigDoc).then(() => {
+        return true
+    }).catch((error) => {
+        //console.error(error.message)
+        throw Error(error.message)
+    }) 
+}

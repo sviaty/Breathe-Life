@@ -4,7 +4,7 @@ import { TextInput, Surface } from "@react-native-material/core";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 // Color
-import Colors from '../../constants/ColorsConstant';
+import Colors from '../../constants/ColorConstant';
 
 // Style
 import AppStyle from '../../styles/AppStyle';
@@ -130,7 +130,6 @@ const UserUpdateInformationsScreen = ({ navigation }: Props) => {
                     dataUser.userMail, 
                     "", 
                     dataUser.userBirthDate, 
-                    dataUser.userSmokeStartDate, 
                     dataUser.userSmokeAvgNbr, 
                     
                     dataUser.idPatch, 
@@ -142,9 +141,6 @@ const UserUpdateInformationsScreen = ({ navigation }: Props) => {
 
                 userBirthDate = dataUser.userBirthDate.toDate()
                 setUserBirthDate(userBirthDate)
-
-                userSmokeDate = dataUser.userSmokeStartDate.toDate()
-                setUserSmokeDate(userSmokeDate)
 
                 userSomeAvgDay = dataUser.userSmokeAvgNbr
                 setUserSomeAvgDay(userSomeAvgDay)
@@ -223,7 +219,6 @@ const UserUpdateInformationsScreen = ({ navigation }: Props) => {
             userName: userName,
             userMail: userSelector.userMail,
             userBirthDate: userBirthDate,
-            userSmokeStartDate: userSmokeDate,
             userSmokeAvgNbr: userSomeAvgDay,
             idPatch: userSelector.idPatch,
             idPill: userSelector.idPill,
@@ -237,7 +232,6 @@ const UserUpdateInformationsScreen = ({ navigation }: Props) => {
                 userSelector.userMail, 
                 userSelector.userToken, 
                 userSelector.userBirthDate, 
-                userSelector.userSmokeStartDate, 
                 userSelector.userSmokeAvgNbr, 
                 userSelector.idPatch, 
                 userSelector.idPill, 

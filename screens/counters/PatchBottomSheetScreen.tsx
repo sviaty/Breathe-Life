@@ -4,7 +4,7 @@ import BottomSheet, { useBottomSheet, BottomSheetBackdrop } from '@gorhom/bottom
 import {Picker} from '@react-native-picker/picker';
 
 // Styles & Colors
-import Colors from '../../constants/ColorsConstant';
+import Colors from '../../constants/ColorConstant';
 import AppStyle from '../../styles/AppStyle';
 
 export type Ref = BottomSheet;

@@ -3,17 +3,13 @@ import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native'
 import { Stack, TextInput, Backdrop, BackdropSubheader } from "@react-native-material/core";
 import SnackBarComponent from '../../components/SnackBarComponent';
 
-// Secure Store
-import SecureStoreClass from '../../secures/SecureStore';
-const secureStoreClass = new SecureStoreClass()
-
 // Data 
 import User from '../../datas/UserData';
 
 // Style
 import AppStyle from '../../styles/AppStyle';
 import LoginStyle from '../../styles/LoginSigninStyle';
-import Colors from '../../constants/ColorsConstant';
+import Colors from '../../constants/ColorConstant';
 import LoaderComponent from '../../components/LoaderComponent';
 
 // FireStore
@@ -28,6 +24,9 @@ import { useSelector, useDispatch } from 'react-redux';
 // Api
 import { getUserFireStore } from '../../api/UserApi';
 
+// Helper
+import { addSecureStore } from '../../helpers/SecureStoreHelper';
+
 /**
  * LoginScreen
  * @returns 
@@ -37,9 +36,6 @@ const LoginScreen = () => {
     // UseState
     const [isLoader, setIsLoader] = useState<boolean>(false)
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
-
-    const [userState, setUserState] = useState<User>(new User("", "", "", "", "", "", 0,"", "", ""))
-
     const [mail, setMail] = useState<string>('');
     const [pwd, setPwd] = useState<string>('');
     const [step, setStep] = useState<string>('');
@@ -108,8 +104,9 @@ const LoginScreen = () => {
                 //console.log(userDataAuth)
 
                 setStep("Enregistrement du token")
+
                 userDataAuth.getIdToken().then(token => {
-                    secureStoreClass.saveToken('tokenId', token)
+                    addSecureStore("tokenId", token)
                 })
 
                 getUserInDatabase()
@@ -156,7 +153,7 @@ const LoginScreen = () => {
 
                 const dataUser = doc.data()
 
-                secureStoreClass.saveToken('userId', doc.id)
+                addSecureStore('userId', doc.id)
 
                 const u = new User(
                     doc.id,
@@ -164,9 +161,7 @@ const LoginScreen = () => {
                     dataUser.userMail, 
                     "", 
                     dataUser.userBirthDate, 
-                    dataUser.userSmokeStartDate, 
                     dataUser.userSmokeAvgNbr, 
-                    
                     dataUser.idPatch, 
                     dataUser.idPill, 
                     dataUser.idCigarette);

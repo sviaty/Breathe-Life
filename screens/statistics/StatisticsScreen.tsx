@@ -5,7 +5,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 const Tab = createMaterialTopTabNavigator();
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import Colors from '../../constants/ColorsConstant';
+import Colors from '../../constants/ColorConstant';
 
 import StatisticsDayScreen from './StatisticsDayScreen';
 import StatisticsWeekSreen from './StatisticsWeekSreen';
@@ -13,6 +13,8 @@ import StatisticsMounthSreen from './StatisticsMounthSreen';
 import StatisticsYearsScreen from './StatisticsYearsScreen';
 import StatisticsGlobalScreen from './StatisticsGlobalScreen';
 import AppStyle from '../../styles/AppStyle';
+
+//tabBarLabelStyle: { fontSize: 11 },
 
 const StatCounterComponent = () => {
   return (
@@ -22,7 +24,7 @@ const StatCounterComponent = () => {
         tabBarActiveTintColor: 'white',
         tabBarInactiveTintColor: 'black',
         tabBarAllowFontScaling: true,
-        tabBarLabelStyle: { fontSize: 11 },
+        
         tabBarIndicatorStyle: {
             height: '100%',
             backgroundColor: Colors.blueFb,
@@ -35,14 +37,10 @@ const StatCounterComponent = () => {
 
       }
     }>
-      <Tab.Screen 
-        name="Jours" 
-        component={StatisticsDayScreen} 
-      />
-      <Tab.Screen name="Semaine" component={StatisticsWeekSreen} />
-      <Tab.Screen name="Mois" component={StatisticsMounthSreen} />
-      <Tab.Screen name="Année" component={StatisticsYearsScreen} />
-      <Tab.Screen name="Global" component={StatisticsGlobalScreen} />
+      <Tab.Screen name="Semaine" component={StatisticsWeekSreen} options={{lazy: true}}/>
+      <Tab.Screen name="Mois" component={StatisticsMounthSreen} options={{lazy: true}}/>
+      <Tab.Screen name="Année" component={StatisticsYearsScreen} options={{lazy: true}}/>
+
     </Tab.Navigator>
     </SafeAreaProvider>
   )

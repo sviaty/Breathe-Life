@@ -1,19 +1,21 @@
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { Snackbar } from 'react-native-paper';
 
-
+/**
+ * Component SnackBarComponent
+ * @param props 
+ * @returns 
+ */
 const SnackBarComponent = (props:any) => {
-  return (
-    <View>
-       <Snackbar
+    return (
+        <Snackbar
             visible={props.visible}
             onDismiss={() => props.setVisible(false)}
             duration={props.duration}>
                 {props.message}
         </Snackbar>
-    </View>
-  )
+    );
 }
 
 export default SnackBarComponent

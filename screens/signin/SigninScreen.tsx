@@ -7,12 +7,14 @@ import SnackBarComponent from '../../components/SnackBarComponent';
 // FireStore
 import firebaseConfig from '../../firebaseConfig';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+
 const auth = getAuth(firebaseConfig);
+
 
 // Style
 import AppStyle from '../../styles/AppStyle';
 import SigninStyle from '../../styles/LoginSigninStyle';
-import Colors from '../../constants/ColorsConstant';
+import Colors from '../../constants/ColorConstant';
 
 // Api
 import { addUserFireStore } from '../../api/UserApi';
@@ -154,6 +156,8 @@ const SigninScreen = ({navigation}: {navigation: any}) => {
         const userData = {
             userName: name,
             userMail: mail,
+            userBirthDate: "",
+            userSmokeAvgNbr: "",
             idPatch: "",
             idPill: "",
             idCigarette: ""
