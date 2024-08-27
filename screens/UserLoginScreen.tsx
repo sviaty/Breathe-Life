@@ -1,34 +1,43 @@
-import { StyleSheet, Text, View } from 'react-native'
+// React & React Native
 import React from 'react'
 
-import Colors from '../constants/ColorConstant';
-
-import { NavigationContainer } from '@react-navigation/native';
+// Navigation
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 const Tab = createMaterialBottomTabNavigator();
 
-import SettingUserScreen from './users/UserUpdateInformationsScreen';
-import SettingCounterComponent from '../screens/counters/CounterScreen';
-import StatCounterComponent from '../screens/statistics/StatisticsScreen';
-import AppStyle from '../styles/AppStyle';
-import UserInformationsScreen from './users/UserInformationsScreen';
-import UserSettingsScreen from './users/UserSettingsScreen';
-//import AddCounterComponent from '../components/AddCounterComponent';
+// Constants
+import Colors from '../constants/ColorConstant';
+import { 
+    ID_NAVIGATE_USER_COUNTER_SCREEN, 
+    ID_NAVIGATE_USER_SETTINGS_SCREEN, 
+    ID_NAVIGATE_USER_STATS_SCREEN } from '../constants/IdConstant';
 
+// Helpers
+import textTranslate from '../helpers/TranslateHelper';
+
+// Screens
+import UserSettingsScreen from './users/UserSettingsScreen';
+import UserCounterScreen from '../screens/counters/CounterScreen';
+import UserStatsScreen from '../screens/statistics/StatisticsScreen';
+
+/**
+ * Screen UserLoginScreen
+ * @returns 
+ */
 const UserLoginScreen = () => {
 
     return (
 
         <Tab.Navigator
-            initialRouteName="SettingUser"
+            initialRouteName={ ID_NAVIGATE_USER_SETTINGS_SCREEN }
             activeColor={Colors.colorOrange}>
                 
             <Tab.Screen
-                name="UserSettingsScreen"
-                component={UserSettingsScreen}
+                name={ ID_NAVIGATE_USER_SETTINGS_SCREEN }
+                component={ UserSettingsScreen }
                 options={{
-                    tabBarLabel: 'Paramètres',
+                    tabBarLabel: textTranslate.t('navUserSettings'),
                     tabBarIcon: ({ color }) => (
                         <MaterialCommunityIcons name="account-cog" color={color} size={26} />
                     ),
@@ -36,11 +45,10 @@ const UserLoginScreen = () => {
             />
                 
             <Tab.Screen
-                name="SettingCounter"
-                component={SettingCounterComponent}
+                name={ ID_NAVIGATE_USER_COUNTER_SCREEN }
+                component={ UserCounterScreen }
                 options={{
-                    title: 'Awesome app',
-                    tabBarLabel: 'Compteur',
+                    tabBarLabel: textTranslate.t('navUserCounter'), 
                     tabBarIcon: ({ color }) => (
                         <MaterialCommunityIcons name="smoking" color={color} size={26} />
                     ),
@@ -48,11 +56,10 @@ const UserLoginScreen = () => {
             />
 
             <Tab.Screen
-                name="StatCounter"
-                component={StatCounterComponent}
+                name={ ID_NAVIGATE_USER_STATS_SCREEN }
+                component={ UserStatsScreen }
                 options={{
-                    title: 'Awesome app',
-                    tabBarLabel: 'Statistiques',
+                    tabBarLabel: textTranslate.t('navUserStats'),
                     tabBarIcon: ({ color }) => (
                         <MaterialCommunityIcons name="google-analytics" color={color} size={26} />
                     ),
@@ -64,5 +71,3 @@ const UserLoginScreen = () => {
 }
 
 export default UserLoginScreen
-
-const styles = StyleSheet.create({})

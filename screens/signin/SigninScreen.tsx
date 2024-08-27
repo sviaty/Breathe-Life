@@ -1,48 +1,63 @@
+// React & React Native
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native'
-import { Stack, TextInput, Backdrop, BackdropSubheader } from "@react-native-material/core";
+import { View, Text } from 'react-native'
+
+// Material
+import { Stack, TextInput, Surface} from "@react-native-material/core";
+
+// Styles
+import AppStyle from '../../styles/AppStyle';
+
+// Constants
+import Colors from '../../constants/ColorConstant';
+import { 
+    SURFACE_CATEGORY, 
+    SURFACE_ELEVATION, 
+    TEXTINPUT_VARIANT } from '../../constants/AppConstant';
+import { 
+    ID_NAVIGATE_LOGIN } from '../../constants/IdConstant';
+
+// Datas
+import User from '../../datas/UserData';
+
+// Components
+import ButtonComponent from '../../components/ButtonComponent';
 import LoaderComponent from '../../components/LoaderComponent';
 import SnackBarComponent from '../../components/SnackBarComponent';
 
-// FireStore
-import firebaseConfig from '../../firebaseConfig';
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-
-const auth = getAuth(firebaseConfig);
-
-
-// Style
-import AppStyle from '../../styles/AppStyle';
-import SigninStyle from '../../styles/LoginSigninStyle';
-import Colors from '../../constants/ColorConstant';
+// Helpers
+import textTranslate from '../../helpers/TranslateHelper';
 
 // Api
 import { addUserFireStore } from '../../api/UserApi';
 
+// Fire Store
+import firebaseConfig from '../../firebaseConfig';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+const auth = getAuth(firebaseConfig);
 
 /**
- * SigninScreen
+ * Screen SigninScreen
  * @param param0 
  * @returns 
  */
 const SigninScreen = ({navigation}: {navigation: any}) => {
 
     // UseState
-    const [isLoader, setIsLoader] = useState<boolean>(false)
-    const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
-
     const [name, setName] = useState<string>("");
     const [mail, setMail] = useState<string>("");
     const [pwd, setPwd] = useState<string>("");
     const [pwdCopy, setPwdCopy] = useState<string>("");
 
-    const [step, setStep] = useState<string>('');
-    const [error, setError] = useState<string>('');
-
     const [errorName, setErrorName] = useState<string>('');
     const [errorMail, setErrorMail] = useState<string>('');
     const [errorPwd, setErrorPwd] = useState<string>('');
     const [errorPwdCopy, setErrorPwdCopy] = useState<string>('');
+    const [error, setError] = useState<string>('');
+    const [step, setStep] = useState<string>('');
+    
+    const [isLoader, setIsLoader] = useState<boolean>(false)
+    const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
 
     /**
      * Function handleSignIn
@@ -66,34 +81,34 @@ const SigninScreen = ({navigation}: {navigation: any}) => {
      * @returns boolean
      */
     const isDataCorrect = (): boolean => {
-        setStep("Vérification des données")
+        setStep( textTranslate.t('dataVerificationText') )
 
         if(name.length == 0){
             setIsLoader(false)
-            setErrorName("Le nom est vide")
+            setErrorName( textTranslate.t('errorNameRequired') )
             return false
         }
 
         if(mail.length == 0){
             setIsLoader(false)
-            setErrorMail("L'e-mail est vide")
+            setErrorMail( textTranslate.t('errorMailRequired') )
             return false
         }
 
         if(pwd.length == 0){
             setIsLoader(false)
-            setErrorPwd("Le mot de passe est vide")
+            setErrorPwd( textTranslate.t('errorPwdRequired') )
             return false
         }
 
         if(pwdCopy.length == 0){
             setIsLoader(false)
-            setErrorPwdCopy("Le mot de passe re-copié est vide")
+            setErrorPwdCopy( textTranslate.t('errorPwdCopyRequired') )
             return false
         } else {
             if(pwd != pwdCopy){
                 setIsLoader(false)
-                setErrorPwdCopy("Le mot de passe est mal recopié")
+                setErrorPwdCopy( textTranslate.t('errorPwdCopyFalse') )
                 return false
             }
         }
@@ -105,13 +120,11 @@ const SigninScreen = ({navigation}: {navigation: any}) => {
      * Function createUserAuth
      */
     const createUserAuth = () => {
-        setStep("Création des identifiants de l'utilisateur")
+        setStep( textTranslate.t('userIdCreate') )
 
         createUserWithEmailAndPassword(auth, mail, pwd)
             .then((userCredential) => {
                 const user = userCredential.user;
-                //console.log(user)
-                
                 addUser()
             })
             .catch((error) => {
@@ -128,16 +141,16 @@ const SigninScreen = ({navigation}: {navigation: any}) => {
      */
     const displayErrorUserAuth = (error: any) => {
         //console.log(error.code)
-        
+
         switch (error.code) {
             case "auth/email-already-in-use": {
-                setError("L' e-mail est déjà utilisé par un utilisateur.")
-                setErrorMail("L' e-mail est déjà utilisé par un utilisateur.")
+                setError( textTranslate.t('userMailAlreadyUse') )
+                setErrorMail( textTranslate.t('userMailAlreadyUse') )
                 break;
             }
             case "auth/weak-password": {
-                setError("Le mot de passe doit contenir au minimum 6 charactères.")
-                setErrorPwd("Le mot de passe doit contenir au minimum 6 charactères.")
+                setError( textTranslate.t('userPwdWeak') )
+                setErrorPwd( textTranslate.t('userPwdWeak') )
                 break;
             }
             default: {
@@ -151,33 +164,24 @@ const SigninScreen = ({navigation}: {navigation: any}) => {
      * Function addUser
      */
     const addUser = async () => {
-        setStep('Ajout des données utilisateur')
 
-        const userData = {
-            userName: name,
-            userMail: mail,
-            userBirthDate: "",
-            userSmokeAvgNbr: "",
-            idPatch: "",
-            idPill: "",
-            idCigarette: ""
-        }
+        setStep( textTranslate.t('userSaveData') )
+        const user = new User("",name,mail,"","",0,"","","")
 
-        await addUserFireStore(userData).then(() => {
+        await addUserFireStore(user).then(() => {
 
             setIsLoader(false)
-
-            // display snack bar
             setIsSnackBar(true)
 
-            navigation.navigate('LogIn')
+            navigation.navigate(ID_NAVIGATE_LOGIN)
             
         }).catch((error) => {
     
             setIsLoader(false)
 
-            setError("Error add data : "+ error)
-            console.error("Error add data : "+ error);
+            const mError = error.message
+            setError(mError)
+            //console.error(mError);
         }) 
     };
 
@@ -185,88 +189,110 @@ const SigninScreen = ({navigation}: {navigation: any}) => {
      * View JSX
      */
     return (
-        <View style={AppStyle.container}>
-  
+        <View>
+
             <View style={AppStyle.subTitleContainer}>
-                <Text style={AppStyle.subTitleText}>Inscription</Text>
+                <Text style={AppStyle.subTitleText}>{textTranslate.t('signinText')}</Text>
             </View>
 
-            <Stack spacing={0} style={AppStyle.stackLogin} removeClippedSubviews={true}>
+            <Stack 
+                spacing={0} 
+                style={AppStyle.mainContainerStack}
+                removeClippedSubviews={true}>
+                
+                <View style={AppStyle.rowView}>
+                    <TextInput 
+                        variant={ TEXTINPUT_VARIANT }
+                        label={ textTranslate.t('signinInputNameLabel') }
+                        placeholder={ textTranslate.t('signinInputNamePlaceholder') }
+                        helperText={ errorName }
+                        color={ Colors.colorOrange }
+                        keyboardType="default"
+                        style={ AppStyle.textInputSigin }
+                        value={ name }
+                        onChangeText={ setName } />
+                </View>
+                
+                <View style={AppStyle.rowView}>
+                    <TextInput 
+                        variant={ TEXTINPUT_VARIANT }
+                        label={ textTranslate.t('signinInputMailLabel') }
+                        placeholder={ textTranslate.t('signinInputMailPlaceholder') }
+                        helperText={ errorMail }
+                        color={ Colors.colorOrange }
+                        autoCapitalize="none"
+                        autoComplete="email"
+                        keyboardType="email-address"
+                        style={ AppStyle.textInputSigin }
+                        value={ mail }
+                        onChangeText={ setMail } />
+                </View>
 
-                <TextInput 
-                    variant="outlined"
-                    label="Entrer votre nom"
-                    placeholder="John"
-                    helperText={errorName}
-                    color={Colors.colorOrange}
-                    keyboardType="default"
-                    style={SigninStyle.textInput}
-                    value={name}
-                    onChangeText={setName} />
+                <View style={AppStyle.rowView}>
+                    <TextInput 
+                        variant={ TEXTINPUT_VARIANT }
+                        label={ textTranslate.t('signinInputPwdLabel') }
+                        placeholder={ textTranslate.t('signinInputPwdPlaceholder') }
+                        helperText={errorPwd}
+                        color={Colors.colorOrange}
+                        autoCapitalize="none"
+                        style={AppStyle.textInputSigin}
+                        value={pwd}
+                        onChangeText={setPwd}
+                        secureTextEntry={true} />
+                </View>
+                
+                <View style={AppStyle.rowView}>
+                    <TextInput 
+                        variant={ TEXTINPUT_VARIANT }
+                        label={ textTranslate.t('signinInputPwCopyLabel') }
+                        placeholder={ textTranslate.t('signinInputPwdCopyPlaceholder') }
+                        helperText={errorPwdCopy}
+                        color={Colors.colorOrange}
+                        autoCapitalize="none"
+                        style={AppStyle.textInputSigin}
+                        value={pwdCopy}
+                        onChangeText={setPwdCopy}
+                        secureTextEntry={true}
+                        contextMenuHidden={true} />
+                </View>
 
-                <TextInput 
-                    variant="outlined"
-                    label="Entrer votre mail"
-                    placeholder="e-mail@gmail.com"
-                    helperText={errorMail}
-                    color={Colors.colorOrange}
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    keyboardType="email-address"
-                    style={SigninStyle.textInput}
-                    value={mail}
-                    onChangeText={setMail} />
+                {isLoader == true ? 
+                <View style={AppStyle.rowView}>
+                    <Surface 
+                        elevation={SURFACE_ELEVATION}
+                        category={SURFACE_CATEGORY}
+                        style={AppStyle.surfaceBtnBlueView }>
 
-                <TextInput 
-                    variant="outlined"
-                    label="Entrer votre mot de passe"
-                    placeholder="Mot de passe"
-                    helperText={errorPwd}
-                    color={Colors.colorOrange}
-                    autoCapitalize="none"
-                    style={SigninStyle.textInput}
-                    value={pwd}
-                    onChangeText={setPwd}
-                    secureTextEntry={true} />
-
-                <TextInput 
-                    variant="outlined"
-                    label="Re-copier votre mot de passe"
-                    placeholder="Mot de passe"
-                    helperText={errorPwdCopy}
-                    color={Colors.colorOrange}
-                    autoCapitalize="none"
-                    style={SigninStyle.textInput}
-                    value={pwdCopy}
-                    onChangeText={setPwdCopy}
-                    secureTextEntry={true}
-                    contextMenuHidden={true} />
-
-                <TouchableOpacity
-                    onPress={() => handleSignIn()}
-                    activeOpacity={0.6}
-                    style={SigninStyle.btnLogin}>
-                    <Text style={SigninStyle.buttonText}>Inscription</Text>
-                </TouchableOpacity>
-
+                        <LoaderComponent 
+                            text={ textTranslate.t('signinLoaderText') } 
+                            step={step} 
+                            color={Colors.white} 
+                            size="large"/>
+                    </Surface>
+                </View>
+                : 
+                <View style={AppStyle.rowView}>
+                    <ButtonComponent 
+                        btnText={ textTranslate.t('signinBtnText') }
+                        textColor={Colors.white}
+                        activeOpacity={0.6}
+                        backgroundColor={Colors.blueFb}
+                        handleFunction={() => handleSignIn()} />
+                </View>
+                }
+                <Text style={AppStyle.textError}>{error}</Text>
+                
             </Stack>
-
-            {isLoader == true ? 
-            <View>
-                <LoaderComponent text="Inscription en cours ..." step={step} color={Colors.blueFb} size={'large'}/>
-            </View>
-            : 
-            <Text style={SigninStyle.textError}>{error}</Text>
-            }
             
-            <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={3000} message={'User is signed'}/>
+            <SnackBarComponent 
+                visible={isSnackBar} 
+                setVisible={setIsSnackBar} 
+                message={ textTranslate.t('signinSnackText') }
+                duration={3000} />
 
         </View>
     )
 }
 
 export default SigninScreen
-
-const styles = StyleSheet.create({
-   
-})

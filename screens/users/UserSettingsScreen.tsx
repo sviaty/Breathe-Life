@@ -1,14 +1,21 @@
-import { StyleSheet, Text, View } from 'react-native'
+// React & React Native
 import React from 'react'
+import { StyleSheet } from 'react-native'
 
-// Style
-import Colors from '../../constants/ColorConstant';
-
-// Navigator
+// Navigation
 import { createStackNavigator } from '@react-navigation/stack';
 const Stack = createStackNavigator();
 
-// Screen
+// Constants
+import Colors from '../../constants/ColorConstant';
+import { 
+    ID_NAVIGATE_USER_SETTINGS_INFO_SCREEN, 
+    ID_NAVIGATE_USER_SETTINGS_UPDATE_INFO_SCREEN } from '../../constants/IdConstant';
+
+// Helpers
+import textTranslate from '../../helpers/TranslateHelper';
+
+// Screens
 import UserInformationsScreen from './UserInformationsScreen';
 import UserUpdateInformationsScreen from './UserUpdateInformationsScreen';
 
@@ -19,32 +26,32 @@ import UserUpdateInformationsScreen from './UserUpdateInformationsScreen';
 const UserSettingsScreen = () => {
   return (
     <Stack.Navigator 
-        initialRouteName="UserInformationsScreen">
+        initialRouteName={ ID_NAVIGATE_USER_SETTINGS_INFO_SCREEN }>
 
         <Stack.Screen 
-            name="UserInformationsScreen" 
-            component={UserInformationsScreen} 
+            name={ ID_NAVIGATE_USER_SETTINGS_INFO_SCREEN }
+            component={ UserInformationsScreen } 
             options={{ 
-                title: 'Vos informations', 
+                title: textTranslate.t('navUserSettingsInfo'), 
                 headerTintColor: Colors.white,
                 headerStyle: {
-                    backgroundColor: Colors.blueFb,
+                    backgroundColor: Colors.colorOrange,
                     height: 50
-                    
                 }
             }}
             />
 
         <Stack.Screen 
-            name="UserUpdateInformationsScreen" 
-            component={UserUpdateInformationsScreen} 
+            name={ ID_NAVIGATE_USER_SETTINGS_UPDATE_INFO_SCREEN } 
+            component={ UserUpdateInformationsScreen } 
             options={{ 
-                title: 'Modifier vos informations', 
+                title: textTranslate.t('navUserSettingsUpdateInfo'), 
                 headerTintColor: Colors.white,
                 headerStyle: {
-                    backgroundColor: Colors.blueFb,
+                    backgroundColor: Colors.colorOrange,
                     height: 50
-                }
+                },
+                headerBackTitle: textTranslate.t('navBackButton')
             }}/>
     </Stack.Navigator>
   )

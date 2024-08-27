@@ -1,19 +1,34 @@
+// React & React Native
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native'
-import { Stack, TextInput, Backdrop, BackdropSubheader } from "@react-native-material/core";
-import SnackBarComponent from '../../components/SnackBarComponent';
+import { StyleSheet, View, Text } from 'react-native'
 
-// Data 
+// Material
+import { Stack, TextInput, Surface } from "@react-native-material/core";
+
+// Styles
+import AppStyle from '../../styles/AppStyle';
+
+// Constants
+import Colors from '../../constants/ColorConstant';
+import { 
+    SURFACE_CATEGORY, 
+    SURFACE_ELEVATION, 
+    TEXTINPUT_VARIANT } from '../../constants/AppConstant';
+import { 
+    ID_TOKEN, 
+    ID_USER } from '../../constants/IdConstant';
+
+// Datas
 import User from '../../datas/UserData';
 
-// Style
-import AppStyle from '../../styles/AppStyle';
-import LoginStyle from '../../styles/LoginSigninStyle';
-import Colors from '../../constants/ColorConstant';
+// Components
+import ButtonComponent from '../../components/ButtonComponent';
 import LoaderComponent from '../../components/LoaderComponent';
+import SnackBarComponent from '../../components/SnackBarComponent';
 
-// FireStore
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+// Helpers
+import textTranslate from '../../helpers/TranslateHelper';
+import { addSecureStore } from '../../helpers/SecureStoreHelper';
 
 // Redux
 import { RootState } from '../../redux/Store';
@@ -24,8 +39,8 @@ import { useSelector, useDispatch } from 'react-redux';
 // Api
 import { getUserFireStore } from '../../api/UserApi';
 
-// Helper
-import { addSecureStore } from '../../helpers/SecureStoreHelper';
+// Fire Store
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 /**
  * LoginScreen
@@ -70,19 +85,19 @@ const LoginScreen = () => {
      * @returns boolean
      */
     const isDataCorrect = (): boolean => {
-        setStep("Vérification des données")
+        setStep( textTranslate.t('dataVerificationText') )
 
         if (mail.length == 0) {
             setIsLoader(false)
             dispatch(setIsLogin(false));
-            setErrorMail("L'e-mail est vide")
+            setErrorMail( textTranslate.t('errorMailRequired') )
             return false
         }
 
         if (pwd.length == 0) {
             setIsLoader(false)
             dispatch(setIsLogin(false));
-            setErrorPwd("Le mot de passe est vide")
+            setErrorPwd( textTranslate.t('errorPwdRequired') )
             return false
         }
 
@@ -93,7 +108,7 @@ const LoginScreen = () => {
      * Function loginUserAuth
      */
     const loginUserAuth = () => {
-        setStep("Identification de l'utilisateur")
+        setStep( textTranslate.t('userIdLogin') )
 
         const auth = getAuth();
 
@@ -103,23 +118,20 @@ const LoginScreen = () => {
                 const userDataAuth = userCredential.user;
                 //console.log(userDataAuth)
 
-                setStep("Enregistrement du token")
+                setStep( textTranslate.t('userSaveTokenLogin') )
 
                 userDataAuth.getIdToken().then(token => {
-                    addSecureStore("tokenId", token)
+                    addSecureStore(ID_TOKEN, token)
                 })
 
                 getUserInDatabase()
             })
             .catch((error) => {
                 //console.log(error)
-
                 setIsLoader(false)
                 dispatch(setIsLogin(false));
-
                 displayErrorUserAuth(error)
-            }
-            );
+            });
     };
 
     /**
@@ -131,7 +143,7 @@ const LoginScreen = () => {
 
         switch (error.code) {
             case "auth/invalid-credential": {
-                setError("L'e-mail ou le mot de passe n'est pas bon.")
+                setError( textTranslate.t('userMailPwdWrongLogin') )
                 break;
             }
             default: {
@@ -145,7 +157,7 @@ const LoginScreen = () => {
      * Function getUserInDatabase
      */
     const getUserInDatabase = async () => {
-        setStep('Récupération des données utilisateur')
+        setStep( textTranslate.t('userGetDataUserLogin') )
 
         getUserFireStore(mail).then((userList) => {
 
@@ -153,7 +165,7 @@ const LoginScreen = () => {
 
                 const dataUser = doc.data()
 
-                addSecureStore('userId', doc.id)
+                addSecureStore(ID_USER, doc.id)
 
                 const u = new User(
                     doc.id,
@@ -165,11 +177,9 @@ const LoginScreen = () => {
                     dataUser.idPatch, 
                     dataUser.idPill, 
                     dataUser.idCigarette);
+
                 dispatch(setUser(u));
             });
-
-            setStep("Vous êtes connecté")
-            //console.log('User is logged');
 
             setIsSnackBar(true)
             dispatch(setIsLogin(true));
@@ -178,8 +188,9 @@ const LoginScreen = () => {
             setIsLoader(false)
             dispatch(setIsLogin(false));
 
-            setError("Error add data : " + error)
-            console.error("Error add data : " + error);
+            const mError = error.message
+            setError(mError)
+            //console.error(mError);
         }) 
     }
 
@@ -187,61 +198,85 @@ const LoginScreen = () => {
      * View JSX
      */
     return (
-        <View style={AppStyle.container}>
+        <View>
 
             <View style={AppStyle.subTitleContainer}>
                 <Text style={AppStyle.subTitleText}>Connexion</Text>
             </View>
 
-            <Stack spacing={0} style={AppStyle.stackLogin}>
-
-                <TextInput
-                    variant="outlined"
-                    label="Entrer votre mail"
-                    placeholder="e-mail@gmail.com"
-                    helperText={errorMail}
-                    color={Colors.colorOrange}
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    keyboardType="email-address"
-                    style={LoginStyle.textInput}
-                    value={mail}
-                    onChangeText={setMail} />
-
-                <TextInput
-                    variant="outlined"
-                    label="Entrer votre mot de passe"
-                    placeholder="Mot de passe"
-                    helperText={errorPwd}
-                    color={Colors.colorOrange}
-                    autoCapitalize="none"
-                    style={LoginStyle.textInput}
-                    value={pwd}
-                    onChangeText={setPwd}
-                    secureTextEntry={true} />
-
-                <View style={LoginStyle.textConditionContenair}>
-                    <Text>En cliquant sur connexion, vous acceptez notre condition générale d'utilisation.</Text>
+            <Stack 
+                spacing={0} 
+                style={AppStyle.mainContainerStack}>
+                
+                <View style={AppStyle.rowView}>
+                    <TextInput
+                        variant={ TEXTINPUT_VARIANT }
+                        label={ textTranslate.t('loginInputMailLabel') } 
+                        placeholder={ textTranslate.t('loginInputMailPlaceholder') } 
+                        helperText={errorMail}
+                        color={Colors.colorOrange}
+                        autoCapitalize="none"
+                        autoComplete="email"
+                        keyboardType="email-address"
+                        style={ AppStyle.textInputLogin }
+                        value={mail}
+                        onChangeText={setMail} />
                 </View>
 
-                <TouchableOpacity
-                    onPress={handleLogIn}
-                    activeOpacity={0.6}
-                    style={LoginStyle.btnLogin}>
-                    <Text style={LoginStyle.buttonText}>Connexion</Text>
-                </TouchableOpacity>
+                <View style={AppStyle.rowView}>
+                    <TextInput
+                        variant={ TEXTINPUT_VARIANT }
+                        label={ textTranslate.t('loginInputPwdLabel') } 
+                        placeholder={ textTranslate.t('loginInputPwdPlaceholder') } 
+                        helperText={errorPwd}
+                        color={Colors.colorOrange}
+                        autoCapitalize="none"
+                        style={ AppStyle.textInputLogin }
+                        value={pwd}
+                        onChangeText={setPwd}
+                        secureTextEntry={true} />
+                </View>
+
+                <View style={AppStyle.rowView}>
+                    <View style={AppStyle.textUseConditionContenair}>
+                        <Text>{ textTranslate.t('loginUseCondition') } </Text>
+                    </View>
+                </View>
+
+                {isLoader == true ? 
+                <View style={AppStyle.rowView}>
+                    <Surface 
+                        elevation={SURFACE_ELEVATION}
+                        category={SURFACE_CATEGORY}
+                        style={AppStyle.surfaceBtnBlueView }>
+
+                        <LoaderComponent 
+                            text={ textTranslate.t('loginLoaderText') } 
+                            step={step} 
+                            color={Colors.white} 
+                            size="large"/>
+                    </Surface>
+                </View>
+                : 
+                <View style={AppStyle.rowView}>
+                    <ButtonComponent 
+                        btnText={ textTranslate.t('loginBtnText') }
+                        textColor={Colors.white}
+                        activeOpacity={0.6}
+                        backgroundColor={Colors.blueFb}
+                        handleFunction={() => handleLogIn()} />
+                </View>
+                }
+
+                <Text style={AppStyle.textError}>{error}</Text>
 
             </Stack>
 
-            {isLoader == true ?
-                <View>
-                    <LoaderComponent text="Connection en cours ..." step={step} color={Colors.blueFb} size={'large'} />
-                </View>
-                :
-                <Text style={LoginStyle.textError}>{error}</Text>
-            }
-
-            <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={3000} message={'User is logged'} />
+            <SnackBarComponent 
+                visible={isSnackBar} 
+                setVisible={setIsSnackBar}
+                message={ textTranslate.t('loginSnackText') }
+                duration={3000} />
 
         </View>
     )

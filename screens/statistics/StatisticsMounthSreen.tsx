@@ -22,7 +22,7 @@ import { useSelector, useDispatch } from 'react-redux';
 // API
 import { getUserPatchsByIdUserFireStore } from '../../api/UserPatchsApi';
 import { getUserPillMounthByIdUserFireStore, getUserPillsByIdUserFireStore } from '../../api/UserPillsApi';
-import { getUserCigaretteMounthByIdUserFireStore, getUserCigarettesByIdUserFireStore, getUserCigaretteWeekByIdUserFireStore } from '../../api/UserCigarettesApi';
+import { getUserCigaretteMounthByIdUserFireStore, getUserCigarettesByIdUserFireStore } from '../../api/UserCigarettesApi';
 
 import {
     LineChart,

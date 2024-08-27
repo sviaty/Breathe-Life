@@ -1,46 +1,73 @@
+// React & React Native
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, Text, View, Pressable } from 'react-native';
+import { StyleSheet, Text, View, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Colors from '../constants/ColorConstant';
 
+// Navigation
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 const Stack = createNativeStackNavigator();
 
-import UserNoLoginScreen from '../screens/UserNoLoginScreen';
-import UserLoginScreen from '../screens/UserLoginScreen';
-import User from '../datas/UserData';
+// Styles
+import AppStyle from '../styles/AppStyle';
 
-import SecureStoreClass from '../secures/SecureStore';
-const secureStoreClass = new SecureStoreClass()
+// Constants
+import Colors from '../constants/ColorConstant';
+import { 
+    ID_NAVIGATE_USER_LOGIN_SCREEN, 
+    ID_NAVIGATE_USER_NO_LOGIN_SCREEN, 
+    ID_TOKEN, 
+    ID_USER 
+} from '../constants/IdConstant';
+
+// Datas
+import User from '../datas/UserData';
 
 // Components
 import LoaderComponent from '../components/LoaderComponent';
 
+// Screens
+import UserNoLoginScreen from '../screens/UserNoLoginScreen';
+import UserLoginScreen from '../screens/UserLoginScreen';
+
+// Helpers
+import { deleteSecureStore, getSecureStore } from '../helpers/SecureStoreHelper';
+import textTranslate from '../helpers/TranslateHelper';
+
+// Secure Store
+import SecureStoreClass from '../secures/SecureStore';
+const secureStoreClass = new SecureStoreClass()
+
+// Redux
 import { RootState } from '../redux/Store';
 import { setIsLogin } from '../redux/slices/IsLoginSlice';
 import { setUser } from '../redux/slices/UserSlice';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { initializeApp } from "firebase/app";
-import { getFirestore, collection, query, where, doc, getDoc, getDocs } from "firebase/firestore";
-import AppStyle from '../styles/AppStyle';
-import App from '../App';
+// Api
+import { getUserByIdFireStore } from '../api/UserApi';
 
+// Fire Store
 import firebaseConfig from '../firebaseConfig';
-import { deleteSecureStore } from '../helpers/SecureStoreHelper';
-
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 const db = getFirestore(firebaseConfig); 
 
+/**
+ * 
+ * @returns Screen MainScreen
+ */
 const MainScreen = () => {
 
+    // UseState
     const [loggin, setLoggin] = useState<boolean>(false)
-
     const [isLoader, setIsLoader] = useState<boolean>(true)
 
+    // Selector
     const isLogin = useSelector((state: RootState) => state.isLoginReducer.isLogin);
-
     const userSelector = useSelector((state: RootState) => state.userReducer.user);
+
+    // Dispatch
+    const dispatch = useDispatch();
 
     // Slice
     useEffect(() => {
@@ -49,77 +76,58 @@ const MainScreen = () => {
 
     useEffect(() => {
       setIsLoader(true)
-
-      fetchDataTokenId();
+      getIdUserSecureStore();
     }, [])
 
-    // Dispatch
-    const dispatch = useDispatch();
-    // dispatch(setIsLogin(true));
-    // console.log('isLogin ' + isLogin)
-
-    const fetchDataTokenId = async () => {
-      const token = await secureStoreClass.getToken('tokenId')
-      if(token == null){
-        //console.log('Le token est null')
-        setLoggin(false)
-        dispatch(setIsLogin(false));
-
-        setIsLoader(false)
-      } else {
-        getUserInDatabase()
-      }
-    }
-
-    const getUserInDatabase = async () => {
-
-      const userIdStoreSecure = await secureStoreClass.getToken('userId')
-
-        if(userIdStoreSecure != null){
-          //console.log(userIdStoreSecure)
-
-          try {
-            const docRef = doc(db, "users", userIdStoreSecure);
-    
-            const docSnap = await getDoc(docRef);
-    
-            const dataUser = docSnap.data()
-            //console.log(dataUser);
-            
-            if(dataUser != null){
-              const u = new User(
-                docSnap.id, 
-                dataUser.userName, 
-                dataUser.userMail, 
-                '', 
-                dataUser.userBirthDate, 
-                dataUser.userSmokeAvgNbr, 
-                dataUser.idPatch, 
-                dataUser.idPill, 
-                dataUser.idCigarette);
-              dispatch(setUser(u));
-
-              setLoggin(true)
-              dispatch(setIsLogin(true));
-              setIsLoader(false)
+    /**
+     * Function getIdUserSecureStore
+     */
+    const getIdUserSecureStore = async () => {
+        await getSecureStore(ID_USER).then((userIdStoreSecure) => {
+            //console.log(userIdStoreSecure)
+            if(userIdStoreSecure != null){
+                getUserInDatabase(userIdStoreSecure)
             } else {
-              setLoggin(false)
-              setIsLoader(false)
+                setLoggin(false)
+                dispatch(setIsLogin(false));
+                setIsLoader(false)
             }
-          } catch (error) {
+        }).catch((error) => {
+            //console.error(error.message)
             setLoggin(false)
             dispatch(setIsLogin(false));
             setIsLoader(false)
-            console.error("Error get data : "+ error);
-          }
-        }
+        }) 
     }
 
-    const handleLogout = async () => {
-        deleteSecureStore('tokenId')
+    /**
+     * Function getUserInDatabase
+     */
+    const getUserInDatabase = async (userIdStoreSecure: string) => {
 
+        getUserByIdFireStore(userIdStoreSecure).then((user) => {
+                
+            dispatch(setUser(user));
+
+            setLoggin(true)
+            dispatch(setIsLogin(true));
+            setIsLoader(false)
+
+        }).catch((error) => {
+            setLoggin(false)
+            dispatch(setIsLogin(false));
+            setIsLoader(false)
+            //console.error(error.message)
+        }) 
+    }
+
+    /**
+     * Function handleLogout
+     */
+    const handleLogout = async () => {
+        deleteSecureStore(ID_TOKEN)
+        deleteSecureStore(ID_USER)
         setLoggin(false)
-        //setIsLoader(false)
         dispatch(setIsLogin(false));
     }
 
@@ -132,32 +140,29 @@ const MainScreen = () => {
               end={{ x: 1, y: 1 }}
               style={AppStyle.linearContenairMain}>
 
-            <LoaderComponent text="Chargement de l'application" step="" color={Colors.white} size={'large'}/>
+            <LoaderComponent text={ textTranslate.t('appLoading') } step="" color={Colors.white} size={'large'}/>
           </LinearGradient>
         </View>
       )
     } else {
-
       if(loggin == true){
         return (
 
         <NavigationContainer> 
           <Stack.Navigator>
             <Stack.Screen 
-              name="UserLoginScreen" 
-              component={UserLoginScreen}
+              name={ ID_NAVIGATE_USER_LOGIN_SCREEN }
+              component={ UserLoginScreen }
               options={({ navigation }) => ({
-                title: 'Breathe Life',
+                title: textTranslate.t('appName'),
                 headerTintColor: Colors.white,
                 headerStyle: {
-                  backgroundColor: Colors.colorOrange,
+                  backgroundColor: Colors.blueFb,
                 },
                 headerRight: () => (
-                  <Pressable
-                    onPress={() => handleLogout()}
-                  >
-                  <Text style={{color: Colors.white}}>Déconnexion</Text>
-                  </Pressable>
+                    <Pressable onPress={() => handleLogout()} >
+                        <Text style={{color: Colors.white}}> { textTranslate.t('logoutBtn') } </Text>
+                    </Pressable>
                 ),
               })} />
 
@@ -169,14 +174,14 @@ const MainScreen = () => {
         return (
         <NavigationContainer> 
           <Stack.Navigator>
-            <Stack.Screen 
-              name="UserNoLoginScreen" 
-              component={UserNoLoginScreen} 
+            <Stack.Screen  
+              name={ ID_NAVIGATE_USER_NO_LOGIN_SCREEN } 
+              component={ UserNoLoginScreen } 
               options={({ navigation }) => ({
-                title: 'Breathe Life',
+                title: textTranslate.t('appName'),
                 headerTintColor: Colors.white,
                 headerStyle: {
-                  backgroundColor: Colors.colorOrange,
+                    backgroundColor: Colors.blueFb,
                 },
               })} />
 

@@ -2,16 +2,32 @@ import Moment from 'moment'
 // https://momentjs.com/docs/
 
 /**
+ * Function parseStringToDate
+ */
+export const parseStringToDate = (dateString: string): Date => {
+    return Moment(dateString, "DD-MM-YYYY").toDate();
+}
+
+/**
+ * Function parseDateToString
+ * @param dateDate 
+ * @returns 
+ */
+export const parseDateToString = (dateDate: Date): string => {
+    return Moment(dateDate).format("DD-MM-YYYY");
+}
+
+
+/**
  * Function getAgeUser
  * @param dateOfBirth 
  * @returns 
  */
-export const getAgeUser = (dateOfBirth:any) => {
+export const getAgeUser = (dateOfBirth:string) => {
     if(dateOfBirth != ""){
-        dateOfBirth = dateOfBirth.toDate()
         //console.log(dateOfBirth)
         if(dateOfBirth != null){
-            const dateBirth = Moment(new Date(dateOfBirth))
+            const dateBirth = Moment(parseStringToDate(dateOfBirth))
             //console.log(dateBirth)
             const dateNow = Moment(new Date())
             //console.log(dateNow)

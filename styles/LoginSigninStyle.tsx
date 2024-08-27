@@ -42,12 +42,7 @@ export default StyleSheet.create({
         fontSize: 20,
     },
 
-    textError: {
-        fontSize: 18,
-        margin: 15,
-        color: Colors.colorRed
-    },
-
+   
     textConditionContenair: {
         width: screenWidth - 20,
         marginTop:10,

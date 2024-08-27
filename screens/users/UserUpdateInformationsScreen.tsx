@@ -1,30 +1,43 @@
+// React & React Native
 import React, { useState , useEffect} from 'react';
 import { StyleSheet, SafeAreaView, ScrollView, Text, View, Keyboard, TouchableOpacity } from 'react-native'
-import { TextInput, Surface } from "@react-native-material/core";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
-// Color
-import Colors from '../../constants/ColorConstant';
+// Material
+import { TextInput, Surface, Stack } from "@react-native-material/core";
+
+// Navigation
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 // Style
 import AppStyle from '../../styles/AppStyle';
-import UserSettingsStyle from '../../styles/UserSettingsStyle';
+
+// Constants
+import Colors from '../../constants/ColorConstant';
+import { 
+    SURFACE_CATEGORY, 
+    SURFACE_ELEVATION, 
+    TEXTINPUT_VARIANT } from '../../constants/AppConstant';
+import { 
+    ID_NAVIGATE_USER_SETTINGS_INFO_SCREEN } from '../../constants/IdConstant';
+
+// Helpers
+import textTranslate from '../../helpers/TranslateHelper';
+import { parseDateToString, parseStringToDate } from '../../helpers/DateHelper';
 
 // Datas
 import User from '../../datas/UserData';
+
+// Components
+import LoaderComponent from '../../components/LoaderComponent';
 
 // Redux
 import { RootState } from '../../redux/Store';
 import { setUser } from '../../redux/slices/UserSlice';
 import { useSelector, useDispatch } from 'react-redux';
 
-// FireStore
-import firebaseConfig from '../../firebaseConfig';
-import { getFirestore, serverTimestamp, collection, query, where, addDoc, doc, setDoc, getDoc, getDocs } from "firebase/firestore";
-import LoaderComponent from '../../components/LoaderComponent';
-const db = getFirestore(firebaseConfig);
-
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+// Api
+import { getUserByIdFireStore, setUserByObjectFireStore } from '../../api/UserApi';
 
 type RootStackParamList = {
     UserUpdateInformationsScreen: any;
@@ -44,24 +57,11 @@ const UserUpdateInformationsScreen = ({ navigation }: Props) => {
     const [userBirthDateVisible, setUserBirthDateVisible] = useState(false);
     const [errorUserBirthDate, setErrorUserBirthDate] = useState<string>("")
 
-    let [userSmokeDate, setUserSmokeDate] = useState<Date>(new Date());
-    const [userSmokeDateVisible, setUserSmokeDateVisible] = useState(false);
-    const [errorUserSmokeDate, setErrorUserSmokeDate] = useState<string>("")
-
     let [userSomeAvgDay, setUserSomeAvgDay] = useState<string>('');
     const [errorUserSomeAvgDay, setErrorUserSomeAvgDay] = useState<string>("")
 
-    let [userCigarette, setUserCigarette] = useState<string>('');
-    let [userPatch, setUerPatch] = useState<string>('');
-    let [userPastille, setUserPastille] = useState<string>('');
-
-    const [revealed, setRevealed] = useState<boolean>(false);
-
-    const [isLoadingUserInfo, setIsLoadingUserInfo] = useState<boolean>(true);
-
     const [isLoadSaveUserData, setIsLoadSaveUserData] = useState<boolean>(false);
     const [isLoadGetUserData, setIsLoadGetUserData] = useState<boolean>(true);
-
 
     const [errorSaveUserData, setErrorSaveUserData] = useState<string>("")
 
@@ -76,99 +76,49 @@ const UserUpdateInformationsScreen = ({ navigation }: Props) => {
         getDataUser()
     }, [])  
 
-
-    const showUserBirthDatePicker = () => {
-        setUserBirthDateVisible(true)
-    }
-      
-    const hideUserBirthDatePicker = () => {
-        setUserBirthDateVisible(false)
-        Keyboard.dismiss()
-    }
-
-    const handleConfirmUserBirthDate = (date: Date) => {
-        userBirthDate = date
-        setUserBirthDate(date)
-        hideUserBirthDatePicker()
-    }
-
-
-
-    const showUserSmokeDatePicker = () => {
-        setUserSmokeDateVisible(true)
-    }
-      
-    const hideUserSmokeDatePicker = () => {
-        setUserSmokeDateVisible(false)
-        Keyboard.dismiss()
-    }
-
-    const handleConfirmUserSmokeDate = (date: Date) => {
-        userSmokeDate = date
-        setUserSmokeDate(date)
-        hideUserSmokeDatePicker()
-    }
-
-    const handleUserSmokeCigaretteTypeList = () => {
-        console.log(!revealed)
-        setRevealed(!revealed)
-    }
-
-
-    const getDataUser = async () => {
+    /**
+     * Function getDataUser
+     */
+     const getDataUser = () => {
         setIsLoadGetUserData(true)
 
-        const q = query(collection(db, "users"), where("userMail", "==", userSelector.userMail));
-        await getDocs(q).then((userList) => {
-            userList.forEach((doc) => {
-                //console.log(doc.data());
-                const dataUser = doc.data()
+        getUserByIdFireStore(userSelector.userId).then((user) => {
 
-                const u = new User(
-                    doc.id,
-                    dataUser.userName, 
-                    dataUser.userMail, 
-                    "", 
-                    dataUser.userBirthDate, 
-                    dataUser.userSmokeAvgNbr, 
-                    
-                    dataUser.idPatch, 
-                    dataUser.idPill, 
-                    dataUser.idCigarette);
-
-                userName = dataUser.userName
+                userName = user.userName
                 setUserName(userName)
 
-                userBirthDate = dataUser.userBirthDate.toDate()
-                setUserBirthDate(userBirthDate)
-
-                userSomeAvgDay = dataUser.userSmokeAvgNbr
+                if(user.userBirthDate != ""){
+                    userBirthDate = parseStringToDate(user.userBirthDate)
+                    setUserBirthDate(userBirthDate)
+                }
+                
+                userSomeAvgDay = user.userSmokeAvgNbr.toString()
                 setUserSomeAvgDay(userSomeAvgDay)
 
-                dispatch(setUser(u));
+                dispatch(setUser(user));
 
                 setIsLoadGetUserData(false)
-            });
+
         }).catch((error) => {
             setIsLoadGetUserData(false)
-            console.error("Error add data : " + error);
-        })
+            //console.log("Error getUserByIdFireStore")
+            console.error(error.message);
+        }) 
     }
 
+    /**
+     * Function handleSaveUserData
+     */
     const handleSaveUserData = async () => {
         setIsLoadSaveUserData(true)
 
         setErrorUserName("")
         setErrorUserBirthDate("")
-        setErrorUserSmokeDate("")
         setErrorUserSomeAvgDay("")
-        
-        //console.log(isDataCorrect())
 
         if(isDataCorrect()){
             saveUserData()
         }
-
     }
 
     /**
@@ -179,31 +129,15 @@ const UserUpdateInformationsScreen = ({ navigation }: Props) => {
 
         if (userName.length == 0) {
             setIsLoadSaveUserData(false)
-            setErrorUserName("Le nom est obligatoire")
+            setErrorUserName( textTranslate.t('userUpdateNameRequired') )
             return false
         }
-
-        /*
-        if (userBirthDate.toDateString.length == 0) {
-            setIsLoadSaveUserData(false)
-            setErrorUserBirthDate("La date de naissance est obligatoire")
-            return false
-        }
-
-       
-        if (userSmokeDate.toDateString.length == 0) {
-            setIsLoadSaveUserData(false)
-            setErrorUserSmokeDate("La date est obligatoire")
-            return false
-        }
-        */
 
         if (userSomeAvgDay.length == 0) {
             setIsLoadSaveUserData(false)
-            setErrorUserSomeAvgDay("Le nombre moyen de cigarette est obligatoire")
+            setErrorUserSomeAvgDay(textTranslate.t('userUpdateCigNbrRequired') )
             return false
         }
-       
 
         return true
     }
@@ -212,27 +146,26 @@ const UserUpdateInformationsScreen = ({ navigation }: Props) => {
      * Function saveUserData
      */
     const saveUserData = async () => {
-        
-        const userDoc = doc(db, "users", userSelector.userId)
-        
-        await setDoc(userDoc, {
+
+        const userData = {
             userName: userName,
             userMail: userSelector.userMail,
-            userBirthDate: userBirthDate,
+            userBirthDate: parseDateToString(userBirthDate),
             userSmokeAvgNbr: userSomeAvgDay,
             idPatch: userSelector.idPatch,
             idPill: userSelector.idPill,
             idCigarette: userSelector.idCigarette,
-        }).then((value) => {
-            //console.log(value);
+        }
+
+        setUserByObjectFireStore(userSelector.userId, userData).then((value) => {
 
             const u = new User(
                 userSelector.userId, 
                 userSelector.userName, 
                 userSelector.userMail, 
                 userSelector.userToken, 
-                userSelector.userBirthDate, 
-                userSelector.userSmokeAvgNbr, 
+                parseDateToString(userBirthDate), 
+                parseInt(userSomeAvgDay), 
                 userSelector.idPatch, 
                 userSelector.idPill, 
                 userSelector.idCigarette);
@@ -241,70 +174,82 @@ const UserUpdateInformationsScreen = ({ navigation }: Props) => {
 
             setIsLoadSaveUserData(false)
 
-            //getDataUser()
-            navigation.navigate('UserInformationsScreen')
+            navigation.navigate( ID_NAVIGATE_USER_SETTINGS_INFO_SCREEN )
 
         }).catch((error) => {
-            console.error("Error set user in firestore database : ")
-            console.error(error)
+            //console.log("Error setUserFireStore")
+            console.error(error.message)
             setErrorSaveUserData(error.message)
         })
     }
 
-    /*
-    <TextInput 
-        variant="outlined"
-        label="Entrer la date où vous avez commencé à fumer"
-        placeholder="JJ/MM/AAAA"
-        helperText={errorUserSmokeDate}
-        color={Colors.colorOrange}
-        style={UserSettingsStyle.inputText}
-        value={userSmokeDate.toLocaleDateString()} 
-        showSoftInputOnFocus={false}
-        onPress={ () => showUserSmokeDatePicker()} />
+    /**
+     * Function showUserBirthDatePicker
+     */
+    const showUserBirthDatePicker = () => {
+        setUserBirthDateVisible(true)
+    }
+    
+    /**
+     * Function hideUserBirthDatePicker
+     */
+    const hideUserBirthDatePicker = () => {
+        setUserBirthDateVisible(false)
+        Keyboard.dismiss()
+    }
 
-    <DateTimePickerModal
-        isVisible={userSmokeDateVisible}
-        mode="date"
-        onConfirm={handleConfirmUserSmokeDate}
-        onCancel={hideUserSmokeDatePicker} />
-    */
+    /**
+     * Function handleConfirmUserBirthDate
+     * @param date 
+     */
+    const handleConfirmUserBirthDate = (date: Date) => {
+        userBirthDate = date
+        setUserBirthDate(date)
+        hideUserBirthDatePicker()
+    }
 
+    /**
+     * View JSX
+     */
     return (
-        <SafeAreaView style={AppStyle.container}>
+        <SafeAreaView>
             <ScrollView 
-                style={UserSettingsStyle.userScrollView}
                 automaticallyAdjustKeyboardInsets={true}>
 
                 <View>
-
                     { isLoadGetUserData == true ? 
                     <View>
-                        <LoaderComponent text="Chargement en cours ..." step="" color={Colors.blueFb} size="large"/>
+                        <LoaderComponent text={ textTranslate.t('viewLoading') } step="" color={Colors.blueFb} size="large"/>
                     </View>
                     : 
-                    <View style={UserSettingsStyle.userInputContainer}>
+                    <Stack 
+                        spacing={0} 
+                        style={AppStyle.mainContainerStack}>
                     
-                        <TextInput 
-                            variant="outlined"
-                            label="Entrer votre nom"
-                            placeholder="Nom"
-                            helperText={errorUserName}
-                            color={Colors.colorOrange}
-                            style={UserSettingsStyle.inputText}
-                            value={userName}
-                            onChangeText={setUserName} />
+                        <View style={AppStyle.rowView}>
+                            <TextInput 
+                                variant={ TEXTINPUT_VARIANT }
+                                label={ textTranslate.t('signinInputNameLabel') }
+                                placeholder={ textTranslate.t('signinInputNamePlaceholder') }
+                                helperText={errorUserName}
+                                color={Colors.colorOrange}
+                                style={ AppStyle.textInputLogin }
+                                value={userName}
+                                onChangeText={setUserName} />
+                        </View>
 
-                        <TextInput 
-                            variant="outlined"
-                            label="Entrer votre date de naissance"
-                            placeholder="JJ/MM/AAAA"
-                            helperText={errorUserBirthDate}
-                            color={Colors.colorOrange}
-                            style={UserSettingsStyle.inputText}
-                            value={userBirthDate.toLocaleDateString()}
-                            showSoftInputOnFocus={false}
-                            onPress={ () => showUserBirthDatePicker()} />
+                        <View style={AppStyle.rowView}>
+                            <TextInput 
+                                variant={ TEXTINPUT_VARIANT }
+                                label={ textTranslate.t('userUpdateBirthDate') } 
+                                placeholder={ textTranslate.t('userUpdateBirthDatePlaceholder') } 
+                                helperText={errorUserBirthDate}
+                                color={Colors.colorOrange}
+                                style={ AppStyle.textInputLogin }
+                                value={userBirthDate.toLocaleDateString()}
+                                showSoftInputOnFocus={false}
+                                onPress={ () => showUserBirthDatePicker()} />
+                        </View>
 
                         <DateTimePickerModal
                             isVisible={userBirthDateVisible}
@@ -312,37 +257,44 @@ const UserUpdateInformationsScreen = ({ navigation }: Props) => {
                             onConfirm={handleConfirmUserBirthDate}
                             onCancel={hideUserBirthDatePicker} />
 
-                        <TextInput 
-                            keyboardType='number-pad'
-                            variant="outlined"
-                            label="Entrer le nombre de cigarette fumer par jours"
-                            placeholder="Nombre de cigarette fumer par jours"
-                            helperText={errorUserSomeAvgDay}
-                            color={Colors.colorOrange}
-                            style={UserSettingsStyle.inputText}
-                            value={userSomeAvgDay}
-                            onChangeText={setUserSomeAvgDay} />
-
-                        <Surface 
-                            elevation={4}
-                            category="medium"
-                            style={AppStyle.btnAddPatch}
-                            > 
-                            <TouchableOpacity
-                                onPress={() => handleSaveUserData()}
-                                activeOpacity={0.6}>
-                                <Text style={AppStyle.btnAddPatchText}>Enregister</Text>
-                            </TouchableOpacity>
-                        </Surface>
-
-                        { isLoadSaveUserData == true ?
-                        <View>
-                            <LoaderComponent text="Enregistrement en cours ..." step="" color={Colors.blueFb} size="large"/>
+                        <View style={AppStyle.rowView}>
+                            <TextInput 
+                                variant={ TEXTINPUT_VARIANT }
+                                label={ textTranslate.t('userUpdateCigAvg') } 
+                                placeholder={ textTranslate.t('userUpdateCigAvgPlaceholder') }  
+                                helperText={errorUserSomeAvgDay}
+                                keyboardType='number-pad'
+                                color={Colors.colorOrange}
+                                style={ AppStyle.textInputLogin }
+                                value={userSomeAvgDay}
+                                onChangeText={setUserSomeAvgDay} />
                         </View>
-                        :
+
+                        <View style={AppStyle.rowView}>
+                            <View style={{flex: 1}}>
+                                <Surface 
+                                    elevation={ SURFACE_ELEVATION }
+                                    category={ SURFACE_CATEGORY }
+                                    style={AppStyle.surfaceBtnStat}>
+                                    { isLoadSaveUserData == true ? 
+                                    <View style={AppStyle.btnGoUpdate}>
+                                        <LoaderComponent text={ textTranslate.t('userUpdateBtnLoader') } step="" color={Colors.white} size="small"/>
+                                    </View>
+                                    : 
+                                    <TouchableOpacity
+                                        onPress={ () => handleSaveUserData()}
+                                        activeOpacity={0.6}
+                                        style={AppStyle.btnGoUpdate}>
+                                        <Text style={AppStyle.btnGoUpdateTxt}>{ textTranslate.t('userUpdateBtnSave') }</Text>
+                                    </TouchableOpacity>
+                                    }
+                                </Surface>
+                            </View>
+                        </View>
+
                         <Text style={AppStyle.textError}>{errorSaveUserData}</Text>
-                        }
-                    </View>
+
+                    </Stack>
                     }
                 </View>  
             </ScrollView>
@@ -351,24 +303,3 @@ const UserUpdateInformationsScreen = ({ navigation }: Props) => {
 }
 
 export default UserUpdateInformationsScreen
-
-const pickerSelectStyles = StyleSheet.create({
-    inputIOS: {
-        backgroundColor: Colors.white,
-        fontSize: 16,
-        borderWidth: 2,
-        borderColor: 'silver',
-        borderRadius: 5,
-        color: 'black',
-        padding: 15 
-    },
-    inputAndroid: {
-        backgroundColor: Colors.white,
-        fontSize: 16,
-        borderWidth: 2,
-        borderColor: 'silver',
-        borderRadius: 5,
-        color: 'black',
-        padding: 15 
-    }
-});

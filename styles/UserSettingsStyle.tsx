@@ -12,10 +12,6 @@ export default StyleSheet.create({
         marginTop: 15,
     },
 
-    userScrollView: {
-        
-    },
-
     userBackdrop: {
         marginStart: 20,
         marginEnd: 20,

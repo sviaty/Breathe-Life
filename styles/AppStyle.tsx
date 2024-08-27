@@ -5,6 +5,193 @@ const screenWidth = Dimensions.get('screen').width;
 const screenHeight = Dimensions.get('screen').height;
 
 export default StyleSheet.create({
+
+    // Container View 
+    mainContainer: {
+        flex: 1,
+    },
+
+    mainContainerStack: {
+        alignItems: 'center',
+        margin: 8
+    },
+
+    rowView: {
+        flexDirection: "row"
+    },
+
+    rowViewFlex: {
+        flex: 1,
+        flexDirection: "row"
+    },
+
+    columnView: {
+        flexDirection: "column"
+    },
+
+    // Surface 
+    surfaceBtnBlueView: {
+        flex:1,
+        backgroundColor: Colors.blueFb,
+        borderRadius: 5,
+        padding: 8,
+        margin: 8
+    },
+
+    surfaceStatBlueView: {
+        flex: 1,
+        backgroundColor: Colors.blueFb,
+        verticalAlign: 'auto',
+        borderRadius: 5,
+        margin:8
+    },
+
+    surfaceStatRedView: {
+        flex: 1,
+        backgroundColor: Colors.red,
+        verticalAlign: 'auto',
+        marginTop: 8,
+        marginStart: 8,
+        marginEnd: 8,
+        borderBottomStartRadius: 0,
+        borderBottomEndRadius: 0
+    },
+
+    surfaceBtnStat: {
+        verticalAlign: 'auto',
+        borderRadius: 5,
+        margin:8
+    },
+
+    surfaceOrangeStat: {
+        flex: 1,
+        backgroundColor: Colors.colorOrange,
+        verticalAlign: 'auto',
+        marginTop: 8,
+        marginStart: 8,
+        marginEnd: 8,
+        borderBottomStartRadius: 0,
+        borderBottomEndRadius: 0
+    },
+    
+
+    // Title 
+    titleContainerBlue: {
+        backgroundColor: Colors.white,
+        padding: 16,
+        borderWidth: 2,
+        borderColor: Colors.blueFb,
+        borderStartStartRadius: 5,
+        borderStartEndRadius: 5,
+        borderTopStartRadius: 5,
+        borderTopEndRadius: 5,
+    },
+
+    titleContainerRed: {
+        backgroundColor: Colors.white,
+        padding: 16,
+        borderWidth: 2,
+        borderColor: Colors.red,
+        borderStartStartRadius: 5,
+        borderStartEndRadius: 5,
+        borderTopStartRadius: 5,
+        borderTopEndRadius: 5,
+    },
+
+    titleContainerOrange: {
+        backgroundColor: Colors.white,
+        padding: 16,
+        borderWidth: 2,
+        borderColor: Colors.colorOrange,
+        borderStartStartRadius: 5,
+        borderStartEndRadius: 5,
+        borderTopStartRadius: 5,
+        borderTopEndRadius: 5,
+    },
+
+    titleText: {
+        color: Colors.black,
+        fontSize: 18,
+        fontWeight: 'bold'
+    },
+
+    descContainer: {
+        padding: 16,
+    },
+
+    descText: {
+        color: Colors.white,
+        fontSize: 18,
+    },
+
+    // SubTitle 
+    subTitleContainer : {
+        width: screenWidth,
+        backgroundColor: Colors.colorOrange,
+    },
+
+    // TextInput
+    textInputSigin: {
+        flex: 1,
+        margin: 8
+    },
+
+    textInputLogin: {
+        flex: 1,
+        margin: 8
+    },
+
+    // Text 
+    textUseConditionContenair: {
+        flex: 1,
+        margin:8,
+        paddingStart: 5
+    },
+
+    // TextError
+    textError: {
+        fontSize: 18,
+        margin: 8,
+        color: Colors.colorRed
+    },
+
+    // Button 
+    btnGoUpdate: {
+        backgroundColor: Colors.blueFb,
+        padding: 15,
+        borderRadius: 5,
+    },
+
+    btnGoUpdateTxt: {
+        textAlign: 'center',
+        color: Colors.white,
+        textTransform: 'uppercase',
+        fontWeight: 'bold',
+        fontSize: 18,
+    },
+
+    btnDeleteAcount: {
+        backgroundColor: Colors.red,
+        padding: 15,
+        borderRadius: 5,
+    },
+
+
+
+
+
+
+
+
+
+
+    subTitleText : {
+        color: Colors.white,
+        fontWeight:'bold',
+        fontSize: 20,
+        padding: 16,
+    },
+
    
     // Button 
     buttonTouchableOpacity: {
@@ -31,20 +218,7 @@ export default StyleSheet.create({
         alignItems: 'center',
     },
 
-    // SubTitle 
-    subTitleContainer : {
-        width: screenWidth,
-        backgroundColor: Colors.blueFb,
-    },
-
-    subTitleText : {
-        color: Colors.white,
-        fontWeight:'bold',
-        fontSize: 20,
-        padding: 15,
-
-    },
-
+   
     // Header 
     headerContenair : {
         alignItems: 'center',

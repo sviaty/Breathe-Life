@@ -33,7 +33,7 @@ const CounterCigaretteScreen = () => {
                 title: 'Marque de cigarette', 
                 headerTintColor: Colors.white,
                 headerStyle: {
-                    backgroundColor: Colors.colorOrange,
+                    backgroundColor: Colors.blueFb,
                     height: 50
                 }
             }} />
