@@ -201,7 +201,7 @@ const LoginScreen = () => {
         <View>
 
             <View style={AppStyle.subTitleContainer}>
-                <Text style={AppStyle.subTitleText}>Connexion</Text>
+                <Text style={AppStyle.subTitleText}>{ textTranslate.t('loginText') } </Text>
             </View>
 
             <Stack 

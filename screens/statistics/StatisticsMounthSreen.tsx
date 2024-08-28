@@ -1,13 +1,25 @@
+// React & React Native
 import React, { useState , useEffect} from 'react';
 import { StyleSheet, Text, View, Dimensions } from 'react-native'
+import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Surface } from "@react-native-material/core";
-import { LinearGradient } from 'expo-linear-gradient';
 import { useIsFocused } from '@react-navigation/native';
 
-// Styles & Colors
-import Colors from '../../constants/ColorConstant';
+// Material 
+import { Surface } from "@react-native-material/core";
+
+// Styles
 import AppStyle from '../../styles/AppStyle';
+import StatStyle from '../../styles/StatStyle';
+
+// Constants
+import Colors from '../../constants/ColorConstant';
+import { 
+    SURFACE_CATEGORY, 
+    SURFACE_ELEVATION } from '../../constants/AppConstant';
+
+// Helpers
+import textTranslate from '../../helpers/TranslateHelper';
 
 // Components
 import LoaderComponent from '../../components/LoaderComponent';
@@ -24,15 +36,7 @@ import { getUserPatchsByIdUserFireStore } from '../../api/UserPatchsApi';
 import { getUserPillMounthByIdUserFireStore, getUserPillsByIdUserFireStore } from '../../api/UserPillsApi';
 import { getUserCigaretteMounthByIdUserFireStore, getUserCigarettesByIdUserFireStore } from '../../api/UserCigarettesApi';
 
-import {
-    LineChart,
-    BarChart,
-    PieChart,
-    ProgressChart,
-    ContributionGraph,
-    StackedBarChart
-} from "react-native-chart-kit";
-import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
+import { LineChart } from "react-native-chart-kit";
 
 const StatisticsMounthSreen = () => {
 
@@ -137,8 +141,6 @@ const StatisticsMounthSreen = () => {
                         countNicotine = countNicotine + parseInt(patchData.nicotine)
                         setCountNicotine(countNicotine)
                         //console.log(countNicotine)
-
-                        //getStatPatchInDatabase(patchData.idPatch)
                     }
                 })
 
@@ -146,13 +148,12 @@ const StatisticsMounthSreen = () => {
                 setIsLoadCountPatch(false)
 
             } else {
-                //console.log('cigaretteList size = 0');
                 setCountPatch(0)
                 setIsLoadCountPatch(false)
             }
             
         }).catch((error) => {
-            console.log("Error get user patchs in firestore database : ")
+            //console.log("Error getUserPatchsByIdUserFireStore")
             console.error(error.message)
         })
     }
@@ -186,8 +187,6 @@ const StatisticsMounthSreen = () => {
                         countNicotine = countNicotine + parseFloat(pillData.nicotine)
                         setCountNicotine(countNicotine)
                         //console.log(countNicotine)
-                        
-                        //getStatPillInDatabase(pillData.idPill)
                     }
                 })
 
@@ -195,13 +194,12 @@ const StatisticsMounthSreen = () => {
                 setIsLoadCountPill(false)
 
             } else {
-                //console.log('cigaretteList size = 0');
                 setCountPill(0)
                 setIsLoadCountPill(false)
             }
 
         }).catch((error) => {
-            console.log("Error get user pills in firestore database")
+            //console.log("Error getUserPillsByIdUserFireStore")
             console.error(error.message)
         })
 
@@ -219,7 +217,6 @@ const StatisticsMounthSreen = () => {
         dataCigaretteTab.length = 0
         setDataCigaretteTab([...dataCigaretteTab])
 
-     
         getUserCigarettesByIdUserFireStore(userSelector.userId).then((userCigaretteList) => {
 
             if(userCigaretteList.size != 0){
@@ -258,19 +255,14 @@ const StatisticsMounthSreen = () => {
                         }
                         
                         i += 1
-
-                        //getStatCigaretteInDatabase(cigaretteData.idCigarette)
                     }
                 });
 
                 setIsLoadCountPriceEconomy(false)
-
                 setCountCigarette(i)
-
                 setIsLoadCountCigarette(false)
 
             } else {
-                //console.log('cigaretteList size = 0');
                 setCountCigarette(0)
                 setIsLoadCountCigarette(false)
                 setIsLoadCountPriceEconomy(false)
@@ -280,7 +272,7 @@ const StatisticsMounthSreen = () => {
             }
 
         }).catch((error) => {
-            console.log("Error get user pills in firestore database")
+            //console.log("Error getUserCigarettesByIdUserFireStore")
             console.error(error.message)
         })
 
@@ -309,7 +301,7 @@ const StatisticsMounthSreen = () => {
             }
         }).catch((error) => {
             setIsLoadCigChart(false)
-            console.log("Error getUserCigaretteMounthByIdUserFireStore")
+            //console.log("Error getUserCigaretteMounthByIdUserFireStore")
             console.error(error.message)
         })
     }
@@ -337,7 +329,7 @@ const StatisticsMounthSreen = () => {
             }
         }).catch((error) => {
             setIsLoadPillChart(false)
-            console.log("Error getStatPillMounth")
+            console.log("Error getUserPillMounthByIdUserFireStore")
             console.error(error.message)
         })
     }
@@ -354,480 +346,321 @@ const StatisticsMounthSreen = () => {
         "21", "22", "23", "24", "25", "26", "27", "28", "29", "30",
         "31",
     ]
+
     /**
      * JSX View
      */
     return (
-    <SafeAreaProvider style={AppStyle.container}>
+        <SafeAreaProvider style={AppStyle.container}>
 
-        <GestureHandlerRootView>
-        <ScrollView>
-        <View style={styles.statContainer}>
+            <GestureHandlerRootView>
 
-            <View style={styles.statDispositifNicotine}>
+                <ScrollView>
 
-                <Surface 
-                    elevation={4}
-                    category="medium"
-                    style={styles.statSurfaceRed}>
-                        
-                    <View style={ styles.titleContainerRed }>
-                        <Text style={ styles.titleText }>Cigarettes</Text>
-                    </View>
-                    
-                    <View>
-                        {isLoadCountCigarette == true ? 
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                        : 
-                        <Text style={styles.descContenairViewText}> {countCigarette} </Text>
-                        }
-                    </View>
-                </Surface>
+                    <View style={ StatStyle.statContainer }>
 
-                <Surface 
-                    elevation={4}
-                    category="medium"
-                    style={styles.statSurfaceRed}>
-                        
-                    <View style={ styles.titleContainerRed }>
-                        <Text style={ styles.titleText }>Dépense</Text>
-                    </View>
-                    
-                    <View>
-                    {isLoadCountPriceEconomy == true ? 
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                        : 
-                        <View>
-                            <Text style={styles.descContenairViewText}> {countPriceDepense.toFixed(2)} € </Text>
+                        <View style={ StatStyle.statDispositifNicotine }>
+
+                            <Surface 
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={ StatStyle.statSurfaceRed }>
+                                    
+                                <View style={ StatStyle.titleContainerRed }>
+                                    <Text style={ StatStyle.titleText }>{ textTranslate.t('statCigarette') }</Text>
+                                </View>
+                                
+                                <View>
+                                    {isLoadCountCigarette == true ? 
+                                    <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                                    : 
+                                    <Text style={StatStyle.descContenairViewText}>{countCigarette}</Text>
+                                    }
+                                </View>
+                            </Surface>
+
+                            <Surface 
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={ StatStyle.statSurfaceRed }>
+                                    
+                                <View style={ StatStyle.titleContainerRed }>
+                                    <Text style={ StatStyle.titleText }>{ textTranslate.t('statSpent') }</Text>
+                                </View>
+                                
+                                <View>
+                                {isLoadCountPriceEconomy == true ? 
+                                    <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                                    : 
+                                    <View>
+                                        <Text style={ StatStyle.descContenairViewText }> {countPriceDepense.toFixed(2)} { textTranslate.t('cigarettePriceEuros') } </Text>
+                                    </View>
+                                    }
+                                </View>
+                            </Surface>
+
                         </View>
-                        }
-                    </View>
-                </Surface>
 
-            </View>
+                        <View style={ StatStyle.statDispositifNicotine }>
+                            <Surface 
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={ StatStyle.statSurfaceBlue }>
 
-            <View style={styles.statDispositifNicotine}>
-                <Surface 
-                    elevation={4}
-                    category="medium"
-                    style={styles.statSurfaceBlue}>
+            <                   View style={ StatStyle.titleContainerBlue }>
+                                    <Text style={ StatStyle.titleText }>{ textTranslate.t('statCigaretteSmoke') }</Text>
+                                </View>
 
-<                   View style={ styles.titleContainerBlue }>
-                        <Text style={ styles.titleText }> Cigarettes consommées </Text>
-                    </View>
+                                <View>
 
-                    <View>
+                                {isLoadCigChart == true ? 
+                                <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                                : 
+                                <LineChart
+                                    data={{
+                                        labels: tab31j,
+                                        datasets: [
+                                        {data: [
+                                            dataCigaretteWeek.m1, dataCigaretteWeek.m2, dataCigaretteWeek.m3, dataCigaretteWeek.m4, dataCigaretteWeek.m5, dataCigaretteWeek.m6, dataCigaretteWeek.m7, dataCigaretteWeek.m8, dataCigaretteWeek.m9, dataCigaretteWeek.m10,
+                                            dataCigaretteWeek.m11, dataCigaretteWeek.m12, dataCigaretteWeek.m13, dataCigaretteWeek.m14, dataCigaretteWeek.m15, dataCigaretteWeek.m16, dataCigaretteWeek.m17, dataCigaretteWeek.m18, dataCigaretteWeek.m19, dataCigaretteWeek.m20,
+                                            dataCigaretteWeek.m21, dataCigaretteWeek.m22, dataCigaretteWeek.m23, dataCigaretteWeek.m24, dataCigaretteWeek.m25, dataCigaretteWeek.m26, dataCigaretteWeek.m27, dataCigaretteWeek.m28, dataCigaretteWeek.m29, dataCigaretteWeek.m30,
+                                            dataCigaretteWeek.m31,
+                                        ]}]
+                                    }}
 
-                    {isLoadCigChart == true ? 
-                    <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                    : 
-                    <LineChart
-                        data={{
-                            labels: tab31j,
-                            datasets: [
-                            {data: [
-                                dataCigaretteWeek.m1, dataCigaretteWeek.m2, dataCigaretteWeek.m3, dataCigaretteWeek.m4, dataCigaretteWeek.m5, dataCigaretteWeek.m6, dataCigaretteWeek.m7, dataCigaretteWeek.m8, dataCigaretteWeek.m9, dataCigaretteWeek.m10,
-                                dataCigaretteWeek.m11, dataCigaretteWeek.m12, dataCigaretteWeek.m13, dataCigaretteWeek.m14, dataCigaretteWeek.m15, dataCigaretteWeek.m16, dataCigaretteWeek.m17, dataCigaretteWeek.m18, dataCigaretteWeek.m19, dataCigaretteWeek.m20,
-                                dataCigaretteWeek.m21, dataCigaretteWeek.m22, dataCigaretteWeek.m23, dataCigaretteWeek.m24, dataCigaretteWeek.m25, dataCigaretteWeek.m26, dataCigaretteWeek.m27, dataCigaretteWeek.m28, dataCigaretteWeek.m29, dataCigaretteWeek.m30,
-                                dataCigaretteWeek.m31,
-                            ]}]
-                        }}
+                                    width={Dimensions.get("window").width -32} // from react-native
+                                    height={200}
+                                    yAxisLabel=""
+                                    yAxisSuffix=""
+                                    fromZero={true}
+                                    yAxisInterval={1} // optional, defaults to 1
+                                    chartConfig={{
+                                        backgroundColor: Colors.transparent,
+                                        backgroundGradientFrom: Colors.blueFb,
+                                        backgroundGradientTo: Colors.blueFb,
+                                        decimalPlaces: 0, // optional, defaults to 2dp
+                                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                        style: {
+                                            //borderRadius: 16
+                                        },
+                                        propsForDots: {
+                                            r: "2",
+                                            strokeWidth: "2",
+                                            stroke: 'silver'
+                                        },
 
-                        width={Dimensions.get("window").width -32} // from react-native
-                        height={200}
-                        yAxisLabel=""
-                        yAxisSuffix=""
-                        fromZero={true}
-                        yAxisInterval={1} // optional, defaults to 1
-                        chartConfig={{
-                            backgroundColor: Colors.transparent,
-                            backgroundGradientFrom: Colors.blueFb,
-                            backgroundGradientTo: Colors.blueFb,
-                            decimalPlaces: 0, // optional, defaults to 2dp
-                            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                            style: {
-                                //borderRadius: 16
-                            },
-                            propsForDots: {
-                                r: "2",
-                                strokeWidth: "2",
-                                stroke: 'silver'
-                            },
+                                        propsForVerticalLabels: {
+                                            fontSize: 7
+                                        }
+                                    }}
+                                    bezier
+                                    style={{
+                                        marginVertical: 8,
+                                        marginStart: 0
+                                    }}
+                                />
+                                }
+                                
+                                </View>
 
-                            propsForVerticalLabels: {
-                                fontSize: 7
-                            }
-                        }}
-                        bezier
-                        style={{
-                            marginVertical: 8,
-                            marginStart: 0
-                        }}
-                    />
-                    }
-                    
-                    </View>
-
-                </Surface>
-            </View>
-
-            <View style={styles.statDispositifNicotine}>
-
-                <Surface 
-                    elevation={4}
-                    category="medium"
-                    style={styles.statSurfaceRed}>
-                        
-                    <View style={ styles.titleContainerRed }>
-                        <Text style={ styles.titleText }>Nicotine</Text>
-                    </View>
-                    
-                    <View>
-                        { isLoadCountCigarette == true ?
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                        : 
-                        <View>
-                            <Text style={styles.descContenairViewText2}> {countNicotine.toFixed(1)} </Text>
-                            <Text style={styles.statUnitCount}> mg </Text>
+                            </Surface>
                         </View>
-                        }
-                    </View>
-                </Surface>
 
-                <Surface 
-                    elevation={4}
-                    category="medium"
-                    style={styles.statSurfaceRed}>
-                        
-                    <View style={ styles.titleContainerRed }>
-                        <Text style={ styles.titleText }>Goudron</Text>
-                    </View>
-                    
-                    <View>
-                    { isLoadCountCigarette == true ?
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                        : 
-                        <View>
-                            <Text style={styles.descContenairViewText2}> {countGoudron} </Text>
-                            <Text style={styles.statUnitCount}> mg </Text>
+                        <View style={ StatStyle.statDispositifNicotine }>
+
+                            <Surface 
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={ StatStyle.statSurfaceRed }>
+                                    
+                                <View style={ StatStyle.titleContainerRed }>
+                                    <Text style={ StatStyle.titleText }>{ textTranslate.t('statNicotine') }</Text>
+                                </View>
+                                
+                                <View>
+                                    { isLoadCountCigarette == true ?
+                                    <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                                    : 
+                                    <View>
+                                        <Text style={ StatStyle.descContenairViewText2 }> { countNicotine.toFixed(1) } </Text>
+                                        <Text style={ StatStyle.statUnitCount }>{ textTranslate.t('cigaretteMgMesure') }</Text>
+                                    </View>
+                                    }
+                                </View>
+                            </Surface>
+
+                            <Surface 
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={ StatStyle.statSurfaceRed }>
+                                    
+                                <View style={ StatStyle.titleContainerRed }>
+                                    <Text style={ StatStyle.titleText }>{ textTranslate.t('statTar') }</Text>
+                                </View>
+                                
+                                <View>
+                                { isLoadCountCigarette == true ?
+                                    <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                                    : 
+                                    <View>
+                                        <Text style={ StatStyle.descContenairViewText2}> {countGoudron} </Text>
+                                        <Text style={ StatStyle.statUnitCount}>{ textTranslate.t('cigaretteMgMesure') }</Text>
+                                    </View>
+                                    }
+                                </View>
+                            </Surface>
+
+                            <Surface 
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={ StatStyle.statSurfaceRed }>
+                                    
+                                <View style={ StatStyle.titleContainerRed }>
+                                    <Text style={ StatStyle.titleText }>{ textTranslate.t('statCarbone') }</Text>
+                                </View>
+                                
+                                <View>
+                                { isLoadCountCigarette == true ?
+                                    <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                                    : 
+                                    <View>
+                                        <Text style={ StatStyle.descContenairViewText2}> {countCarbonne} </Text>
+                                        <Text style={ StatStyle.statUnitCount}>{ textTranslate.t('cigaretteMgMesure') }</Text>
+                                    </View>
+                                    }
+                                </View>
+                            </Surface>
                         </View>
-                        }
-                    </View>
-                </Surface>
 
-                <Surface 
-                    elevation={4}
-                    category="medium"
-                    style={styles.statSurfaceRed}>
-                        
-                    <View style={ styles.titleContainerRed }>
-                        <Text style={ styles.titleText }>Carbone</Text>
-                    </View>
-                    
-                    <View>
-                    { isLoadCountCigarette == true ?
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                        : 
-                        <View>
-                            <Text style={styles.descContenairViewText2}> {countCarbonne} </Text>
-                            <Text style={styles.statUnitCount}> mg </Text>
+                        <View style={ StatStyle.statDispositifNicotine }>
+                            <Surface 
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={ StatStyle.statSurfaceOrange }>
+                                    
+                                <View style={ StatStyle.titleContainer }>
+                                    <Text style={ StatStyle.titleText }>{ textTranslate.t('statPatchs') }</Text>
+                                </View>
+                                
+                                <View>
+                                    {isLoadCountPatch == true ? 
+                                    <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                                    : 
+                                    <Text style={ StatStyle.descContenairViewText }> {countPatch} </Text>
+                                    }
+                                </View>
+                            </Surface>
+
+                            <Surface 
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={ StatStyle.statSurfaceOrange }>
+                                    
+                                <View style={ StatStyle.titleContainer }>
+                                    <Text style={ StatStyle.titleText }>{ textTranslate.t('statPills') }</Text>
+                                </View>
+                                
+                                <View>
+                                    {isLoadCountPill == true ? 
+                                    <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                                    : 
+                                    <Text style={ StatStyle.descContenairViewText }> {countPill} </Text>
+                                    }
+                                </View>
+                            </Surface>
                         </View>
-                        }
-                    </View>
-                </Surface>
-            </View>
 
-            <View style={styles.statDispositifNicotine}>
-                <Surface 
-                    elevation={4}
-                    category="medium"
-                    style={styles.statSurfaceOrange}>
-                        
-                    <View style={ styles.titleContainer }>
-                        <Text style={ styles.titleText }>Patchs</Text>
-                    </View>
-                    
-                    <View>
-                        {isLoadCountPatch == true ? 
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                        : 
-                        <Text style={styles.descContenairViewText}> {countPatch} </Text>
-                        }
-                    </View>
-                </Surface>
+                        <View style={ StatStyle.statDispositifNicotine }>
+                            <Surface 
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={ StatStyle.statSurfaceBlue }>
 
-                <Surface 
-                    elevation={4}
-                    category="medium"
-                    style={styles.statSurfaceOrange}>
-                        
-                    <View style={ styles.titleContainer }>
-                        <Text style={ styles.titleText }>Pastilles</Text>
-                    </View>
-                    
-                    <View>
-                        {isLoadCountPill == true ? 
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                        : 
-                        <Text style={styles.descContenairViewText}> {countPill} </Text>
-                        }
-                    </View>
-                </Surface>
-            </View>
+            <                   View style={ StatStyle.titleContainerBlue }>
+                                    <Text style={ StatStyle.titleText }>{ textTranslate.t('statPillsConsume') }</Text>
+                                </View>
 
-            <View style={styles.statDispositifNicotine}>
-                <Surface 
-                    elevation={4}
-                    category="medium"
-                    style={styles.statSurfaceBlue}>
+                                <View>
 
-<                   View style={ styles.titleContainerBlue }>
-                        <Text style={ styles.titleText }> Pastilles consommées </Text>
-                    </View>
+                                {isLoadPillChart == true ? 
+                                    <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                                : 
+                                <LineChart
+                                    data={{
+                                        labels: tab31j,
+                                        datasets: [{data: [
+                                            dataPillWeek.m1, dataPillWeek.m2, dataPillWeek.m3, dataPillWeek.m4, dataPillWeek.m5, dataPillWeek.m6, dataPillWeek.m7, dataPillWeek.m8, dataPillWeek.m9, dataPillWeek.m10,
+                                            dataPillWeek.m11, dataPillWeek.m12, dataPillWeek.m13, dataPillWeek.m14, dataPillWeek.m15, dataPillWeek.m16, dataPillWeek.m17, dataPillWeek.m18, dataPillWeek.m19, dataPillWeek.m20,
+                                            dataPillWeek.m21, dataPillWeek.m22, dataPillWeek.m23, dataPillWeek.m24, dataPillWeek.m25, dataPillWeek.m26, dataPillWeek.m27, dataPillWeek.m28, dataPillWeek.m29, dataPillWeek.m30,
+                                            dataPillWeek.m31,
+                                        ]}]
+                                    }}
 
-                    <View>
+                                    width={Dimensions.get("window").width -32} // from react-native
+                                    height={200}
+                                    yAxisLabel=""
+                                    yAxisSuffix=""
+                                    fromZero={true}
+                                    yAxisInterval={1} // optional, defaults to 1
+                                    chartConfig={{
+                                        backgroundColor: Colors.transparent,
+                                        backgroundGradientFrom: Colors.blueFb,
+                                        backgroundGradientTo: Colors.blueFb,
+                                        decimalPlaces: 0, // optional, defaults to 2dp
+                                        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                        style: {
+                                            //borderRadius: 16
+                                        },
+                                        propsForDots: {
+                                            r: "2",
+                                            strokeWidth: "2",
+                                            stroke: 'silver'
+                                        },
+                                    }}
+                                    bezier
+                                    style={{
+                                        marginVertical: 8,
+                                    }}
+                                />
+                                }
+                                
+                                </View>
 
-                    {isLoadPillChart == true ? 
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                    : 
-                    <LineChart
-                        data={{
-                            labels: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"],
-                            datasets: [{data: [
-                                dataPillWeek.m1, dataPillWeek.m2, dataPillWeek.m3, dataPillWeek.m4, dataPillWeek.m5, dataPillWeek.m6, dataPillWeek.m7, dataPillWeek.m8, dataPillWeek.m9, dataPillWeek.m10,
-                                dataPillWeek.m11, dataPillWeek.m12, dataPillWeek.m13, dataPillWeek.m14, dataPillWeek.m15, dataPillWeek.m16, dataPillWeek.m17, dataPillWeek.m18, dataPillWeek.m19, dataPillWeek.m20,
-                                dataPillWeek.m21, dataPillWeek.m22, dataPillWeek.m23, dataPillWeek.m24, dataPillWeek.m25, dataPillWeek.m26, dataPillWeek.m27, dataPillWeek.m28, dataPillWeek.m29, dataPillWeek.m30,
-                                dataPillWeek.m31,
-                            ]}]
-                        }}
-
-                        width={Dimensions.get("window").width -32} // from react-native
-                        height={200}
-                        yAxisLabel=""
-                        yAxisSuffix=""
-                        fromZero={true}
-                        yAxisInterval={1} // optional, defaults to 1
-                        chartConfig={{
-                            backgroundColor: Colors.transparent,
-                            backgroundGradientFrom: Colors.blueFb,
-                            backgroundGradientTo: Colors.blueFb,
-                            decimalPlaces: 0, // optional, defaults to 2dp
-                            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                            style: {
-                                //borderRadius: 16
-                            },
-                            propsForDots: {
-                                r: "2",
-                                strokeWidth: "2",
-                                stroke: 'silver'
-                            },
-                        }}
-                        bezier
-                        style={{
-                            marginVertical: 8,
-                        }}
-                    />
-                    }
-                    
-                    </View>
-
-                </Surface>
-            </View>
-
-            <View style={styles.statDispositifNicotine}>
-
-                <Surface 
-                    elevation={4}
-                    category="medium"
-                    style={styles.statSurfaceGreen}>
-                        
-                    <View style={ styles.titleContainerGreen }>
-                        <Text style={ styles.titleText }>Economie</Text>
-                    </View>
-                    
-                    <View>
-                    {isLoadCountPriceEconomy == true ? 
-                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                        : 
-                        <View>
-                            <Text style={styles.descContenairViewText}> {countPriceEconomy.toFixed(2)} € </Text>
+                            </Surface>
                         </View>
-                        }
+
+                        <View style={ StatStyle.statDispositifNicotine }>
+
+                            <Surface 
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={ StatStyle.statSurfaceGreen }>
+                                    
+                                <View style={ StatStyle.titleContainerGreen }>
+                                    <Text style={ StatStyle.titleText }>{ textTranslate.t('statEconomy') }</Text>
+                                </View>
+                                
+                                <View>
+                                {isLoadCountPriceEconomy == true ? 
+                                    <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                                    : 
+                                    <View>
+                                        <Text style={ StatStyle.descContenairViewText }> {countPriceEconomy.toFixed(2)} { textTranslate.t('cigarettePriceEuros') } </Text>
+                                    </View>
+                                    }
+                                </View>
+                            </Surface>
+                        </View>
+
                     </View>
-                </Surface>
+                </ScrollView>
 
-            </View>
+            </GestureHandlerRootView>
 
-        </View>
-        </ScrollView>
-        </GestureHandlerRootView>
-
-    </SafeAreaProvider>
+        </SafeAreaProvider>
   )
 }
 
 export default StatisticsMounthSreen
-
-const styles = StyleSheet.create({
-    statContainer: {
-        margin:5
-    },
-
-    statSurfaceOrange: {
-        flex: 1,
-        backgroundColor: Colors.colorOrange,
-        borderRadius: 10,
-        margin:8
-    },
-
-    statSurfaceRed: {
-        flex: 1,
-        backgroundColor: Colors.red,
-        borderRadius: 10,
-        margin:8
-    },
-
-    statSurfaceGreen: {
-        flex: 1,
-        backgroundColor: Colors.green,
-        borderRadius: 10,
-        margin:8
-    },
-
-    statSurfaceBlue: {
-        flex: 1,
-        backgroundColor: Colors.blueFb,
-        borderRadius: 10,
-        margin:8
-    },
-
-    titleContainer: {
-        backgroundColor: Colors.white,
-        padding: 16,
-        borderWidth: 2,
-        borderColor: Colors.colorOrange,
-        borderStartStartRadius: 5,
-        borderStartEndRadius: 5,
-    },
-
-    titleContainerRed: {
-        backgroundColor: Colors.white,
-        padding: 16,
-        borderWidth: 2,
-        borderColor: Colors.red,
-        borderStartStartRadius: 5,
-        borderStartEndRadius: 5,
-    },
-
-    titleContainerGreen: {
-        backgroundColor: Colors.white,
-        padding: 16,
-        borderWidth: 2,
-        borderColor: Colors.green,
-        borderStartStartRadius: 5,
-        borderStartEndRadius: 5,
-    },
-
-    titleContainerBlue: {
-        backgroundColor: Colors.white,
-        padding: 16,
-        borderWidth: 2,
-        borderColor: Colors.blueFb,
-        borderStartStartRadius: 5,
-        borderStartEndRadius: 5,
-    },
-
-    titleText: {
-        textAlign: 'center',
-        color: Colors.black,
-        fontSize: 16,
-        fontWeight: 'bold'
-    },
-
-    descContenairViewText: {
-        color: Colors.white,
-        textAlign:'center',
-        verticalAlign: 'auto',
-        fontSize: 30,
-        padding: 16
-    },
-
-    descContenairViewText2: {
-        color: Colors.white,
-        textAlign:'center',
-        verticalAlign: 'auto',
-        fontSize: 30,
-        paddingTop: 16
-    },
-
-    statUnitCount: {
-        color: Colors.white,
-        textAlign:'center',
-        verticalAlign: 'auto',
-        fontSize: 14,
-        paddingBottom: 16
-    },
-
-
-    statDispositifNicotine: {
-        flexDirection: "row"
-    },
-
-    statCigaretteItem: {
-        flex: 1,
-        backgroundColor: Colors.colorOrange,
-        height: 120,
-        borderRadius: 10,
-        margin:8
-    },
-
-    statDispositifNicotineItem: {
-        flex: 1,
-        height: 120,
-        backgroundColor: Colors.blueFb,
-    
-        borderRadius: 10,
-        margin:8
-    },
-
-    statDepenseItem: {
-        flex: 1,
-        height: 120,
-        backgroundColor: Colors.red,
-    
-        borderRadius: 10,
-        margin:8
-    },
-
-    statEconomyItem: {
-        flex: 1,
-        height: 120,
-        backgroundColor: Colors.green,
-    
-        borderRadius: 10,
-        margin:8
-    },
-
-    statDispositifNicotineTitle: {
-        color: Colors.white,
-        textAlign:'center',
-        fontWeight: 'bold',
-        fontSize: 20,
-        paddingTop: 10,
-    },
-
-    statDispositifNicotineContenair: {
-        flex:1,
-        justifyContent: 'center',
-    },
-
-    statDispositifNicotineCount: {
-        color: Colors.white,
-        textAlign:'center',
-        verticalAlign: 'auto',
-        fontSize: 35
-    }
-
-})
