@@ -1,15 +1,30 @@
 // React & React Native
-import React, { useState, useMemo, useCallback, useEffect, useRef} from 'react';
-import { StyleSheet, Platform,  Text, View, TouchableOpacity, Pressable, Alert, Dimensions, ScrollView} from 'react-native'
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { Platform,  Text, View, TouchableOpacity, Pressable, Alert, ScrollView } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Surface, Stack } from "@react-native-material/core";
 import { Picker } from '@react-native-picker/picker';
 import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 
-// Styles & Colors
-import Colors from '../../constants/ColorConstant';
+// Material 
+import { Surface } from "@react-native-material/core";
+
+// Navigation 
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+
+// Styles 
 import AppStyle from '../../styles/AppStyle';
+import CounterStyle from '../../styles/CounterStyle';
+
+// Constants 
+import Colors from '../../constants/ColorConstant';
+import { 
+    SURFACE_CATEGORY, 
+    SURFACE_ELEVATION } from '../../constants/AppConstant';
+
+// Helpers
+import { getDifference2Date } from '../../helpers/DateHelper';
+import textTranslate from '../../helpers/TranslateHelper';
 
 // Components
 import LoaderComponent from '../../components/LoaderComponent';
@@ -36,16 +51,12 @@ import { getUserCigarettesByIdUserFireStore, getUserLastCigaretteByIdUserFireSto
  * http://additifstabac.free.fr/index.php/cigarettes-pourcentages-additifs-taux-nicotine-goudrons-monoxyde-carbone-co/
  */
 
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { getDifference2Date } from '../../helpers/DateHelper';
-
 type RootStackParamList = {
-    CounterCigaretteListScreen: any;
-    CounterCigaretteAddScreen: any;
-    SettingCounter: any;
+    UserCounterCigaretteListScreen: any;
+    UserCounterCigaretteAddScreen: any;
   };
 
-type Props = NativeStackScreenProps<RootStackParamList, 'CounterCigaretteListScreen', 'CounterCigaretteAddScreen'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'UserCounterCigaretteListScreen', 'UserCounterCigaretteAddScreen'>;
 
 /**
  * Screen CounterCigaretteListScreen
@@ -60,26 +71,23 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
     const [isLoadCountCigarette, setIsLoadCountCigarette] = useState<boolean>(true);
 
     const [isLoaderGet, setIsLoaderGet] = useState<boolean>(false)
-    const [isBackdropRevealed, setIsBackdropRevealed] = useState<boolean>(true)
-
     const [isLoaderUserAdd, setIsLoaderUserAdd] = useState<boolean>(false)
-    const [errorAddPill, setErrorAddPill] = useState<string>("")
-
-    const [isLoaderCigAdd, setIsLoaderCigAdd] = useState<boolean>(false)
-    const [errorAddCigUser, setErrorAddCigUser] = useState<string>("")
-    
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
     const [textSnackBar, setTextSnackBar] = useState<string>("")
 
-    let [userCig, setUserCig] = useState<string>("Selectionner une marque de cigarette");
-    let [userCigText, setUserCigText] = useState<string>( "Selectionner une marque de cigarette");
+    let [userCig, setUserCig] = useState<string>( textTranslate.t('counterCigListBrandSelected') );
+    let [userCigText, setUserCigText] = useState<string>( textTranslate.t('counterCigListBrandSelected') );
 
     const c = new Cigarette("","",0,0,0,0,0,0,"")
     let [userCigSelected, setUserCigSelected] = useState<Cigarette>(c);
 
     let [dataCigTab, setDataCigTab] = useState<Cigarette[]>([]);
     let [dataCigTabItem, setDataCigTabItem] = useState<any[]>([]);
-    
+    let [diff, setDiff] = useState<string>("")
+
+    // UseRef
+    const intervalRef:any = useRef();
+
     // UseSelector
     const userSelector = useSelector((state: RootState) => state.userReducer.user);
 
@@ -110,7 +118,7 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
         await getCigaretteListFireStore(userSelector.userId).then((cigList) => {
             //console.log(cigList.size);
 
-            const cItem = { label: "Selectionner une marque de cigarette", value: "Selectionner une marque de cigarette" }
+            const cItem = { label: textTranslate.t('counterCigListBrandSelected'), value: textTranslate.t('counterCigListBrandSelected') }
             //console.log(pItem);
 
             dataCigTabItem.push(cItem)
@@ -150,7 +158,7 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
 
         }).catch((error) => {
             setIsLoaderGet(false)
-            console.log("Error get cigarette in firestore database")
+            //console.log("Error getCigaretteListFireStore")
             console.error(error.message)
         }) 
     }
@@ -159,7 +167,6 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
      * Function changeCigSelectedFomUserIdCig
      */
     const changeCigSelectedFomUserIdCig = () => {
-        //console.log("changeCigSelectedFomUserIdCig")
         setUserCig("")
         if(userSelector.idCigarette != ""){
             setUserCig(userSelector.idCigarette)
@@ -172,7 +179,7 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
             })
         } else {
             if(Platform.OS === 'ios'){
-                setUserCigText("Selectionner une marque de cigarette")
+                setUserCigText( textTranslate.t('counterCigListBrandSelected') )
             }
         }
     }
@@ -184,8 +191,7 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
         setUserCig(idCig)
         //console.log(idCig)
 
-        if(idCig != "Selectionner une marque de cigarette"){
-            //console.log('IS NOT undefined')
+        if(idCig != textTranslate.t('counterCigListBrandSelected') ){
             dataCigTab.forEach((cig) => {
                 if(cig.idCigarette == idCig){
                     setUserCigSelected(cig)
@@ -208,12 +214,11 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
                 0,
                 ""
             );
+
             setUserCigSelected(c)
-            setUserCigText("Selectionner une marque de cigarette")
+            setUserCigText( textTranslate.t('counterCigListBrandSelected') )
 
             setUserIdCig("")
-
-            //console.log('IS undefined')
         }
     }
 
@@ -239,7 +244,7 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
             dispatch(setUser(user));
 
         }).catch((error) => {
-            console.log("Error set user idCig in firestore database : ")
+            //console.log("Error setUserFireStore")
             console.error(error.message)
         }) 
     }
@@ -250,24 +255,25 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
     const handleAddUserCig = () => {
 
         Alert.alert(
-            'Etes vous sure de vouloir fumer cette cigarette ?', 
+            textTranslate.t('counterCigListAlertText'), 
             '', 
             [
-            {
-                text: 'Cancel',
-                onPress: () => {
-                    //console.log('Cancel Pressed')
+                {
+                    text: textTranslate.t('counterCigListAlertCancel'),
+                    onPress: () => {
+                        //console.log('Cancel Pressed')
+                    },
+                    style: 'cancel',
                 },
-                style: 'cancel',
-            },
-            {
-                text: 'OK', onPress: () => {
-                    //console.log('OK Pressed')
-                    addUserCig()
-                },
-            }
-            ]);
-        
+                {
+                    text: textTranslate.t('counterCigListAlertConfirm'),
+                    onPress: () => {
+                        //console.log('OK Pressed')
+                        addUserCig()
+                    },
+                }
+            ]
+        );
     }
 
     /**
@@ -296,17 +302,14 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
             //console.log(value)
             setIsLoaderUserAdd(false)
             setIsSnackBar(true)
+
         }).catch((error) => {
 
             setIsLoaderUserAdd(false)
-            //setErrorAddPatch("addUserCigarettes error : " + error.message)
-            console.log("Error addUserCigarettes")
+            //console.log("Error addUserCigarettes")
             console.error(error)
         })
     }
-
-    let [diff, setDiff] = useState<string>("")
-    const intervalRef:any = useRef();
 
     /**
      * Function startInterval
@@ -345,11 +348,11 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
                 const d = cigList.dateTime.toDate()
                 startInterval(d)                
             } else {
-                setDiff("Vous n'avez pas encore consommer de cigarette")
+                setDiff( textTranslate.t('counterCigListNoSmoke') )
             }
             
         }).catch((error) => {
-            console.log("Error getUserLastCigaretteByIdUserFireStore")
+            //console.log("Error getUserLastCigaretteByIdUserFireStore")
             console.error(error)
         })
     }
@@ -389,15 +392,9 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
             }
 
         }).catch((error) => {
-            console.log("Error get user pills in firestore database")
+            //console.log("Error getUserCigarettesByIdUserFireStore")
             console.error(error.message)
         })
-    }
-
-    /**
-     * Function onRefresh 
-     */
-    const onRefresh = () => {
     }
 
     const snapPoints = useMemo(() => ['50%'], []);
@@ -416,409 +413,189 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
 
     // View JSX
     return (
-        <SafeAreaProvider style={styles.mainContainer}>
-            <GestureHandlerRootView>
-            <ScrollView>
-                <View style={styles.statContainer}>
-                    { isLoaderGet == true ? 
-                    <View style={styles.loadContainerView}>
-                        <LoaderComponent text="Chargement des cigarettes" step="" color={Colors.blueFb} size="large"/>
-                    </View>
-                    : 
-                    <View style={styles.mainContainerView}>
-                        <View style={styles.statDispositifNicotine}>
-                        <Surface 
-                            elevation={4}
-                            category="medium"
-                            style={ styles.surfaceContainerBlue }>
+        <SafeAreaProvider>
 
-                            { Platform.OS === 'android' ? 
-                            <View>
-                            <View style={ styles.titleContainer2 }>
-                                <Text style={ styles.titleText }>Choisir une marque de cigarette</Text>
+            <GestureHandlerRootView>
+
+                <ScrollView>
+                    <View style={CounterStyle.statContainer}>
+                        { isLoaderGet == true ? 
+                        <View style={CounterStyle.loadContainerView}>
+                            <LoaderComponent text={ textTranslate.t('cigaretteViewLoading') } step="" color={Colors.blueFb} size="large"/>
+                        </View>
+                        : 
+                        <View style={CounterStyle.mainContainerView}>
+                            <View style={CounterStyle.statDispositifNicotine}>
+                            <Surface 
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={ CounterStyle.surfaceContainerBlue }>
+
+                                { Platform.OS === 'android' ? 
+                                <View>
+                                    <View style={ CounterStyle.titleContainer2 }>
+                                        <Text style={ CounterStyle.titleText }>{ textTranslate.t('cigaretteViewLoading') }</Text>
+                                    </View>
+                                    <Picker
+                                        selectedValue={userCig}
+                                        onValueChange={(cig) => handlePickerSelect(cig) }
+                                        placeholder={ textTranslate.t('counterCigListBrandSelected') }
+                                        mode={'dialog'}
+                                        style={{backgroundColor: Colors.white}}
+                                    >   
+                                    {
+                                    dataCigTabItem.map(cigTabItem => <Picker.Item key={cigTabItem.value} label={cigTabItem.label} value={cigTabItem.value}/>)
+                                    }          
+                                    </Picker>
+                                </View>
+                                : null }
+
+                                { Platform.OS === 'ios' ? 
+                                <Pressable 
+                                    onPress={() => snapeToIndex(0)}>
+
+                                    <View style={ CounterStyle.titleContainer }>
+                                        <Text style={ CounterStyle.titleText }>{ textTranslate.t('cigaretteViewLoading') }</Text>
+                                    </View>
+
+                                    <View style={ CounterStyle.descContainerPicker }>
+                                        <Text style={ CounterStyle.descTextPicker }>{userCigText}</Text>
+                                    </View>
+
+                                </Pressable>
+                                : null }
+
+                                <TouchableOpacity
+                                    onPress={() => navigation.navigate('UserCounterCigaretteAddScreen')}
+                                    activeOpacity={0.6}
+                                    style={CounterStyle.surfaceBtnBlue2}>
+                                    <Text style={CounterStyle.surfaceBtnBlueText}>{ textTranslate.t('counterCigListAddBrand') }</Text>
+                                </TouchableOpacity>
+                            </Surface>     
+                            </View>                       
+            
+                            { userCigText != textTranslate.t('counterCigListBrandSelected') ?
+                            <View style={CounterStyle.mainC}>
+                                <View style={CounterStyle.statDispositifNicotine}>
+
+                                    <View style={{flex: 1}}>
+                                    <Surface 
+                                        elevation={ SURFACE_ELEVATION }
+                                        category={ SURFACE_CATEGORY }
+                                        style={ CounterStyle.surfaceContainerRed2 } >   
+
+                                        <View style={ CounterStyle.titleContainerRed }>
+                                            <Text style={ CounterStyle.titleText }>{userCigSelected.cigaretteName}</Text>
+                                        </View>
+
+                                        <View style={ CounterStyle.descContainerRed }>
+                                            <Text style={ CounterStyle.descText }>{ textTranslate.t('cigaretteNicotine') } {userCigSelected.cigaretteNicotine} { textTranslate.t('cigaretteMgMesure') }</Text>
+                                            <Text style={ CounterStyle.descText }>{ textTranslate.t('cigaretteGoudron') } {userCigSelected.cigaretteGoudron} { textTranslate.t('cigaretteMgMesure') }</Text>
+                                            <Text style={ CounterStyle.descText }>{ textTranslate.t('cigaretteCarbonne') } {userCigSelected.cigaretteCarbone} { textTranslate.t('cigaretteMgMesure') }</Text>
+                                            <Text style={ CounterStyle.descText }>{ textTranslate.t('cigaretteNbr') } {userCigSelected.cigarettePrice} { textTranslate.t('cigaretteNbrPerPaquet') }</Text>
+                                            <Text style={ CounterStyle.descText }>{ textTranslate.t('cigarettePrice') } {userCigSelected.cigarettePrice} { textTranslate.t('cigarettePriceEuros') }</Text>
+                                        </View>
+                                    </Surface>
+
+                                    <TouchableOpacity
+                                        onPress={() => handleAddUserCig()}
+                                        activeOpacity={0.6}
+                                        style={CounterStyle.surfaceBtnBlue3}>
+
+                                        { isLoaderUserAdd == true ?
+                                        <LoaderComponent text={ textTranslate.t('counterCigListAddLoader') } step="" color={Colors.white} size="large"/>
+                                        :
+                                        <Text style={CounterStyle.surfaceBtnBlueText}>{ textTranslate.t('counterCigListSmoke') }</Text>
+                                        }
+                                    </TouchableOpacity>
+
+                                </View>
+                                </View>   
+
+                                <View style={ CounterStyle.statDispositifNicotine }>
+                                    <Surface 
+                                        elevation={ SURFACE_ELEVATION }
+                                        category={ SURFACE_CATEGORY }
+                                        style={ CounterStyle.surfaceContainerGreen } > 
+
+                                        <View style={ CounterStyle.titleContainer }>
+                                            <Text style={ CounterStyle.titleText }>{ textTranslate.t('counterCigListLastSmoke') }</Text>
+                                        </View>  
+
+                                        <View style={ CounterStyle.descContainer }>
+                                            <Text style={ CounterStyle.descContenairViewText }>{diff}</Text>
+                                        </View>
+                                    
+                                    </Surface>
+
+                                
+                                </View>
+
+                                <View style={ CounterStyle.statDispositifNicotine }>
+                                    <Surface 
+                                        elevation={ SURFACE_ELEVATION }
+                                        category={ SURFACE_CATEGORY }
+                                        style={ CounterStyle.surfaceContainerRed }>
+                                            
+                                        <View style={ CounterStyle.titleContainerRed }>
+                                            <Text style={ CounterStyle.titleText }>{ textTranslate.t('counterCigListNbrSmoke') }</Text>
+                                        </View>
+                                        
+                                        <View style={ CounterStyle.descContainerRed2 }>
+                                            {isLoadCountCigarette == true ? 
+                                            <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
+                                            : 
+                                            <Text style={ CounterStyle.descContenairViewText }> {countCigarette} </Text>
+                                            }
+                                        </View>
+                                    </Surface>
+                                </View>
+
                             </View>
+                            : null }
+                        </View> 
+                        }
+                    </View>
+                </ScrollView>
+           
+                <BottomSheet
+                    ref={bottomSheetRef}
+                    index={-1}
+                    snapPoints={snapPoints}
+                    enablePanDownToClose={true}
+                    handleIndicatorStyle={{ backgroundColor: Colors.blueFb }}
+                    backgroundStyle={{ backgroundColor: Colors.background }}
+                    backdropComponent={renderBackdrop}>
+
+                    <View style={CounterStyle.contentContainer}>
+
+                        <Text style={CounterStyle.containerHeadline}>{ textTranslate.t('counterCigListChoiceBrand') }</Text>
+                        
+                        <View style={AppStyle.pickerSelect}>
                             <Picker
                                 selectedValue={userCig}
                                 onValueChange={(cig) => handlePickerSelect(cig) }
-                                placeholder="Selectionner une marque de cigarette"
+                                placeholder={ textTranslate.t('counterCigListBrandSelected') }
                                 mode={'dialog'}
-                                style={{backgroundColor: Colors.white}}
                             >   
                             {
                             dataCigTabItem.map(cigTabItem => <Picker.Item key={cigTabItem.value} label={cigTabItem.label} value={cigTabItem.value}/>)
                             }          
                             </Picker>
-                            </View>
-                            : null }
-
-                            { Platform.OS === 'ios' ? 
-                            <Pressable 
-                                onPress={() => snapeToIndex(0)}>
-
-                                <View style={ styles.titleContainer }>
-                                    <Text style={ styles.titleText }>Choisir une marque de cigarette</Text>
-                                </View>
-
-                                <View style={ styles.descContainerPicker }>
-                                    <Text style={ styles.descTextPicker }>{userCigText}</Text>
-                                </View>
-
-                            </Pressable>
-                            : null }
-
-                            <TouchableOpacity
-                                onPress={() => navigation.navigate('CounterCigaretteAddScreen')}
-                                activeOpacity={0.6}
-                                style={styles.surfaceBtnBlue2}>
-                                <Text style={styles.surfaceBtnBlueText}> Ajouter une marque </Text>
-                            </TouchableOpacity>
-                        </Surface>     
-                        </View>                       
-        
-                        { userCigText != "Selectionner une marque de cigarette" ?
-                        <View style={styles.mainC}>
-                            <View style={styles.statDispositifNicotine}>
-
-                                <View style={{flex: 1}}>
-                                <Surface 
-                                    elevation={4}
-                                    category="medium"
-                                    style={ styles.surfaceContainerRed2 } >   
-
-                                    <View style={ styles.titleContainerRed }>
-                                        <Text style={ styles.titleText }>{userCigSelected.cigaretteName}</Text>
-                                    </View>
-
-                                    <View style={ styles.descContainerRed }>
-                                        <Text style={ styles.descText }>Nicotine : {userCigSelected.cigaretteNicotine} (mg)</Text>
-                                        <Text style={ styles.descText }>Goudron : {userCigSelected.cigaretteGoudron} (mg)</Text>
-                                        <Text style={ styles.descText }>Monoxyde de carbone : {userCigSelected.cigaretteCarbone} (mg)</Text>
-                                        <Text style={ styles.descText }>Nombre de cigarette : {userCigSelected.cigarettePrice} / paquet </Text>
-                                        <Text style={ styles.descText }>Prix du paquet : {userCigSelected.cigarettePrice} (euros)</Text>
-                                    </View>
-                                </Surface>
-
-                                <TouchableOpacity
-                                    onPress={() => handleAddUserCig()}
-                                    activeOpacity={0.6}
-                                    style={styles.surfaceBtnBlue3}>
-
-                                    { isLoaderUserAdd == true ?
-                                    <LoaderComponent text="Ajout de la cigarette ..." step="" color={Colors.white} size="large"/>
-                                    :
-                                    <Text style={styles.surfaceBtnBlueText}>Fumer une cigarette</Text>
-                                    }
-                                </TouchableOpacity>
-
-                            </View>
-                            </View>   
-
-                            <View style={styles.statDispositifNicotine}>
-                                <Surface 
-                                    elevation={4}
-                                    category="medium"
-                                    style={ styles.surfaceContainerGreen } > 
-
-                                    <View style={ styles.titleContainer }>
-                                        <Text style={ styles.titleText }>Dernière cigarette fumée</Text>
-                                    </View>  
-
-                                    <View style={ styles.descContainer }>
-                                        <Text style={ styles.descContenairViewText }>{diff}</Text>
-                                    </View>
-                                
-                                </Surface>
-
-                            
-                            </View>
-
-                            <View style={styles.statDispositifNicotine}>
-                                <Surface 
-                                    elevation={4}
-                                    category="medium"
-                                    style={styles.surfaceContainerRed}>
-                                        
-                                    <View style={ styles.titleContainerRed }>
-                                        <Text style={ styles.titleText }>Nombre cigarettes </Text>
-                                    </View>
-                                    
-                                    <View style={ styles.descContainerRed2 }>
-                                        {isLoadCountCigarette == true ? 
-                                        <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
-                                        : 
-                                        <Text style={styles.descContenairViewText}> {countCigarette} </Text>
-                                        }
-                                    </View>
-                                </Surface>
-                            </View>
-
                         </View>
-                        : null }
-                    </View> 
-                    }
-                </View>
-            </ScrollView>
-           
-                
-            <BottomSheet
-                ref={bottomSheetRef}
-                index={-1}
-                snapPoints={snapPoints}
-                enablePanDownToClose={true}
-                handleIndicatorStyle={{ backgroundColor: Colors.blueFb }}
-                backgroundStyle={{ backgroundColor: Colors.background }}
-                backdropComponent={renderBackdrop}>
-
-                <View style={styles.contentContainer}>
-
-                    <Text style={styles.containerHeadline}> Choisir une marque de cigarette </Text>
-                    
-                    <View style={AppStyle.pickerSelect}>
-                        <Picker
-                            selectedValue={userCig}
-                            onValueChange={(cig) => handlePickerSelect(cig) }
-                            placeholder="Selectionner une marque de cigarette"
-                            mode={'dialog'}
-                        >   
-                        {
-                        dataCigTabItem.map(cigTabItem => <Picker.Item key={cigTabItem.value} label={cigTabItem.label} value={cigTabItem.value}/>)
-                        }          
-                        </Picker>
                     </View>
-                </View>
-            </BottomSheet>
+                </BottomSheet>
             
             </GestureHandlerRootView>
 
-            <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={5000} message={textSnackBar}/>
+            <SnackBarComponent 
+                visible={isSnackBar} 
+                setVisible={setIsSnackBar} 
+                message={textSnackBar}
+                duration={5000} />
             
         </SafeAreaProvider>
     )
 }
 
 export default CounterCigaretteListScreen
-
-const screenWidth = Dimensions.get('screen').width;
-const styles = StyleSheet.create({
-
-    statDispositifNicotine: {
-        flexDirection: "row",
-        alignItems: 'center',
-    },
-
-    statContainer: {
-        margin:8
-    },
-
-    mainContainer: {
-        flex: 1,
-    },
-
-    mainC: {
-        alignItems: 'center',
-        marginTop: 8
-    },
-
-    mainContainerView: {
-        alignItems: 'center',
-        flexDirection: 'column',
-    },
-
-    loadContainerView : {
-        alignItems: 'center',
-        alignContent: 'center'
-    },
-
-    pickerSelectOrange: {
-        width: screenWidth - 32,
-        backgroundColor:'white',
-        borderWidth: 2,
-        borderColor: Colors.colorOrange,
-        borderRadius: 5,
-        marginTop:16,
-    },
-
-    patchInfoContainerView: {
-        alignItems: 'center',
-    },
-
-    titleContainer: {
-        backgroundColor: Colors.white,
-        padding: 16,
-        borderStartStartRadius: 5,
-        borderStartEndRadius: 5,
-        borderTopStartRadius: 5,
-        borderTopEndRadius: 5
-    },
-
-    titleContainer2: {
-        backgroundColor: Colors.white,
-        padding: 16,
-        paddingBottom: 0,
-        borderStartStartRadius: 5,
-        borderStartEndRadius: 5,
-        borderTopStartRadius: 5,
-        borderTopEndRadius: 5
-    },
-
-    titleContainerRed: {
-        backgroundColor: Colors.white,
-        padding: 16,
-        borderStartStartRadius: 5,
-        borderStartEndRadius: 5,
-        borderTopStartRadius: 5,
-        borderTopEndRadius: 5,
-        borderWidth: 2,
-        borderColor: Colors.red,
-    },
-
-    titleText: {
-        color: Colors.black,
-        fontSize: 18,
-        fontWeight: 'bold'
-    },
-
-    descContainer: {
-        padding: 8,
-    },
-
-    descContainerRed: {
-        padding: 16,
-        backgroundColor: Colors.red
-    },
-
-    descContainerRed2: {
-        padding: 8,
-        backgroundColor: Colors.red,
-        borderEndStartRadius: 5,
-        borderEndEndRadius: 5,
-        borderBottomStartRadius: 5,
-        borderBottomEndRadius: 5,
-    },
-
-    descText: {
-        color: Colors.white,
-        fontSize: 18,
-    },
-
-    descContainerPicker: {
-        backgroundColor: Colors.white,
-        padding: 16,
-        paddingTop: 0
-    },
-
-    descTextPicker: {
-        color: Colors.blueFb,
-        fontSize: 18,
-    },
-
-    surfaceContainerOrange : {
-        width: screenWidth - 32,
-        backgroundColor: Colors.colorOrange,
-        borderWidth: 2,
-        borderColor: Colors.colorOrange,
-        borderRadius: 5,
-        marginTop: 16,
-    },
-
-    surfaceContainerGreen: {
-        flex: 1,
-        backgroundColor: Colors.green,
-        borderWidth: 2,
-        borderColor: Colors.green,
-        borderRadius: 5,
-        margin: 8,
-    },
-
-    surfaceContainerRed: {
-        flex: 1,
-        backgroundColor: Colors.red,
-        borderRadius: 5,
-        margin: 8,
-    },
-
-    surfaceContainerRed2: {
-        flex: 1,
-        backgroundColor: Colors.red,
-        borderRadius: 5,
-        marginTop: 8,
-        marginLeft: 8,
-        marginRight: 8
-    },
-
-    surfaceContainerBlue: {
-        width: screenWidth - 32,
-        backgroundColor: Colors.blueFb,
-        borderWidth: 2,
-        borderColor: Colors.blueFb,
-        borderRadius: 5,
-        marginTop: 8,
-    },
-
-    surfaceBtnBlue: {
-        width: screenWidth - 32,
-        backgroundColor: Colors.blueFb,
-        borderWidth: 2,
-        borderColor: Colors.blueFb,
-        borderRadius: 5,
-        padding: 16,
-        marginTop: 16,
-    },
-
-    surfaceBtnBlue2: {
-        backgroundColor: Colors.blueFb,
-        borderEndStartRadius: 5,
-        borderEndEndRadius: 5,
-        borderBottomStartRadius: 5,
-        borderBottomEndRadius: 5,
-        padding: 16,
-    },
-
-    surfaceBtnBlue3: {
-        backgroundColor: Colors.blueFb,
-        borderEndStartRadius: 5,
-        borderEndEndRadius: 5,
-        borderBottomStartRadius: 5,
-        borderBottomEndRadius: 5,
-        padding: 16,
-        marginStart: 8,
-        marginEnd:8,
-        marginBottom: 8,
-    },
-
-    surfaceBtnBlueText: {
-        textAlign: 'center',
-        color: Colors.white,
-        fontSize: 18,
-        fontWeight: 'bold',
-        textTransform: 'uppercase',
-    },
-
-    descContenairViewText: {
-        color: Colors.white,
-        textAlign:'center',
-        verticalAlign: 'auto',
-        fontSize: 30,
-    },
-
-
-    container: {
-		flex: 1,
-		alignItems: 'center'
-	},
-    contentContainer: {
-		alignItems: 'center'
-	},
-
-    contentContainer2: {
-        flex:1,
-		alignItems: 'center'
-	},
-
-	containerHeadline: {
-		fontSize: 24,
-		fontWeight: '600',
-		padding: 20,
-		color: Colors.colorOrange
-	}
-})

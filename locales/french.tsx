@@ -1,5 +1,3 @@
-
-
 export const frenchTranslate = { 
     welcome: "Bonjour",
 
@@ -7,25 +5,23 @@ export const frenchTranslate = {
     appLoading: "Chargement de l'application",
 
     viewLoading: "Chargement en cours ...",
+    cigaretteViewLoading: "Chargement des cigarettes ...",
+    patchViewLoading: "Chargement des patchs ...",
+    pillViewLoading: "Chargement des pastilles ...",
 
     navLogin: "Connexion",
     navSignin: "Inscription",
-
     navUserSettings: "Paramètres",
     navUserCounter: "Compteur",
     navUserStats: "Statistiques",
-
     navUserSettingsInfo: "Vos informations",
     navUserSettingsUpdateInfo: "Modifier vos informations",
-
     navUserCountPatchs: "Patchs", 
     navUserCountPills: "Pastilles", 
     navUserCountCigarettes: "Cigarettes", 
-
     navUserStatWeek: "Semaine",
     navUserStatMounth: "Mois",
     navUserStatYears: "Année",
-
     navBackButton: "Retour",
     
     signinText: "Inscription",
@@ -55,23 +51,17 @@ export const frenchTranslate = {
 
     userSettingsBtnUpdateInfo: "Modifier vos informations",
     userSettingsBtnDeleteAcount: "Supprimer votre compte",
-    
     userSettingsBtnUpdateCig: "Changer la marque de cigarette",
     userSettingsBtnChoiceCig: "Choisir une marque de cigarette",
-
     userSettingsBtnUpdatePatch: "Changer de patch",
     userSettingsBtnChoicePatch: "Choisir un patch",
-
     userSettingsBtnUpdatePill: "Changer de pastille",
     userSettingsBtnChoicePill: "Choisir une pastille",
-    
     userSettingAgeInformation: " ans.",
     userSettingNoAgeInformation: "Aucune informations sur votre age.",
-
     userSettingTitleCigarette: "Cigarettes",
     userSettingCigaretteNbrInfo: " / jours.",
     userSettingCigaretteNbrNoInfo: "Aucune informations sur le nombre de cigarettes fumées par jours.",
-
     userSettingDeleteFireBaseAuth: "Suppression du compte utilisateur Firebase Auth",
     userSettingDelete: "Suppression de l'utilisateur",
 
@@ -81,15 +71,66 @@ export const frenchTranslate = {
     userUpdateBirthDatePlaceholder: "JJ/MM/AAAA",
     userUpdateCigAvg: "Entrer le nombre de cigarette fumer par jours",
     userUpdateCigAvgPlaceholder: "10",
-
     userUpdateBtnSave: "Enregistrer",
     userUpdateBtnLoader: "Enregistrement en cours ...",
+
+    counterCigAddBrandRequired: "Le nom de la marque est obligatoire.",
+    counterCigAddNicotineRequired: "Le taux de nicotine est obligatoire.",
+    counterCigAddGoudronRequired: "Le taux de goudron est obligatoire.",
+    counterCigAddCarboneRequired: "Le taux de monoxyde de carbone est obligatoire.",
+    counterCigAddNbrRequired: "Le nombre de cigarette par paquet est obligatoire.",
+    counterCigAddPriceRequired: "Le prix du paquet est obligatoire.",
+    
+    counterCigAddBrand: "Entrer le nom de la marque",
+    counterCigAddBrandPlaceholder: "Marlboro",
+    counterCigAddNicotine: "Entrer le taux de nicotine (mg)",
+    counterCigAddNicotinePlaceholder: "0.8",
+    counterCigAddGoudron: "Entrer le taux de goudron (mg)",
+    counterCigAddGoudronPlaceholder: "9",
+    counterCigAddCarbone: "Entrer le taux de monoxyde de carbone (mg)",
+    counterCigAddCarbonePlaceholder: "9",
+    counterCigAddNbr: "Entrer le nombre de cigarette par paquet",
+    counterCigAddNbrPlaceholder: "20",
+    counterCigAddPrice: "Entrer le prix du paquet",
+    counterCigAddPricePlaceholder: "14",
+    counterCigAddBtnText: "Ajouter",
+    counterCigAddBtnLoader: "Ajout de la marque de cigarette en cours ...",
+
+    counterCigListBrandSelected: "Selectionner une marque de cigarette",
+    counterCigListAlertText: "Êtes-vous sûre de vouloir fumer cette cigarette ?",
+    counterCigListAlertConfirm: "Oui",
+    counterCigListAlertCancel: "Non",
+    counterCigListSmoke: "Fumer une cigarette",
+    counterCigListNoSmoke: "Vous n'avez pas encore consommer de cigarette.",
+    counterCigListChoiceBrand: "Choisir une marque de cigarette.",
+    counterCigListAddBrand: "Ajouter une marque",
+    counterCigListAddLoader: "Ajout de la cigarette ...",
+    counterCigListLastSmoke: "Dernière cigarette fumée",
+    counterCigListNbrSmoke: "Nombre de cigarettes",
+
+    counterPatchSelected: "Selectionner un patch",
+    counterPatchNoPatchApply: "Vous n'avez pas encore appliquer de patch",
+    counterPatchChoice: "Choisir un patch",
+    counterPatchAdd : "Appliquer un patch",
+    counterPatchAddLoader : "Ajout du patch en cours ...",
+    counterPatchLast: "Dernier patch appliqué",
+    counterPatchAfterAdd: "Application du patch : ",
+
+    counterPillSelected: "Selectionner une pastille",
+    counterPillNoPillApply: "Vous n'avez pas encore consommer de pastille",
+    counterPillChoice: "Choisir une pastille",
+    counterPillAdd: "Consommer une pastille",
+    counterPillAddLoader: "Ajout de la pastille en cours ...",
+    counterPillLast: "Dernière pastille consommée",
+    counterPillAfterAdd: "Consommation de la pastille : ",
 
     cigaretteType: "Marque de cigarette",
     cigaretteNicotine: "Nicotine : ",
     cigaretteMgMesure: " mg",
     cigaretteGoudron: "Goudron : ",
     cigaretteCarbonne: "Monoxyde de carbone : ",
+    cigaretteNbr: "Nombre : ",
+    cigaretteNbrPerPaquet: " / paquets",
     cigarettePrice: "Prix : ",
     cigarettePriceEuros: " €",
     cigaretteNoSelected: "Pas de cigarette selectionné.",
@@ -123,7 +164,4 @@ export const frenchTranslate = {
     userSaveTokenLogin: "Enregistrement du token de sécurité.",
     userMailPwdWrongLogin: "L'e-mail ou le mot de passe n'est pas correcte.",
     userGetDataUserLogin: "Récupération des données utilisateurs.",
-
-
-
 }

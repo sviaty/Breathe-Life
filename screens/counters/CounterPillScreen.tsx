@@ -1,15 +1,25 @@
 // React & React Native
 import React, { useState, useMemo, useCallback, useEffect, useRef} from 'react';
-import { StyleSheet, Platform,  Text, View, TouchableOpacity, Pressable, Dimensions } from 'react-native'
+import { Platform,  Text, View, TouchableOpacity, Pressable } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
 import { Surface } from "@react-native-material/core";
 import { Picker } from '@react-native-picker/picker';
 import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 
-// Styles & Colors
-import Colors from '../../constants/ColorConstant';
+// Styles 
 import AppStyle from '../../styles/AppStyle';
+import CounterStyle from '../../styles/CounterStyle';
+
+// Constants
+import Colors from '../../constants/ColorConstant';
+import { 
+    SURFACE_CATEGORY, 
+    SURFACE_ELEVATION } from '../../constants/AppConstant';
+
+// Helpers
+import { getDifference2Date } from '../../helpers/DateHelper';
+import textTranslate from '../../helpers/TranslateHelper';
 
 // Components
 import LoaderComponent from '../../components/LoaderComponent';
@@ -31,7 +41,6 @@ import { serverTimestamp } from "firebase/firestore";
 import { getPillListFireStore } from '../../api/PillApi';
 import { setUserFireStore } from '../../api/UserApi';
 import { getUserLastPillByIdUserFireStore, setUserPillsFireStore } from '../../api/UserPillsApi';
-import { getDifference2Date } from '../../helpers/DateHelper';
 
 /**
  * SettingPillComponent 
@@ -40,22 +49,21 @@ const SettingPillComponent = () => {
 
     // UseState
     const [isLoaderGet, setIsLoaderGet] = useState<boolean>(false)
-
     const [isLoaderUserAdd, setIsLoaderUserAdd] = useState<boolean>(false)
-    const [errorAddPill, setErrorAddPill] = useState<string>("")
-     
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
  
-    let [userPill, setUserPill] = useState<string>("Selectionner une pastille");
-    let [userPillText, setUserPillText] = useState<string>("Selectionner une pastille");
+    let [userPill, setUserPill] = useState<string>( textTranslate.t('counterPillSelected') );
+    let [userPillText, setUserPillText] = useState<string>( textTranslate.t('counterPillSelected') );
  
     const p = new Pill("","",0)
     let [userPillSelected, setUserPillSelected] = useState<Pill>(p);
  
     let [dataPillTab, setDataPillTab] = useState<Pill[]>([]);
     let [dataPillTabItem, setDataPillTabItem] = useState<any[]>([]);
+    let [diff, setDiff] = useState<string>("")
 
-    
+    // UseRef
+    const intervalRef:any = useRef();
 
     // UseSelector
     const userSelector = useSelector((state: RootState) => state.userReducer.user);
@@ -84,7 +92,7 @@ const SettingPillComponent = () => {
         //console.log(dataPatchTab)
         
         await getPillListFireStore().then((pillList) => {
-            const cItem = { label: "Selectionner une pastille", value: "Selectionner une pastille" }
+            const cItem = { label: textTranslate.t('counterPillSelected'), value: textTranslate.t('counterPillSelected') }
             //console.log(pItem);
 
             dataPillTabItem.push(cItem)
@@ -115,7 +123,7 @@ const SettingPillComponent = () => {
 
         }).catch((error) => {
             setIsLoaderGet(false)
-            console.log("Error get pill in firestore database")
+            //console.log("Error getPillListFireStore")
             console.error(error.message)
         }) 
     }
@@ -124,8 +132,7 @@ const SettingPillComponent = () => {
      * Function changePillSelectedFomUserIdPill
      */
      const changePillSelectedFomUserIdPill = () => {
-        //console.log("changePatchSelectedFomUserIdPatch")
-        setUserPill("Selectionner une pastille")
+        setUserPill( textTranslate.t('counterPillSelected') )
         if(userSelector.idPill != ""){
             setUserPill(userSelector.idPill)
             dataPillTab.forEach((pill) => {
@@ -137,7 +144,7 @@ const SettingPillComponent = () => {
             })
         } else {
             if(Platform.OS === 'ios'){
-                setUserPillText("Selectionner une pastille")
+                setUserPillText( textTranslate.t('counterPillSelected') )
             }
         }
     }
@@ -149,8 +156,7 @@ const SettingPillComponent = () => {
         setUserPill(idPill)
         //console.log(idPill)
 
-        if(idPill != "Selectionner une pastille"){
-            console.log('IS NOT undefined')
+        if(idPill != textTranslate.t('counterPillSelected') ){
             dataPillTab.forEach((pill) => {
                 if(pill.idPill == idPill){
                     setUserPillSelected(pill)
@@ -163,9 +169,7 @@ const SettingPillComponent = () => {
         } else {
             const p = new Pill('', idPill, 0)
             setUserPillSelected(p)
-            setUserPillText("Selectionner une pastille")
-            //console.log('IS undefined')
-
+            setUserPillText( textTranslate.t('counterPillSelected') )
             setUserIdPill("")
         }
     }
@@ -228,9 +232,10 @@ const SettingPillComponent = () => {
         })
     }
 
-    let [diff, setDiff] = useState<string>("")
-    const intervalRef:any = useRef();
-
+    /**
+     * Function startInterval
+     * @param date 
+     */
     const startInterval = (date: Date) => {
         //console.log("start interval")
         intervalRef.current = setInterval(() => {
@@ -240,6 +245,9 @@ const SettingPillComponent = () => {
         }, 1000);
     }
 
+    /**
+     * Function closeInterval
+     */
     const closeInterval = () => {
         //console.log("close interval")
         diff = ""
@@ -261,20 +269,13 @@ const SettingPillComponent = () => {
                 const d = pillList.dateTime.toDate()
                 startInterval(d)                
             } else {
-                setDiff("Vous n'avez pas encore consommer de pastille")
+                setDiff( textTranslate.t('counterPillNoPillApply') )
             }
             
         }).catch((error) => {
-            console.log("Error getUserLastPillByIdUserFireStore")
+            //console.log("Error getUserLastPillByIdUserFireStore")
             console.error(error)
         })
-    }
-
-    /**
-     * Function onRefresh 
-     */
-    const onRefresh = () => {
-        getPillist()
     }
 
     const snapPoints = useMemo(() => ['50%'], []);
@@ -291,116 +292,121 @@ const SettingPillComponent = () => {
 
     // View JSX
     return (
-        <SafeAreaProvider style={styles.mainContainer}>
+        <SafeAreaProvider>
             <GestureHandlerRootView>
+                
                 <ScrollView>
-                <View style={styles.statContainer}>
-                    { isLoaderGet == true ? 
-                    <View style={styles.loadContainerView}>
-                        <LoaderComponent text="Chargement des pastilles" step="" color={Colors.blueFb} size="large"/>
-                    </View>
-                    : 
-                    <View style={styles.mainContainerView}>
-                        <View style={styles.statDispositifNicotine}>
-                        <Surface 
-                            elevation={4}
-                            category="medium"
-                            style={ styles.surfaceContainerBlue } >   
-
-                            { Platform.OS === 'android' ? 
-                            <View>
-                                <View style={ styles.titleContainer2 }>
-                                    <Text style={ styles.titleText }>Choisir une pastille</Text>
-                                </View>
-
-                                <Picker
-                                    selectedValue={userPill}
-                                    onValueChange={(pill) => handlePickerSelect(pill) }
-                                    placeholder="Selectionner une pastille"
-                                    mode={'dialog'}
-                                    style={{backgroundColor: Colors.white}}
-                                >   
-                            
-                            {
-                            dataPillTabItem.map(item => <Picker.Item key={item.value} label={item.label} value={item.value}/>)
-                            }          
-                            </Picker>
-                            </View>
-                            : null }
-
-                            { Platform.OS === 'ios' ? 
-                            <Pressable 
-                                onPress={() => snapeToIndex(0)}>
-
-                                <View style={ styles.titleContainer }>
-                                    <Text style={ styles.titleText }>Choisir une pastille</Text>
-                                </View>
-
-                                <View style={ styles.descContainerPicker }>
-                                    <Text style={ styles.descTextPicker }>{userPillText}</Text>
-                                </View>
-                            </Pressable>
-                            : null }
-                        </Surface>
-                        </View>        
-        
-                        { userPillText != "Selectionner une pastille" ?
-                        <View style={styles.mainC}>
-                             
-                            <View style={styles.statDispositifNicotine}>
-                            <View style={{flex: 1}}>
-                                <Surface 
-                                    elevation={4}
-                                    category="medium"
-                                    style={ styles.surfaceContainerOrange2 } >   
-
-                                    <View style={ styles.titleContainerOrange }>
-                                        <Text style={ styles.titleText }>{userPillSelected.pillName}</Text>
-                                    </View>
-
-                                    <View style={ styles.descContainerOrange }>
-                                        <Text style={ styles.descText }>Nicotine : {userPillSelected.pillNicotine} mg</Text>
-                                    </View>
-                                </Surface>
-                                <TouchableOpacity
-                                    onPress={() => addUserPill()}
-                                    activeOpacity={0.6}
-                                    style={styles.surfaceBtnBlue3}>
-
-                                    { isLoaderUserAdd == true ?
-                                    <LoaderComponent text="Ajout de la pastille en cours ..." step="" color={Colors.white} size="large"/>
-                                    :
-                                    <Text style={styles.surfaceBtnBlueText}>Consommer une pastille</Text>
-                                    }
-                                </TouchableOpacity>
-                            </View>
-                            </View>
-
-                            <View style={styles.statDispositifNicotine}>
-                            <Surface 
-                                elevation={4}
-                                category="medium"
-                                style={ styles.surfaceContainerGreen } >   
-
-                                <View style={ styles.titleContainer }>
-                                    <Text style={ styles.titleText }>Dernière pastille consommer</Text>
-                                </View>
-
-                                <View style={ styles.descContainer }>
-                                    <Text style={ styles.descContenairViewText }>{diff}</Text>
-                                </View>
-                            
-                            </Surface>
-                            </View>
-        
-                            
-
-                            
+                    <View style={CounterStyle.statContainer}>
+                        { isLoaderGet == true ? 
+                        <View style={CounterStyle.loadContainerView}>
+                            <LoaderComponent 
+                                text={ textTranslate.t('pillViewLoading') } 
+                                step="" 
+                                color={Colors.blueFb} 
+                                size="large"/>
                         </View>
-                        : null }
-                    </View> 
-                    }
-                </View>
+                        : 
+                        <View style={ CounterStyle.mainContainerView }>
+                            <View style={ CounterStyle.statDispositifNicotine }>
+                            <Surface 
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={ CounterStyle.surfaceContainerBlue } >   
+
+                                { Platform.OS === 'android' ? 
+                                <View>
+                                    <View style={ CounterStyle.titleContainer2 }>
+                                        <Text style={ CounterStyle.titleText }>{ textTranslate.t('counterPillChoice') }</Text>
+                                    </View>
+
+                                    <Picker
+                                        selectedValue={userPill}
+                                        onValueChange={(pill) => handlePickerSelect(pill) }
+                                        placeholder={ textTranslate.t('counterPillSelected') }
+                                        mode={'dialog'}
+                                        style={{backgroundColor: Colors.white}}>   
+                                
+                                {
+                                dataPillTabItem.map(item => <Picker.Item key={item.value} label={item.label} value={item.value}/>)
+                                }          
+                                </Picker>
+                                </View>
+                                : null }
+
+                                { Platform.OS === 'ios' ? 
+                                <Pressable 
+                                    onPress={() => snapeToIndex(0)}>
+
+                                    <View style={ CounterStyle.titleContainer }>
+                                        <Text style={ CounterStyle.titleText }>{ textTranslate.t('counterPillChoice') }</Text>
+                                    </View>
+
+                                    <View style={ CounterStyle.descContainerPicker }>
+                                        <Text style={ CounterStyle.descTextPicker }>{userPillText}</Text>
+                                    </View>
+                                </Pressable>
+                                : null }
+                            </Surface>
+                            </View>        
+            
+                            { userPillText != textTranslate.t('counterPillSelected') ?
+                            <View style={ CounterStyle.mainC }>
+                                
+                                <View style={ CounterStyle.statDispositifNicotine }>
+                                <View style={{flex: 1}}>
+                                    <Surface 
+                                        elevation={ SURFACE_ELEVATION }
+                                        category={ SURFACE_CATEGORY }
+                                        style={ CounterStyle.surfaceContainerOrange2 } >   
+
+                                        <View style={ CounterStyle.titleContainerOrange }>
+                                            <Text style={ CounterStyle.titleText }>{userPillSelected.pillName}</Text>
+                                        </View>
+
+                                        <View style={ CounterStyle.descContainerOrange }>
+                                            <Text style={ CounterStyle.descText }>{ textTranslate.t('pillNicotine') } {userPillSelected.pillNicotine} { textTranslate.t('cigaretteMgMesure') }</Text>
+                                        </View>
+                                    </Surface>
+                                    <TouchableOpacity
+                                        onPress={() => addUserPill()}
+                                        activeOpacity={0.6}
+                                        style={ CounterStyle.surfaceBtnBlue3 }>
+
+                                        { isLoaderUserAdd == true ?
+                                        <LoaderComponent 
+                                            text={ textTranslate.t('counterPillAddLoader') } 
+                                            step="" 
+                                            color={Colors.white} 
+                                            size="large"/>
+                                        :
+                                        <Text style={ CounterStyle.surfaceBtnBlueText }>{ textTranslate.t('counterPillAdd') } </Text>
+                                        }
+                                    </TouchableOpacity>
+                                </View>
+                                </View>
+
+                                <View style={ CounterStyle.statDispositifNicotine }>
+                                <Surface 
+                                    elevation={ SURFACE_ELEVATION }
+                                    category={ SURFACE_CATEGORY }
+                                    style={ CounterStyle.surfaceContainerGreen } >   
+
+                                    <View style={ CounterStyle.titleContainer }>
+                                        <Text style={ CounterStyle.titleText }>{ textTranslate.t('counterPillLast') }</Text>
+                                    </View>
+
+                                    <View style={ CounterStyle.descContainer }>
+                                        <Text style={ CounterStyle.descContenairViewText }>{ diff }</Text>
+                                    </View>
+                                
+                                </Surface>
+                                </View>
+            
+                            </View>
+                            : null }
+                        </View> 
+                        }
+                    </View>
                 </ScrollView>
             
                 <BottomSheet
@@ -412,15 +418,15 @@ const SettingPillComponent = () => {
                     backgroundStyle={{ backgroundColor: Colors.background }}
                     backdropComponent={renderBackdrop}>
 
-                    <View style={styles.contentContainer}>
+                    <View style={CounterStyle.contentContainer}>
 
-                        <Text style={styles.containerHeadline}> Choisir une pastille </Text>
+                        <Text style={CounterStyle.containerHeadline}> { textTranslate.t('counterPillChoice') } </Text>
                         
                         <View style={AppStyle.pickerSelect}>
                             <Picker
                                 selectedValue={userPill}
                                 onValueChange={(pill) => handlePickerSelect(pill) }
-                                placeholder="Selectionner une pastille"
+                                placeholder={ textTranslate.t('counterPillSelected') }
                                 mode={'dialog'}
                             >   
                             {
@@ -430,9 +436,14 @@ const SettingPillComponent = () => {
                         </View>
                     </View>
                 </BottomSheet>
+
             </GestureHandlerRootView>
 
-            <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={3000} message={ 'Consomation de la pastille : '+userPillSelected.pillName}/>
+            <SnackBarComponent 
+                visible={isSnackBar} 
+                setVisible={setIsSnackBar} 
+                message={ textTranslate.t('counterPillAfterAdd') + userPillSelected.pillName}
+                duration={ 3000 } />
             
         </SafeAreaProvider>
     )
@@ -440,210 +451,3 @@ const SettingPillComponent = () => {
 }
 
 export default SettingPillComponent
-
-const screenWidth = Dimensions.get('screen').width;
-const styles = StyleSheet.create({
-
-    statDispositifNicotine: {
-        flexDirection: "row",
-        alignItems: 'center',
-    },
-
-    statContainer: {
-        margin:8
-    },
-
-    mainContainer: {
-        flex: 1,
-    },
-
-    mainC: {
-        alignItems: 'center',
-    },
-
-    mainContainerView: {
-        alignItems: 'center',
-        flexDirection: 'column',
-    },
-
-    loadContainerView : {
-        alignItems: 'center',
-        alignContent: 'center'
-    },
-
-    pickerSelectOrange: {
-        width: screenWidth - 32,
-        backgroundColor:'white',
-        borderWidth: 2,
-        borderColor: Colors.colorOrange,
-        borderRadius: 5,
-        marginTop:16,
-    },
-
-    patchInfoContainerView: {
-        alignItems: 'center',
-    },
-
-    titleContainer: {
-        backgroundColor: Colors.white,
-        padding: 16,
-        borderStartStartRadius: 5,
-        borderStartEndRadius: 5,
-        borderTopStartRadius: 5,
-        borderTopEndRadius: 5
-    },
-
-    titleContainer2: {
-        backgroundColor: Colors.white,
-        padding: 16,
-        paddingBottom: 0,
-        borderStartStartRadius: 5,
-        borderStartEndRadius: 5,
-        borderTopStartRadius: 5,
-        borderTopEndRadius: 5
-    },
-
-    titleContainerOrange: {
-        backgroundColor: Colors.white,
-        padding: 16,
-        borderWidth: 2,
-        borderColor: Colors.colorOrange,
-        borderStartStartRadius: 5,
-        borderStartEndRadius: 5,
-        borderTopStartRadius: 5,
-        borderTopEndRadius: 5
-    },
-
-    titleText: {
-        color: Colors.black,
-        fontSize: 18,
-        fontWeight: 'bold'
-    },
-
-    descContainer: {
-        padding: 16,
-    },
-
-    descContainerOrange: {
-        backgroundColor: Colors.colorOrange,
-        padding: 16,
-        borderWidth: 2,
-        borderColor: Colors.colorOrange,
-    },
-
-    descContenairViewText: {
-        color: Colors.white,
-        textAlign:'center',
-        verticalAlign: 'auto',
-        fontSize: 30,
-    },
-
-    descText: {
-        color: Colors.white,
-        fontSize: 18,
-    },
-
-    descContainerPicker: {
-        backgroundColor: Colors.white,
-        borderEndStartRadius: 5,
-        borderEndEndRadius: 5,
-        padding: 16,
-        paddingTop: 0
-    },
-
-    descTextPicker: {
-        color: Colors.blueFb,
-        fontSize: 18,
-    },
-
-    surfaceContainerOrange : {
-        flex: 1,
-        margin: 8,
-        borderRadius: 5,
-
-    },
-    
-    surfaceContainerOrange2 : {
-        backgroundColor: Colors.colorOrange,
-        flex: 1,
-        marginTop: 8,
-        marginLeft: 8,
-        marginRight: 8,
-        borderRadius: 5,
-
-    },
-
-    surfaceContainerGreen: {
-        flex: 1,
-        backgroundColor: Colors.green,
-        borderWidth: 2,
-        borderColor: Colors.green,
-        borderRadius: 5,
-        margin: 8,
-    },
-
-    surfaceContainerBlue: {
-        flex: 1,
-        backgroundColor: Colors.blueFb,
-        borderWidth: 2,
-        borderColor: Colors.blueFb,
-        borderRadius: 5,
-        margin: 8,
-    },
-
-    surfaceBtnBlue: {
-        flex: 1,
-        backgroundColor: Colors.blueFb,
-        borderWidth: 2,
-        borderColor: Colors.blueFb,
-        borderRadius: 5,
-        padding: 16,
-        margin: 8
-    },
-
-    surfaceBtnBlue2: {
-        backgroundColor: Colors.blueFb,
-        borderEndStartRadius: 5,
-        borderEndEndRadius: 5,
-        borderBottomStartRadius: 5,
-        borderBottomEndRadius: 5,
-        padding: 16,
-    },
-
-    surfaceBtnBlue3: {
-        backgroundColor: Colors.blueFb,
-        borderEndStartRadius: 5,
-        borderEndEndRadius: 5,
-        borderBottomStartRadius: 5,
-        borderBottomEndRadius: 5,
-        padding: 16,
-        marginStart: 8,
-        marginEnd:8,
-        marginBottom: 8,
-    },
-
-
-    surfaceBtnBlueText: {
-        textAlign: 'center',
-        color: Colors.white,
-        fontSize: 18,
-        fontWeight: 'bold',
-        textTransform: 'uppercase',
-    },
-
-
-
-    container: {
-		flex: 1,
-		alignItems: 'center'
-	},
-    contentContainer: {
-		alignItems: 'center'
-	},
-	containerHeadline: {
-		fontSize: 24,
-		fontWeight: '600',
-		padding: 20,
-		color: Colors.colorOrange
-	}
-})

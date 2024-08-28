@@ -1,15 +1,27 @@
 // React & React Native
 import React, { useState, useMemo, useCallback, useEffect, useRef} from 'react';
-import { StyleSheet, Platform,  Text, View, TouchableOpacity, Pressable, Dimensions, ScrollView } from 'react-native'
+import { Platform,  Text, View, TouchableOpacity, Pressable, ScrollView } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Surface } from "@react-native-material/core";
 import { Picker } from '@react-native-picker/picker';
 import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 
-// Styles & Colors
-import Colors from '../../constants/ColorConstant';
+// Mateiral
+import { Surface } from "@react-native-material/core";
+
+// Styles 
 import AppStyle from '../../styles/AppStyle';
+import CounterStyle from '../../styles/CounterStyle';
+
+// Constants
+import Colors from '../../constants/ColorConstant';
+import { 
+    SURFACE_CATEGORY, 
+    SURFACE_ELEVATION } from '../../constants/AppConstant';
+
+// Helpers
+import { getDifference2Date } from '../../helpers/DateHelper';
+import textTranslate from '../../helpers/TranslateHelper';
 
 // Components
 import LoaderComponent from '../../components/LoaderComponent';
@@ -31,31 +43,29 @@ import { serverTimestamp } from "firebase/firestore";
 import { getPatchListFireStore } from '../../api/PatchApi';
 import { setUserFireStore } from '../../api/UserApi';
 import { getUserLastPatchByIdUserFireStore, setUserPatchsFireStore } from '../../api/UserPatchsApi';
-import { getDifference2Date } from '../../helpers/DateHelper';
 
 /**
- * SettingPatchComponent
+ * Screen CounterPatchScreen
  */
-const SettingPatchComponent = () => {
+const CounterPatchScreen = () => {
 
     // UseState
     const [isLoaderGet, setIsLoaderGet] = useState<boolean>(true)
-
     const [isLoaderUserAdd, setIsLoaderUserAdd] = useState<boolean>(false)
-    const [errorAddPatch, setErrorAddPatch] = useState<string>("")
-    
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
 
-    let [userPatch, setUserPatch] = useState<string>("Selectionner un patch");
-    let [userPatchText, setUserPatchText] = useState<string>("Selectionner un patch");
+    let [userPatch, setUserPatch] = useState<string>( textTranslate.t('counterPatchSelected') );
+    let [userPatchText, setUserPatchText] = useState<string>( textTranslate.t('counterPatchSelected') );
 
     const p = new Patch("","",0)
     let [userPatchSelected, setUserPatchSelected] = useState<Patch>(p);
 
     let [dataPatchTab, setDataPatchTab] = useState<Patch[]>([]);
     let [dataPatchTabItem, setDataPatchTabItem] = useState<any[]>([]);
+    let [diff, setDiff] = useState<string>("")
 
-    
+    // UseRed
+    const intervalRef:any = useRef();
 
     // UseSelector
     const userSelector = useSelector((state: RootState) => state.userReducer.user);
@@ -87,7 +97,7 @@ const SettingPatchComponent = () => {
         getPatchListFireStore().then((patchList) => {
             //console.log(patchList.size);
 
-            const cItem = { label: "Selectionner un patch", value: "Selectionner un patch" }
+            const cItem = { label: textTranslate.t('counterPatchSelected'), value: textTranslate.t('counterPatchSelected') }
             //console.log(pItem);
 
             dataPatchTabItem.push(cItem)
@@ -118,7 +128,7 @@ const SettingPatchComponent = () => {
 
         }).catch((error) => {
             setIsLoaderGet(false)
-            console.log("Error get patch in firestore database")
+            //console.log("Error getPatchListFireStore")
             console.error(error.message)
         }) 
     }
@@ -127,8 +137,7 @@ const SettingPatchComponent = () => {
      * Function changePatchSelectedFomUserIdPatch
      */
     const changePatchSelectedFomUserIdPatch = () => {
-        //console.log("changePatchSelectedFomUserIdPatch")
-        userPatch = "Selectionner un patch"
+        userPatch = textTranslate.t('counterPatchSelected')
         setUserPatch(userPatch)
 
         if(userSelector.idPatch != ""){
@@ -137,7 +146,6 @@ const SettingPatchComponent = () => {
                 if(patch.idPatch == userSelector.idPatch){
                     setUserPatchSelected(patch)
                     setUserPatchText(patch.patchName)
-
                     //console.log(patch)
                 }
             })
@@ -155,8 +163,7 @@ const SettingPatchComponent = () => {
         setUserPatch(idPatch)
         //console.log(idPatch)
 
-        if(idPatch != "Selectionner un patch"){
-            //console.log('IS NOT undefined')
+        if(idPatch != textTranslate.t('counterPatchSelected') ){
             dataPatchTab.forEach((patch) => {
                 if(patch.idPatch == idPatch){
                     setUserPatchSelected(patch)
@@ -169,12 +176,9 @@ const SettingPatchComponent = () => {
         } else {
             const p = new Patch('', idPatch, 0)
             setUserPatchSelected(p)
-            setUserPatchText("Selectionner un patch")
-            //console.log('IS undefined')
-
+            setUserPatchText( textTranslate.t('counterPatchSelected') )
             setUserIdPatch('')
         }
-        
     }
 
     /**
@@ -199,7 +203,7 @@ const SettingPatchComponent = () => {
             dispatch(setUser(user));
 
         }).catch((error) => {
-            console.log("Error set user idPatch in firestore database : ")
+            //console.log("Error setUserIdPatch")
             console.error(error.message)
         }) 
     }
@@ -225,16 +229,13 @@ const SettingPatchComponent = () => {
             //console.log(value)
             setIsLoaderUserAdd(false)
             setIsSnackBar(true)
+
         }).catch((error) => {
             setIsLoaderUserAdd(false)
-            //setErrorAddPatch("addUserPatch error : " + error.message)
-            console.log("Error addUserPatchs")
+            //console.log("Error addUserPatchs")
             console.error(error)
         })
     }
-
-    let [diff, setDiff] = useState<string>("")
-    const intervalRef:any = useRef();
 
     /**
      * Function startInterval
@@ -274,20 +275,13 @@ const SettingPatchComponent = () => {
                 const d = patchList.dateTime.toDate()
                 startInterval(d)                
             } else {
-                setDiff("Vous n'avez pas encore appliquer de patch")
+                setDiff( textTranslate.t('counterPatchNoPatchApply') )
             }
             
         }).catch((error) => {
-            console.log("Error getUserLastPatchByIdUserFireStore")
+            //console.log("Error getUserLastPatchByIdUserFireStore")
             console.error(error)
         })
-    }
-
-    /**
-     * Function onRefresh 
-     */
-    const onRefresh = () => {
-        getPatchList()
     }
 
     const snapPoints = useMemo(() => ['50%'], []);
@@ -296,6 +290,7 @@ const SettingPatchComponent = () => {
 	//const handleClosePress = () => bottomSheetRef.current?.close();
 	//const handleOpenPress = () => bottomSheetRef.current?.expand();
 	//const handleCollapsePress = () => bottomSheetRef.current?.collapse();
+
     const snapeToIndex = (index: number) => bottomSheetRef.current?.snapToIndex(index);
 	const renderBackdrop = useCallback(
 		(props: any) => <BottomSheetBackdrop appearsOnIndex={0} disappearsOnIndex={-1} {...props} />,
@@ -304,110 +299,120 @@ const SettingPatchComponent = () => {
 
     // View JSX
     return (
-        <SafeAreaProvider style={styles.mainContainer}>
+        <SafeAreaProvider>
+
             <GestureHandlerRootView>
+
                 <ScrollView>
-                <View style={styles.statContainer}>
-                    { isLoaderGet == true ? 
-                    <View style={styles.loadContainerView}>
-                        <LoaderComponent text="Chargement des patchs" step="" color={Colors.blueFb} size="large"/>
-                    </View>
-                    : 
-                    <View style={styles.mainContainerView}>
-
-                        <View style={styles.statDispositifNicotine}>
-                        <Surface 
-                            elevation={4}
-                            category="medium"
-                            style={ styles.surfaceContainerBlue } >   
-
-                            { Platform.OS === 'android' ? 
-                            <View>
-                                <View style={ styles.titleContainer2 }>
-                                    <Text style={ styles.titleText }>Choisir un patch</Text>
-                                </View>
-                                <Picker
-                                    selectedValue={userPatch}
-                                    onValueChange={(patch) => handlePickerSelect(patch) }
-                                    placeholder="Selectionner un patch"
-                                    mode={'dialog'}
-                                    style={{backgroundColor: Colors.white, borderBottomStartRadius: 5, borderBottomEndRadius: 5}}>   
-                                    {dataPatchTabItem.map(item => <Picker.Item key={item.value} label={item.label} value={item.value}/>)}          
-                                </Picker>
-                            </View>
-                            : null }
-
-                            { Platform.OS === 'ios' ? 
-                            <Pressable 
-                                onPress={() => snapeToIndex(0)}>
-
-                                <View style={ styles.titleContainer }>
-                                    <Text style={ styles.titleText }>Choisir un patch</Text>
-                                </View>
-
-                                <View style={ styles.descContainerPicker }>
-                                    <Text style={ styles.descTextPicker }>{userPatchText}</Text>
-                                </View>
-                            </Pressable>
-                            : null }
-                        </Surface>
+                    <View style={CounterStyle.statContainer}>
+                        { isLoaderGet == true ? 
+                        <View style={CounterStyle.loadContainerView}>
+                            <LoaderComponent 
+                                text={ textTranslate.t('counterPatchSelected') } 
+                                step="" 
+                                color={Colors.blueFb} 
+                                size="large"/>
                         </View>
+                        : 
+                        <View style={CounterStyle.mainContainerView}>
 
-                        { userPatchText != "Selectionner un patch" ?
-                        <View style={styles.mainC}>
-
-                            <View style={styles.statDispositifNicotine}>
-                                <View style={{flex: 1}}>
-                                <Surface 
-                                    elevation={4}
-                                    category="medium"
-                                    style={ styles.surfaceContainerOrange2 } >  
-
-                                    <View style={ styles.titleContainerOrange }>
-                                        <Text style={ styles.titleText }>{userPatchSelected.patchName}</Text>
-                                    </View>
-
-                                    <View style={ styles.descContainerOrange }>
-                                        <Text style={ styles.descText }>Nicotine : {userPatchSelected.patchNicotine} mg/24h</Text>
-                                    </View>
-
-                                </Surface>
-
-                                <TouchableOpacity
-                                    onPress={() => addUserPatch()}
-                                    activeOpacity={0.6}
-                                    style={styles.surfaceBtnBlue3}>
-
-                                    { isLoaderUserAdd == true ?
-                                    <LoaderComponent text="Ajout du patch en cours ..." step="" color={Colors.white} size="large"/>
-                                    :
-                                    <Text style={styles.surfaceBtnBlueText}>Appliquer un patch</Text>
-                                    }
-                                </TouchableOpacity>
-                                </View>
-                            </View>
-
-                            <View style={styles.statDispositifNicotine}>
+                            <View style={CounterStyle.statDispositifNicotine}>
                             <Surface 
-                                elevation={4}
-                                category="medium"
-                                style={ styles.surfaceContainerGreen } >   
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={ CounterStyle.surfaceContainerBlue } >   
 
-                                <View style={ styles.titleContainer }>
-                                    <Text style={ styles.titleText }>Dernier patch appliqué</Text>
+                                { Platform.OS === 'android' ? 
+                                <View>
+                                    <View style={ CounterStyle.titleContainer2 }>
+                                        <Text style={ CounterStyle.titleText }>{ textTranslate.t('counterPatchSelected') }</Text>
+                                    </View>
+                                    <Picker
+                                        selectedValue={userPatch}
+                                        onValueChange={(patch) => handlePickerSelect(patch) }
+                                        placeholder={ textTranslate.t('counterPatchSelected') }
+                                        mode={'dialog'}
+                                        style={{backgroundColor: Colors.white, borderBottomStartRadius: 5, borderBottomEndRadius: 5}}>   
+                                        {dataPatchTabItem.map(item => <Picker.Item key={item.value} label={item.label} value={item.value}/>)}          
+                                    </Picker>
                                 </View>
+                                : null }
 
-                                <View style={ styles.descContainer }>
-                                    <Text style={ styles.descContenairViewText }>{diff}</Text>
-                                </View>
+                                { Platform.OS === 'ios' ? 
+                                <Pressable 
+                                    onPress={() => snapeToIndex(0)}>
+
+                                    <View style={ CounterStyle.titleContainer }>
+                                        <Text style={ CounterStyle.titleText }>{ textTranslate.t('counterPatchSelected') }</Text>
+                                    </View>
+
+                                    <View style={ CounterStyle.descContainerPicker }>
+                                        <Text style={ CounterStyle.descTextPicker }>{userPatchText}</Text>
+                                    </View>
+                                </Pressable>
+                                : null }
                             </Surface>
                             </View>
 
-                        </View>
-                        : null }
-                    </View> 
-                    }
-                </View>
+                            { userPatchText != textTranslate.t('counterPatchSelected') ?
+                            <View style={CounterStyle.mainC}>
+
+                                <View style={CounterStyle.statDispositifNicotine}>
+                                    <View style={{flex: 1}}>
+                                    <Surface 
+                                        elevation={ SURFACE_ELEVATION }
+                                        category={ SURFACE_CATEGORY }
+                                        style={ CounterStyle.surfaceContainerOrange2 } >  
+
+                                        <View style={ CounterStyle.titleContainerOrange }>
+                                            <Text style={ CounterStyle.titleText }>{userPatchSelected.patchName}</Text>
+                                        </View>
+
+                                        <View style={ CounterStyle.descContainerOrange }>
+                                            <Text style={ CounterStyle.descText }>{ textTranslate.t('patchNicotine') } {userPatchSelected.patchNicotine} { textTranslate.t('patchNicotineMg24') }</Text>
+                                        </View>
+
+                                    </Surface>
+
+                                    <TouchableOpacity
+                                        onPress={() => addUserPatch()}
+                                        activeOpacity={0.6}
+                                        style={CounterStyle.surfaceBtnBlue3}>
+
+                                        { isLoaderUserAdd == true ?
+                                        <LoaderComponent 
+                                            text={ textTranslate.t('counterPatchAddLoader') } 
+                                            step="" 
+                                            color={Colors.white} 
+                                            size="large"/>
+                                        :
+                                        <Text style={CounterStyle.surfaceBtnBlueText}>{ textTranslate.t('counterPatchAdd') }</Text>
+                                        }
+                                    </TouchableOpacity>
+                                    </View>
+                                </View>
+
+                                <View style={CounterStyle.statDispositifNicotine}>
+                                <Surface 
+                                    elevation={ SURFACE_ELEVATION }
+                                    category={ SURFACE_CATEGORY }
+                                    style={ CounterStyle.surfaceContainerGreen } >   
+
+                                    <View style={ CounterStyle.titleContainer }>
+                                        <Text style={ CounterStyle.titleText }>{ textTranslate.t('counterPatchLast') }</Text>
+                                    </View>
+
+                                    <View style={ CounterStyle.descContainer }>
+                                        <Text style={ CounterStyle.descContenairViewText }>{diff}</Text>
+                                    </View>
+                                </Surface>
+                                </View>
+
+                            </View>
+                            : null }
+                        </View> 
+                        }
+                    </View>
                 </ScrollView>
 
                 <BottomSheet
@@ -419,9 +424,9 @@ const SettingPatchComponent = () => {
                     backgroundStyle={{ backgroundColor: Colors.background }}
                     backdropComponent={renderBackdrop}>
 
-                    <View style={styles.contentContainer}>
+                    <View style={CounterStyle.contentContainer}>
 
-                        <Text style={styles.containerHeadline}> Choisir un patch </Text>
+                        <Text style={CounterStyle.containerHeadline}>{ textTranslate.t('counterPatchChoice') }</Text>
                         
                         <View style={AppStyle.pickerSelect}>
                             <Picker
@@ -439,215 +444,14 @@ const SettingPatchComponent = () => {
   
             </GestureHandlerRootView>
 
-        <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={3000} message={ 'Application du patch : '+userPatchSelected.patchName}/>
+            <SnackBarComponent 
+                visible={isSnackBar} 
+                setVisible={setIsSnackBar} 
+                message={ textTranslate.t('counterPatchAfterAdd') + userPatchSelected.patchName}
+                duration={3000} />
                 
-            
         </SafeAreaProvider>
     )
 }
 
-export default SettingPatchComponent
-
-const screenWidth = Dimensions.get('screen').width;
-const styles = StyleSheet.create({
-
-    statDispositifNicotine: {
-        flexDirection: "row",
-        alignItems: 'center',
-    },
-
-    statContainer: {
-        margin:8
-    },
-
-    mainContainer: {
-        flex: 1,
-    },
-
-    mainC: {
-        alignItems: 'center',
-    },
-
-    mainContainerView: {
-        alignItems: 'center',
-        flexDirection: 'column',
-    },
-
-    loadContainerView : {
-        alignItems: 'center',
-        alignContent: 'center'
-    },
-
-    pickerSelectOrange: {
-        width: screenWidth - 32,
-        backgroundColor:'white',
-        borderWidth: 2,
-        borderColor: Colors.colorOrange,
-        borderRadius: 5,
-        marginTop:16,
-    },
-
-    patchInfoContainerView: {
-        alignItems: 'center',
-    },
-
-    titleContainer: {
-        backgroundColor: Colors.white,
-        padding: 16,
-        borderStartStartRadius: 5,
-        borderStartEndRadius: 5,
-        borderTopStartRadius: 5,
-        borderTopEndRadius: 5
-    },
-
-    titleContainer2: {
-        backgroundColor: Colors.white,
-        padding: 16,
-        paddingBottom: 0,
-        borderStartStartRadius: 5,
-        borderStartEndRadius: 5,
-        borderTopStartRadius: 5,
-        borderTopEndRadius: 5
-    },
-
-    titleContainerOrange: {
-        backgroundColor: Colors.white,
-        padding: 16,
-        borderWidth: 2,
-        borderColor: Colors.colorOrange,
-        borderStartStartRadius: 5,
-        borderStartEndRadius: 5,
-        borderTopStartRadius: 5,
-        borderTopEndRadius: 5
-    },
-
-    titleText: {
-        color: Colors.black,
-        fontSize: 18,
-        fontWeight: 'bold'
-    },
-
-    descContainer: {
-        padding: 16,
-    },
-
-    descContainerOrange: {
-        backgroundColor: Colors.colorOrange,
-        padding: 16,
-        borderWidth: 2,
-        borderColor: Colors.colorOrange,
-    },
-
-    descContenairViewText: {
-        color: Colors.white,
-        textAlign:'center',
-        verticalAlign: 'auto',
-        fontSize: 30,
-    },
-
-    descText: {
-        color: Colors.white,
-        fontSize: 18,
-    },
-
-    descContainerPicker: {
-        backgroundColor: Colors.white,
-        borderEndStartRadius: 5,
-        borderEndEndRadius: 5,
-        padding: 16,
-        paddingTop: 0
-    },
-
-    descTextPicker: {
-        color: Colors.blueFb,
-        fontSize: 18,
-    },
-
-    surfaceContainerOrange : {
-        flex: 1,
-        borderRadius: 5,
-        margin: 8,
-    },
-
-    surfaceContainerOrange2 : {
-        backgroundColor: Colors.colorOrange,
-        flex: 1,
-        marginTop: 8,
-        marginLeft: 8,
-        marginRight: 8,
-        borderRadius: 5,
-    },
-
-    surfaceContainerGreen: {
-        flex: 1,
-        backgroundColor: Colors.green,
-        borderWidth: 2,
-        borderColor: Colors.green,
-        borderRadius: 5,
-        margin: 8,
-    },
-
-    surfaceContainerBlue: {
-        flex: 1,
-        backgroundColor: Colors.blueFb,
-        borderWidth: 2,
-        borderColor: Colors.blueFb,
-        borderRadius: 5,
-        margin: 8,
-    },
-
-    surfaceBtnBlue: {
-        width: screenWidth - 32,
-        backgroundColor: Colors.blueFb,
-        borderWidth: 2,
-        borderColor: Colors.blueFb,
-        borderRadius: 5,
-        padding: 16,
-        marginTop: 16,
-    },
-
-    surfaceBtnBlue2: {
-        backgroundColor: Colors.blueFb,
-        borderEndStartRadius: 5,
-        borderEndEndRadius: 5,
-        borderBottomStartRadius: 5,
-        borderBottomEndRadius: 5,
-        padding: 16,
-    },
-
-    surfaceBtnBlue3: {
-        backgroundColor: Colors.blueFb,
-        borderEndStartRadius: 5,
-        borderEndEndRadius: 5,
-        borderBottomStartRadius: 5,
-        borderBottomEndRadius: 5,
-        padding: 16,
-        marginStart: 8,
-        marginEnd:8,
-        marginBottom: 8,
-    },
-
-    surfaceBtnBlueText: {
-        textAlign: 'center',
-        color: Colors.white,
-        fontSize: 18,
-        fontWeight: 'bold',
-        textTransform: 'uppercase',
-    },
-
-
-
-    container: {
-		flex: 1,
-		alignItems: 'center'
-	},
-    contentContainer: {
-		alignItems: 'center'
-	},
-	containerHeadline: {
-		fontSize: 24,
-		fontWeight: '600',
-		padding: 20,
-		color: Colors.colorOrange
-	}
-})
+export default CounterPatchScreen

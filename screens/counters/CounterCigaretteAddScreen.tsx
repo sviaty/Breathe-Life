@@ -1,13 +1,26 @@
 // React & React Native
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Platform,  Text, View, TouchableOpacity, Keyboard, ScrollView, Dimensions } from 'react-native'
+import { Text, View, TouchableOpacity, ScrollView } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+// Material
 import { Surface, Stack, TextInput } from "@react-native-material/core";
 
-// Styles & Colors
-import Colors from '../../constants/ColorConstant';
+// Navigation 
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+
+// Styles 
 import AppStyle from '../../styles/AppStyle';
-import LoginSigninStyle from '../../styles/LoginSigninStyle';
+
+// Constants 
+import Colors from '../../constants/ColorConstant';
+import { 
+    SURFACE_CATEGORY, 
+    SURFACE_ELEVATION, 
+    TEXTINPUT_VARIANT } from '../../constants/AppConstant';
+
+// Helper
+import textTranslate from '../../helpers/TranslateHelper';
 
 // Components
 import LoaderComponent from '../../components/LoaderComponent';
@@ -15,37 +28,37 @@ import SnackBarComponent from '../../components/SnackBarComponent';
 
 // Datas
 import Cigarette from '../../datas/CigaretteData'
+import CigaretteUser from '../../datas/CigaretteUserData';
 
 // Redux
 import { RootState } from '../../redux/Store';
 import { useSelector, useDispatch } from 'react-redux';
 
 // Api
-import CigaretteUser from '../../datas/CigaretteUserData';
 import { addCigaretteUserFireStore } from '../../api/CigaretteApi';
 
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type RootStackParamList = {
-    CounterCigaretteAddScreen: any;
-    CounterCigaretteListScreen: any;
-    SettingCounter: any;
+    UserCounterCigaretteAddScreen: any;
+    UserCounterCigaretteListScreen: any;
   };
 
-type Props = NativeStackScreenProps<RootStackParamList, 'CounterCigaretteAddScreen', 'CounterCigaretteListScreen'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'UserCounterCigaretteAddScreen', 'UserCounterCigaretteListScreen'>;
 
 /**
  * http://additifstabac.free.fr/index.php/cigarettes-pourcentages-additifs-taux-nicotine-goudrons-monoxyde-carbone-co/
  */
 
+/**
+ * Screen CounterCigaretteAddScreen
+ * @param param0 
+ * @returns 
+ */
 const CounterCigaretteAddScreen = ({ navigation }: Props) => {
 
     // UseState
     const [isLoaderCigAdd, setIsLoaderCigAdd] = useState<boolean>(false)
     const [errorAddCigUser, setErrorAddCigUser] = useState<string>("")
-    
-    const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
-    const [textSnackBar, setTextSnackBar] = useState<string>("")
 
     const c = new Cigarette("","",0,0,0,0,0,0,"")
 
@@ -78,6 +91,9 @@ const CounterCigaretteAddScreen = ({ navigation }: Props) => {
 
     }, [])  
 
+    /**
+     * Function handleAddCig
+     */
     const handleAddCig = () => {
         setIsLoaderCigAdd(true)
 
@@ -100,37 +116,37 @@ const CounterCigaretteAddScreen = ({ navigation }: Props) => {
     const isDataCorrect = (): boolean => {
         if(cigName.length == 0){
             setIsLoaderCigAdd(false)
-            setErrorCigName("Le nom de la marque est vide")
+            setErrorCigName( textTranslate.t('counterCigAddBrandRequired') )
             return false
         }
 
         if(cigNicotine.length == 0){
             setIsLoaderCigAdd(false)
-            setErrorCigNicotine("Le taux de nicotine est obligatoire")
+            setErrorCigNicotine( textTranslate.t('counterCigAddNicotineRequired') )
             return false
         }
 
         if(cigGoudron.length == 0){
             setIsLoaderCigAdd(false)
-            setErrorCigGoudron("Le taux de goudron est obligatoire")
+            setErrorCigGoudron( textTranslate.t('counterCigAddGoudronRequired') )
             return false
         }
 
         if(cigCarbonne.length == 0){
             setIsLoaderCigAdd(false)
-            setErrorCigCarbonne("Le monoxyde de carbonne est obligatoire")
+            setErrorCigCarbonne( textTranslate.t('counterCigAddGoudronRequired') )
             return false
         }
 
         if(cigPaquetNbr.length == 0){
             setIsLoaderCigAdd(false)
-            setErrorCigPaquetNbr("Le nombre de cigarette par paquet est obligatoire")
+            setErrorCigPaquetNbr( textTranslate.t('counterCigAddNbrRequired') )
             return false
         }
 
         if(cigPaquetPrice.length == 0){
             setIsLoaderCigAdd(false)
-            setErrorCigPrice("Le prix du paquet est obligatoire")
+            setErrorCigPrice( textTranslate.t('counterCigAddPriceRequired') )
             return false
         }
 
@@ -160,11 +176,6 @@ const CounterCigaretteAddScreen = ({ navigation }: Props) => {
 
         addCigaretteUserFireStore(cigUser).then(() => {
             setIsLoaderCigAdd(false)
-            setTextSnackBar('Ajout de la marque de cigarette : '+ cigName)
-            setIsSnackBar(true)
-
-            //handleOpenCloseBackdrop()
-            //bottomSheetRefAdd.current?.close()
 
             setCigName("")
             setCigNicotine("")
@@ -173,204 +184,135 @@ const CounterCigaretteAddScreen = ({ navigation }: Props) => {
             setCigPaquetNbr("")
             setCigPaquetPrice("")
 
-            //getCigList()
-
-            navigation.navigate('CounterCigaretteListScreen')
+            navigation.navigate('UserCounterCigaretteListScreen')
 
         }).catch((error) => {
             setIsLoaderCigAdd(false)
-            setErrorAddCigUser("Error add cigarette : "+ error)
-            console.error("Error add cig : "+ error);
+            setErrorAddCigUser(error.message)
+            console.error(error.message)
         })
     };
 
-    const handleKeyboardHide = () => {
-        Keyboard.dismiss()
-    }
-
-    /**
-     * Function onRefresh 
-     */
-    const onRefresh = () => {
-    }
-
     // View JSX
     return (
-        <SafeAreaProvider style={styles.mainContainer}>
+        <SafeAreaProvider>
             
-            <View>
-                <ScrollView
-                    persistentScrollbar={true}
-                    scrollEnabled={true}
-                    nestedScrollEnabled={true}
-                    automaticallyAdjustKeyboardInsets={true}>
+            <ScrollView
+                persistentScrollbar={true}
+                scrollEnabled={true}
+                nestedScrollEnabled={true}
+                automaticallyAdjustKeyboardInsets={true}>
 
-                    <Stack spacing={0} style={styles.mainContainerView}>
-
+                <Stack 
+                    spacing={0} 
+                    style={AppStyle.mainContainerStack}>
+                    
+                    <View style={AppStyle.rowView}>
                         <TextInput
-                            variant="outlined"
-                            label="Entrer le nom de la marque"
+                            variant={ TEXTINPUT_VARIANT }
+                            label={ textTranslate.t('counterCigAddBrand') }
+                            placeholder={ textTranslate.t('counterCigAddBrandPlaceholder') } 
                             helperText={errorCigName}
                             color={Colors.blueFb}
-                            placeholder="Malboro"
                             keyboardType="default"
-                            style={styles.textInput}
+                            style={ AppStyle.textInputLogin }
                             value={cigName}
                             onChangeText={setCigName} />
+                    </View>
 
+                    <View style={AppStyle.rowView}>
                         <TextInput
-                            variant="outlined"
-                            label="Entrer le taux de nicotine (mg)"
+                            variant={ TEXTINPUT_VARIANT }
+                            label={ textTranslate.t('counterCigAddNicotine') } 
+                            placeholder={ textTranslate.t('counterCigAddNicotinePlaceholder') } 
                             helperText={errorCigNicotine}
                             color={Colors.blueFb}
-                            placeholder="0.8"
                             keyboardType="decimal-pad"
-                            style={styles.textInput}
+                            style={ AppStyle.textInputLogin }
                             value={cigNicotine}
                             onChangeText={setCigNicotine} />
+                    </View>
 
+                    <View style={AppStyle.rowView}>
                         <TextInput
-                            variant="outlined"
-                            label="Entrer le taux de goudron (mg)"
+                            variant={ TEXTINPUT_VARIANT }
+                            label={ textTranslate.t('counterCigAddGoudron') } 
+                            placeholder={ textTranslate.t('counterCigAddGoudronPlaceholder') } 
                             helperText={errorCigGoudron}
                             color={Colors.blueFb}
-                            placeholder="9"
                             keyboardType="decimal-pad"
-                            style={styles.textInput}
+                            style={ AppStyle.textInputLogin }
                             value={cigGoudron}
                             onChangeText={setCigGoudron} />
+                    </View>
 
+                    <View style={AppStyle.rowView}>
                         <TextInput
-                            variant="outlined"
-                            label="Entrer le taux de monoxyde de carbonne (mg)"
+                            variant={ TEXTINPUT_VARIANT }
+                            label={ textTranslate.t('counterCigAddCarbone') } 
+                            placeholder={ textTranslate.t('counterCigAddCarbonePlaceholder') } 
                             helperText={errorCigCarbonne}
                             color={Colors.blueFb}
-                            placeholder="10"
                             keyboardType="decimal-pad"
-                            style={styles.textInput}
+                            style={ AppStyle.textInputLogin }
                             value={cigCarbonne}
                             onChangeText={setCigCarbonne} />
+                    </View>
 
+                    <View style={AppStyle.rowView}>
                         <TextInput
-                            variant="outlined"
-                            label="Entrer le nombre de cigarette par paquet"
+                            variant={ TEXTINPUT_VARIANT }
+                            label={ textTranslate.t('counterCigAddNbr') }  
+                            placeholder={ textTranslate.t('counterCigAddNbrPlaceholder') }  
                             helperText={errorCigPaquetNbr}
                             color={Colors.blueFb}
-                            placeholder="20"
                             keyboardType="number-pad"
-                            style={styles.textInput}
+                            style={ AppStyle.textInputLogin }
                             value={cigPaquetNbr}
                             onChangeText={setCigPaquetNbr} />
+                    </View>
 
+                    <View style={AppStyle.rowView}>
                         <TextInput
-                            variant="outlined"
-                            label="Entrer le prix du paquet (euros)"
-                            helperText={errorCigPaquetNbr}
+                            variant={ TEXTINPUT_VARIANT }
+                            label={ textTranslate.t('counterCigAddPrice') } 
+                            placeholder={ textTranslate.t('counterCigAddPricePlaceholder') }  
+                            helperText={errorCigPaquetPrice}
                             color={Colors.blueFb}
-                            placeholder="14"
                             keyboardType="decimal-pad"
-                            style={styles.textInput}
+                            style={ AppStyle.textInputLogin }
                             value={cigPaquetPrice}
                             onChangeText={setCigPaquetPrice} />
+                    </View>
 
-                        { isLoaderCigAdd == true ?
-                        <View>
-                            <LoaderComponent text="Ajout de la marque de cigarette en cours ..." step="" color={Colors.blueFb} size="large"/>
-                        </View>
-                        :
-                        <View>
+                    <View style={AppStyle.rowView}>
+                        <View style={{flex: 1}}>
                             <Surface 
-                                elevation={4}
-                                category="medium"
-                                style={ styles.surfaceBtnBlue }> 
-
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={AppStyle.surfaceBtnStat}>
+                                { isLoaderCigAdd == true ? 
+                                <View style={AppStyle.btnGoUpdate}>
+                                    <LoaderComponent text={ textTranslate.t('counterCigAddBtnLoader') } step="" color={Colors.white} size="small"/>
+                                </View>
+                                : 
                                 <TouchableOpacity
-                                    onPress={() => handleAddCig()}
-                                    activeOpacity={0.6}>
-
-                                    <Text style={styles.surfaceBtnBlueText}>Ajouter</Text>
+                                    onPress={ () => handleAddCig()}
+                                    activeOpacity={0.6}
+                                    style={AppStyle.btnGoUpdate}>
+                                    <Text style={AppStyle.btnGoUpdateTxt}>{ textTranslate.t('counterCigAddBtnText') }</Text>
                                 </TouchableOpacity>
+                                }
                             </Surface>
-
-                            <Text style={AppStyle.textError}>{errorAddCigUser}</Text>
                         </View>
-                        }
-                        
-                    </Stack>
+                    </View>
+                    
+                </Stack>
 
-                </ScrollView>
-            </View>
-            
-            <SnackBarComponent visible={isSnackBar} setVisible={setIsSnackBar} duration={5000} message={textSnackBar}/>
+            </ScrollView>
             
         </SafeAreaProvider>
     )
 }
 
 export default CounterCigaretteAddScreen
-
-
-const screenWidth = Dimensions.get('screen').width;
-const styles = StyleSheet.create({
-
-    mainContainer: {
-        flex: 1,
-    },
-
-    mainContainerView: {
-        alignItems: 'center',
-        flexDirection: 'column',
-    },
-
-    textInput: {
-        width: screenWidth - 32,
-        marginTop: 16
-    },
-
-    surfaceBtnBlue: {
-        width: screenWidth - 32,
-        backgroundColor: Colors.blueFb,
-        borderWidth: 2,
-        borderColor: Colors.blueFb,
-        borderRadius: 5,
-        padding: 16,
-        marginTop: 16,
-    },
-
-    surfaceBtnBlueText: {
-        textAlign: 'center',
-        color: Colors.white,
-        fontSize: 18,
-        fontWeight: 'bold',
-        textTransform: 'uppercase',
-    },
-
-    
-    container: {
-		flex: 1,
-		alignItems: 'center'
-	},
-    contentContainer: {
-		alignItems: 'center'
-	},
-
-    contentContainer2: {
-        flex:1,
-		alignItems: 'center'
-	},
-
-	containerHeadline: {
-		fontSize: 24,
-		fontWeight: '600',
-		padding: 15,
-		color: Colors.colorOrange
-	},
-
-    btnAdd: {
-        width: screenWidth - 20,
-        backgroundColor: Colors.blueFb,
-        marginTop:15,
-        padding: 15,
-        borderRadius: 5,
-    },
-})
