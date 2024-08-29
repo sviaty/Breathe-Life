@@ -103,7 +103,7 @@ export const englishTranslate = {
     counterCigListSmoke: "Smoke a cigarette",
     counterCigListNoSmoke: "You have not smoked a cigarette.",
     counterCigListChoiceBrand: "Choosing a cigarette brand.",
-    counterCigListAddBrand: "Add a brand.",
+    counterCigListAddBrand: "Add a brand",
     counterCigListAddLoader: "Adding the cigarette ...",
     counterCigListLastSmoke: "Last cigarette smoked",
     counterCigListNbrSmoke: "Number of cigarettes",

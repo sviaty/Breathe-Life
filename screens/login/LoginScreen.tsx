@@ -1,6 +1,6 @@
 // React & React Native
 import React, { useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native'
+import { View, Text } from 'react-native'
 
 // Material
 import { Stack, TextInput, Surface } from "@react-native-material/core";
@@ -283,7 +283,3 @@ const LoginScreen = () => {
 }
 
 export default LoginScreen
-
-const styles = StyleSheet.create({
-
-})

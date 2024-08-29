@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Stop-Clup",
-    "slug": "Stop-Clup",
+    "name": "Breathe",
+    "slug": "Breathe",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,25 +13,21 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.sviaty.StopClup"
+      "bundleIdentifier": "com.sviatak.Breathe"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#2196F3"
       },
-      "package": "com.sviaty.StopClup"
+      "package": "com.sviatak.Breathe"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-secure-store",
-      "expo-localization"
-    ],
     "extra": {
       "eas": {
-        "projectId": "046c4003-371a-40ba-ac59-b247f45a7696"
+        "projectId": "d971772c-ec4a-4887-aa51-69e9bb207885"
       }
     }
   }

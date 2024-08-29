@@ -308,7 +308,7 @@ const CounterPatchScreen = () => {
                         { isLoaderGet == true ? 
                         <View style={CounterStyle.loadContainerView}>
                             <LoaderComponent 
-                                text={ textTranslate.t('counterPatchSelected') } 
+                                text={ textTranslate.t('patchViewLoading') } 
                                 step="" 
                                 color={Colors.blueFb} 
                                 size="large"/>
@@ -325,7 +325,7 @@ const CounterPatchScreen = () => {
                                 { Platform.OS === 'android' ? 
                                 <View>
                                     <View style={ CounterStyle.titleContainer2 }>
-                                        <Text style={ CounterStyle.titleText }>{ textTranslate.t('counterPatchSelected') }</Text>
+                                        <Text style={ CounterStyle.titleText }>{ textTranslate.t('counterPatchChoice') }</Text>
                                     </View>
                                     <Picker
                                         selectedValue={userPatch}

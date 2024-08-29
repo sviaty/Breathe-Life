@@ -434,7 +434,7 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
                                 { Platform.OS === 'android' ? 
                                 <View>
                                     <View style={ CounterStyle.titleContainer2 }>
-                                        <Text style={ CounterStyle.titleText }>{ textTranslate.t('cigaretteViewLoading') }</Text>
+                                        <Text style={ CounterStyle.titleText }>{ textTranslate.t('counterCigListChoiceBrand') }</Text>
                                     </View>
                                     <Picker
                                         selectedValue={userCig}
