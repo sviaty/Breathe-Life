@@ -65,6 +65,9 @@ export const frenchTranslate = {
     userSettingDeleteFireBaseAuth: "Suppression du compte utilisateur Firebase Auth",
     userSettingDelete: "Suppression de l'utilisateur",
 
+    userSettingDeleteAlertTitle: "Êtes-vous sûr de vouloir supprimer votre compte ?",
+    userSettingDeleteAlertText: "La suppression de votre compte utilisateur va entraîner la suppression de l'ensemble de vos données.",
+
     userUpdateNameRequired: "Le nom est obligatoire",
     userUpdateCigNbrRequired: "Le nombre moyen de cigarette est obligatoire",
     userUpdateBirthDate: "Entrer votre date de naissance",
@@ -105,14 +108,18 @@ export const frenchTranslate = {
     counterCigListChoiceBrand: "Choisir une marque de cigarette.",
     counterCigListAddBrand: "Ajouter une marque",
     counterCigListAddLoader: "Ajout de la cigarette ...",
+    counterCigLastLoader: "Chargement de la dernière cigarette fumée ...",
     counterCigListLastSmoke: "Dernière cigarette fumée",
-    counterCigListNbrSmoke: "Nombre de cigarettes",
+    counterCigListNbrSmoke: "Nombre de cigarettes fumée",
+    counterCigAfterAdd: "Vous avez fumé une cigarette : ",
 
     counterPatchSelected: "Selectionner un patch",
+    counterPatchAlertText: "Votre derniers patch a été appliqué il y a moins de 24h etes vous sure d'en appliquer un autre ?",
     counterPatchNoPatchApply: "Vous n'avez pas encore appliquer de patch",
     counterPatchChoice: "Choisir un patch",
     counterPatchAdd : "Appliquer un patch",
     counterPatchAddLoader : "Ajout du patch en cours ...",
+    counterPatchLastLoader: "Chargement du dernier patch appliqué ...",
     counterPatchLast: "Dernier patch appliqué",
     counterPatchAfterAdd: "Application du patch : ",
 
@@ -121,6 +128,7 @@ export const frenchTranslate = {
     counterPillChoice: "Choisir une pastille",
     counterPillAdd: "Consommer une pastille",
     counterPillAddLoader: "Ajout de la pastille en cours ...",
+    counterPillLastLoader: "Chargement de la dernière pastille consommée ...",
     counterPillLast: "Dernière pastille consommée",
     counterPillAfterAdd: "Consommation de la pastille : ",
 
@@ -153,6 +161,7 @@ export const frenchTranslate = {
     statChartOctober: "Oct", 
     statChartNovember: "Nov", 
     statChartDecember: "Dec",
+    statEconomyInfo: "Pour calculer vos économies, vous devez renseigner votre moyenne de cigarettes fumées par jours dans les paramètres.",
 
     cigaretteType: "Marque de cigarette",
     cigaretteNicotine: "Nicotine : ",

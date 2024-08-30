@@ -65,6 +65,9 @@ export const englishTranslate = {
     userSettingDeleteFireBaseAuth: "Removing user Firebase Auth account",
     userSettingDelete: "Removing user",
 
+    userSettingDeleteAlertTitle: "Are you sure you want to delete your account ?",
+    userSettingDeleteAlertText: "Deleting your user account will result in the deletion of all your data.",
+
     userUpdateNameRequired: "Name is required.",
     userUpdateCigNbrRequired: "The average number of cigarettes is required",
     userUpdateBirthDate: "Enter your date of birth",
@@ -105,14 +108,18 @@ export const englishTranslate = {
     counterCigListChoiceBrand: "Choosing a cigarette brand.",
     counterCigListAddBrand: "Add a brand",
     counterCigListAddLoader: "Adding the cigarette ...",
+    counterCigLastLoader: "Loading the last cigarette smoked ...",
     counterCigListLastSmoke: "Last cigarette smoked",
-    counterCigListNbrSmoke: "Number of cigarettes",
+    counterCigListNbrSmoke: "Number of cigarettes smoked",
+    counterCigAfterAdd: "You smoked a cigarette : ",
 
     counterPatchSelected: "Select a patch",
+    counterPatchAlertText: "Your last patch was applied less than 24 hours ago, are you sure you want to apply another one ?",
     counterPatchNoPatchApply: "You have not yet applied a patch.",
     counterPatchChoice: "Choose a patch",
     counterPatchAdd : "Apply a patch",
     counterPatchAddLoader : "Adding the patch ...", 
+    counterPatchLastLoader: "Loading the latest applied patch...",
     counterPatchLast: "Last patch applied",
     counterPatchAfterAdd: "Applying the patch : ",
 
@@ -121,6 +128,7 @@ export const englishTranslate = {
     counterPillChoice: "Choose a tablet",
     counterPillAdd: "Consume a tablet",
     counterPillAddLoader: "Adding the tablet ...",
+    counterPillLastLoader: "Loading the last consumed tablet...",
     counterPillLast: "Last tablet consumed",
     counterPillAfterAdd: "Consumption of the tablet : ",
 
@@ -153,6 +161,7 @@ export const englishTranslate = {
     statChartOctober: "Oct", 
     statChartNovember: "Nov", 
     statChartDecember: "Dec",
+    statEconomyInfo: "To calculate your savings, you must enter your average number of cigarettes smoked per day in the settings.",
 
     cigaretteType: "Cigarette brand",
     cigaretteNicotine: "Nicotine : ",

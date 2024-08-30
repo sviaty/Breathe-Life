@@ -203,6 +203,13 @@ export default StyleSheet.create({
         fontSize: 30,
     },
 
+    descContenairViewText2: {
+        color: Colors.white,
+        padding: 8,
+        verticalAlign: 'auto',
+        fontSize: 20,
+    },
+
 
     container: {
 		flex: 1,

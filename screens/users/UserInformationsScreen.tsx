@@ -1,6 +1,6 @@
 // React & React Native
 import React, { useState , useEffect} from 'react'
-import { Text, View, TouchableOpacity } from 'react-native'
+import { Text, View, TouchableOpacity, Alert } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-gesture-handler';
 
@@ -204,6 +204,34 @@ const UserInformationsScreen = ({ navigation }: Props) => {
      * Function handleDeleteAccount
      */
     const handleDeleteAccount = () => {
+        
+        showAlertDeleteAccount()
+    }
+
+    const showAlertDeleteAccount = () => {
+        Alert.alert(
+            textTranslate.t('userSettingDeleteAlertTitle'), 
+            textTranslate.t('userSettingDeleteAlertText'), 
+            [
+                {
+                    text: textTranslate.t('counterCigListAlertCancel'),
+                    onPress: () => {
+                        //console.log('Cancel Pressed')
+                    },
+                    style: 'cancel',
+                },
+                {
+                    text: textTranslate.t('counterCigListAlertConfirm'),
+                    onPress: () => {
+                        //console.log('OK Pressed')
+                        userDeleteAccount()
+                    },
+                }
+            ]
+        );
+    }
+
+    const userDeleteAccount = () => {
         setIsLoadDelUser(true)
         
         setDelUserState( textTranslate.t('userSettingDeleteFireBaseAuth') )
@@ -223,7 +251,6 @@ const UserInformationsScreen = ({ navigation }: Props) => {
             //console.log("User is null")
             setIsLoadDelUser(false)
         }
-        
     }
 
     /**
@@ -376,6 +403,29 @@ const UserInformationsScreen = ({ navigation }: Props) => {
                                 handleFunction={ () => { navigation.navigate( ID_NAVIGATE_USER_SETTINGS_UPDATE_INFO_SCREEN ) } } />
                         </View>
                     </View>
+
+                    <View style={AppStyle.rowView}>
+                        <View style={{flex: 1}}>
+                            <Surface 
+                                elevation={ SURFACE_ELEVATION }
+                                category={ SURFACE_CATEGORY }
+                                style={AppStyle.surfaceBtnStat}>
+                                { isLoadDelUser == true ? 
+                                <View style={AppStyle.btnDeleteAcount}>
+                                    <LoaderComponent text={delUserState} step="" color={Colors.white} size="small"/>
+                                </View>
+                                : 
+                                <TouchableOpacity
+                                    onPress={ () => handleDeleteAccount()}
+                                    activeOpacity={0.6}
+                                    style={AppStyle.btnDeleteAcount}>
+                                    <Text style={AppStyle.btnGoUpdateTxt}>{ textTranslate.t('userSettingsBtnDeleteAcount') }</Text>
+                                </TouchableOpacity>
+                                }
+                            </Surface>
+                        </View>
+                    </View>
+
                    
                     <View style={AppStyle.rowView}>
                         <View style={{flex: 1}}>
@@ -540,28 +590,7 @@ const UserInformationsScreen = ({ navigation }: Props) => {
                         </View>
                     </View>
 
-                    <View style={AppStyle.rowView}>
-                        <View style={{flex: 1}}>
-                            <Surface 
-                                elevation={ SURFACE_ELEVATION }
-                                category={ SURFACE_CATEGORY }
-                                style={AppStyle.surfaceBtnStat}>
-                                { isLoadDelUser == true ? 
-                                <View style={AppStyle.btnDeleteAcount}>
-                                    <LoaderComponent text={delUserState} step="" color={Colors.white} size="small"/>
-                                </View>
-                                : 
-                                <TouchableOpacity
-                                    onPress={ () => handleDeleteAccount()}
-                                    activeOpacity={0.6}
-                                    style={AppStyle.btnDeleteAcount}>
-                                    <Text style={AppStyle.btnGoUpdateTxt}>{ textTranslate.t('userSettingsBtnDeleteAcount') }</Text>
-                                </TouchableOpacity>
-                                }
-                            </Surface>
-                        </View>
-                    </View>
-
+                  
                 </View>
             </ScrollView>
         </SafeAreaProvider>

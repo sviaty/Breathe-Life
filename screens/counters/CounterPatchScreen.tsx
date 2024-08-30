@@ -1,6 +1,6 @@
 // React & React Native
 import React, { useState, useMemo, useCallback, useEffect, useRef} from 'react';
-import { Platform,  Text, View, TouchableOpacity, Pressable, ScrollView } from 'react-native';
+import { Platform,  Text, View, TouchableOpacity, Pressable, ScrollView, Alert } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Picker } from '@react-native-picker/picker';
@@ -20,7 +20,7 @@ import {
     SURFACE_ELEVATION } from '../../constants/AppConstant';
 
 // Helpers
-import { getDifference2Date } from '../../helpers/DateHelper';
+import { getDifference2Date, getDifference2DateHour } from '../../helpers/DateHelper';
 import textTranslate from '../../helpers/TranslateHelper';
 
 // Components
@@ -53,6 +53,7 @@ const CounterPatchScreen = () => {
     const [isLoaderGet, setIsLoaderGet] = useState<boolean>(true)
     const [isLoaderUserAdd, setIsLoaderUserAdd] = useState<boolean>(false)
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
+    const [isloadGetLast, setIsloadGetLast] = useState<boolean>(true)
 
     let [userPatch, setUserPatch] = useState<string>( textTranslate.t('counterPatchSelected') );
     let [userPatchText, setUserPatchText] = useState<string>( textTranslate.t('counterPatchSelected') );
@@ -63,6 +64,8 @@ const CounterPatchScreen = () => {
     let [dataPatchTab, setDataPatchTab] = useState<Patch[]>([]);
     let [dataPatchTabItem, setDataPatchTabItem] = useState<any[]>([]);
     let [diff, setDiff] = useState<string>("")
+
+    let [patchLast, setPatchLast] = useState<any>();
 
     // UseRed
     const intervalRef:any = useRef();
@@ -209,6 +212,46 @@ const CounterPatchScreen = () => {
     }
 
     /**
+     * Function handleAddUserPatch
+     */
+    const handleAddUserPatch = () => {
+        const diff = getDifference2DateHour(patchLast)
+        //console.log(diff) 
+
+        if(diff < 24){
+            showAlertPatchTime()
+        } else {
+            addUserPatch()
+        }
+    }
+
+    /**
+     * showAlertPatchTime
+     */
+    const showAlertPatchTime = () => {
+        Alert.alert(
+            textTranslate.t('counterPatchAlertText'), 
+            '', 
+            [
+                {
+                    text: textTranslate.t('counterCigListAlertCancel'),
+                    onPress: () => {
+                        //console.log('Cancel Pressed')
+                    },
+                    style: 'cancel',
+                },
+                {
+                    text: textTranslate.t('counterCigListAlertConfirm'),
+                    onPress: () => {
+                        //console.log('OK Pressed')
+                        addUserPatch()
+                    },
+                }
+            ]
+        );
+    }
+
+    /**
      * Function addUserPatch
      */
     const addUserPatch = async () => {
@@ -266,19 +309,26 @@ const CounterPatchScreen = () => {
      */
     const getlastPatch = () => {
 
+        setIsloadGetLast(true)
         closeInterval()
 
         getUserLastPatchByIdUserFireStore(userSelector.userId).then((patchList) => {
 
             if(patchList != null){
                 //console.log(patchList.dateTime.toDate())
-                const d = patchList.dateTime.toDate()
-                startInterval(d)                
+                setIsloadGetLast(false)
+
+                patchLast = patchList.dateTime.toDate()
+                setPatchLast(patchLast)
+
+                startInterval(patchLast)                
             } else {
+                setIsloadGetLast(false)
                 setDiff( textTranslate.t('counterPatchNoPatchApply') )
             }
             
         }).catch((error) => {
+            setIsloadGetLast(false)
             //console.log("Error getUserLastPatchByIdUserFireStore")
             console.error(error)
         })
@@ -375,7 +425,7 @@ const CounterPatchScreen = () => {
                                     </Surface>
 
                                     <TouchableOpacity
-                                        onPress={() => addUserPatch()}
+                                        onPress={() => handleAddUserPatch()}
                                         activeOpacity={0.6}
                                         style={CounterStyle.surfaceBtnBlue3}>
 
@@ -401,10 +451,27 @@ const CounterPatchScreen = () => {
                                     <View style={ CounterStyle.titleContainer }>
                                         <Text style={ CounterStyle.titleText }>{ textTranslate.t('counterPatchLast') }</Text>
                                     </View>
+                                    
 
                                     <View style={ CounterStyle.descContainer }>
-                                        <Text style={ CounterStyle.descContenairViewText }>{diff}</Text>
+                                        { isloadGetLast == true ?
+                                        <LoaderComponent 
+                                            text={ textTranslate.t('counterPatchLastLoader') } 
+                                            step="" 
+                                            color={Colors.white} 
+                                            size="large"/>
+                                        :
+                                        <View>
+                                            { diff == textTranslate.t('counterPatchNoPatchApply') ?
+                                            <Text style={ CounterStyle.descContenairViewText2 }>{diff}</Text>
+                                            :
+                                            <Text style={ CounterStyle.descContenairViewText }>{diff}</Text>
+                                            }
+                                        </View>
+                                        }
                                     </View>
+
+                            
                                 </Surface>
                                 </View>
 

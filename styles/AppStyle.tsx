@@ -167,7 +167,7 @@ export default StyleSheet.create({
         color: Colors.white,
         textTransform: 'uppercase',
         fontWeight: 'bold',
-        fontSize: 18,
+        fontSize: 20,
     },
 
     btnDeleteAcount: {

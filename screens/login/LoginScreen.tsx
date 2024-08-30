@@ -15,6 +15,8 @@ import {
     SURFACE_ELEVATION, 
     TEXTINPUT_VARIANT } from '../../constants/AppConstant';
 import { 
+    ID_MAIL,
+    ID_PWD,
     ID_TOKEN, 
     ID_USER } from '../../constants/IdConstant';
 
@@ -39,8 +41,9 @@ import { useSelector, useDispatch } from 'react-redux';
 // Api
 import { getUserFireStore } from '../../api/UserApi';
 
-// Fire Store
+// Fire Base
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+const auth = getAuth();
 
 /**
  * LoginScreen
@@ -110,7 +113,8 @@ const LoginScreen = () => {
     const loginUserAuth = () => {
         setStep( textTranslate.t('userIdLogin') )
 
-        const auth = getAuth();
+        addSecureStore(ID_MAIL, mail)
+        addSecureStore(ID_PWD, pwd)
 
         signInWithEmailAndPassword(auth, mail, pwd)
             .then(async (userCredential) => {

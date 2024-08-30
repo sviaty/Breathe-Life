@@ -3,34 +3,34 @@ import Colors from '../constants/ColorConstant';
 
 export default StyleSheet.create({
     statContainer: {
-        margin:5
+        margin: 5
     },
 
     statSurfaceOrange: {
         flex: 1,
         backgroundColor: Colors.colorOrange,
-        borderRadius: 10,
+        borderRadius: 5,
         margin:8
     },
 
     statSurfaceRed: {
         flex: 1,
         backgroundColor: Colors.red,
-        borderRadius: 10,
+        borderRadius: 5,
         margin:8
     },
 
     statSurfaceGreen: {
         flex: 1,
         backgroundColor: Colors.green,
-        borderRadius: 10,
+        borderRadius: 5,
         margin:8
     },
 
     statSurfaceBlue: {
         flex: 1,
         backgroundColor: Colors.blueFb,
-        borderRadius: 10,
+        borderRadius: 5,
         margin:8
     },
 
@@ -41,6 +41,8 @@ export default StyleSheet.create({
         borderColor: Colors.colorOrange,
         borderStartStartRadius: 5,
         borderStartEndRadius: 5,
+        borderTopStartRadius: 5,
+        borderTopEndRadius: 5
     },
 
     titleContainerRed: {
@@ -50,6 +52,8 @@ export default StyleSheet.create({
         borderColor: Colors.red,
         borderStartStartRadius: 5,
         borderStartEndRadius: 5,
+        borderTopStartRadius: 5,
+        borderTopEndRadius: 5
     },
 
     titleContainerGreen: {
@@ -59,6 +63,8 @@ export default StyleSheet.create({
         borderColor: Colors.green,
         borderStartStartRadius: 5,
         borderStartEndRadius: 5,
+        borderTopStartRadius: 5,
+        borderTopEndRadius: 5
     },
 
     titleContainerBlue: {
@@ -68,6 +74,8 @@ export default StyleSheet.create({
         borderColor: Colors.blueFb,
         borderStartStartRadius: 5,
         borderStartEndRadius: 5,
+        borderTopStartRadius: 5,
+        borderTopEndRadius: 5
     },
 
     titleText: {
@@ -93,6 +101,14 @@ export default StyleSheet.create({
         paddingTop: 16
     },
 
+    descContenairViewText3: {
+        color: Colors.white,
+        textAlign:'center',
+        verticalAlign: 'auto',
+        fontSize: 20,
+        padding: 16,
+    },
+
     statUnitCount: {
         color: Colors.white,
         textAlign:'center',
@@ -109,7 +125,7 @@ export default StyleSheet.create({
         flex: 1,
         backgroundColor: Colors.colorOrange,
         height: 120,
-        borderRadius: 10,
+        borderRadius: 5,
         margin:8
     },
 
@@ -118,7 +134,7 @@ export default StyleSheet.create({
         height: 120,
         backgroundColor: Colors.blueFb,
     
-        borderRadius: 10,
+        borderRadius: 5,
         margin:8
     },
 
@@ -127,7 +143,7 @@ export default StyleSheet.create({
         height: 120,
         backgroundColor: Colors.red,
     
-        borderRadius: 10,
+        borderRadius: 5,
         margin:8
     },
 
@@ -136,7 +152,7 @@ export default StyleSheet.create({
         height: 120,
         backgroundColor: Colors.green,
     
-        borderRadius: 10,
+        borderRadius: 5,
         margin:8
     },
 

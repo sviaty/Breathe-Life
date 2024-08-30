@@ -629,7 +629,11 @@ const StatisticsYearsScreen = () => {
                                     <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                                     : 
                                     <View>
-                                        <Text style={ StatStyle.descContenairViewText }> {countPriceEconomy} { textTranslate.t('cigarettePriceEuros') } </Text>
+                                        { countPriceEconomy == 0 ? 
+                                        <Text style={ StatStyle.descContenairViewText3 }>{ textTranslate.t('statEconomyInfo') } </Text>
+                                        : 
+                                        <Text style={ StatStyle.descContenairViewText }> {countPriceEconomy.toFixed(2)} { textTranslate.t('cigarettePriceEuros') } </Text>
+                                        }
                                     </View>
                                     }
                                 </View>

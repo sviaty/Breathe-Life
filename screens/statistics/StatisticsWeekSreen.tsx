@@ -682,11 +682,15 @@ const StatisticsWeekSreen = () => {
                                 </View>
                                 
                                 <View>
-                                {isLoadCountPriceEconomy == true ? 
+                                    {isLoadCountPriceEconomy == true ? 
                                     <LoaderComponent text="" step="" color={Colors.white} size={'small'}/>
                                     : 
                                     <View>
+                                        { countPriceEconomy == 0 ? 
+                                        <Text style={ StatStyle.descContenairViewText3 }>{ textTranslate.t('statEconomyInfo') } </Text>
+                                        : 
                                         <Text style={ StatStyle.descContenairViewText }> {countPriceEconomy.toFixed(2)} { textTranslate.t('cigarettePriceEuros') } </Text>
+                                        }
                                     </View>
                                     }
                                 </View>

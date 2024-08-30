@@ -85,6 +85,27 @@ export const getDifference2Date = (dateLast:Date) => {
 }
 
 /**
+ * getDifference2DateHour
+ * @param dateLast 
+ * @returns 
+ */
+export const getDifference2DateHour = (dateLast:Date) => {
+    //console.log(dateOfBirth)
+    if(dateLast != null){
+        const mDateLast = Moment(new Date(dateLast))
+        //console.log(mDateLast)
+        const mDateNow = Moment(new Date())
+        //console.log(mDateNow)
+        const hours = mDateNow.diff(mDateLast, 'hours')
+        //console.log(seconde)
+        
+        return hours
+    } else {
+        return 0
+    }
+}
+
+/**
  * Function isThisWeek 
  * @param dateLast 
  * @returns 

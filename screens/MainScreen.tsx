@@ -14,8 +14,10 @@ import AppStyle from '../styles/AppStyle';
 // Constants
 import Colors from '../constants/ColorConstant';
 import { 
+    ID_MAIL,
     ID_NAVIGATE_USER_LOGIN_SCREEN, 
     ID_NAVIGATE_USER_NO_LOGIN_SCREEN, 
+    ID_PWD, 
     ID_TOKEN, 
     ID_USER 
 } from '../constants/IdConstant';
@@ -31,7 +33,7 @@ import UserNoLoginScreen from '../screens/UserNoLoginScreen';
 import UserLoginScreen from '../screens/UserLoginScreen';
 
 // Helpers
-import { deleteSecureStore, getSecureStore } from '../helpers/SecureStoreHelper';
+import { addSecureStore, deleteSecureStore, getSecureStore } from '../helpers/SecureStoreHelper';
 import textTranslate from '../helpers/TranslateHelper';
 
 // Secure Store
@@ -47,10 +49,10 @@ import { useSelector, useDispatch } from 'react-redux';
 // Api
 import { getUserByIdFireStore } from '../api/UserApi';
 
-// Fire Store
-import firebaseConfig from '../firebaseConfig';
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-const db = getFirestore(firebaseConfig); 
+// Fire Base
+import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { err } from 'react-native-svg';
+const auth = getAuth();
 
 /**
  * 
@@ -76,17 +78,43 @@ const MainScreen = () => {
 
     useEffect(() => {
       setIsLoader(true)
-      getIdUserSecureStore();
+      getSecureStoreDatas();
     }, [])
 
     /**
      * Function getIdUserSecureStore
      */
-    const getIdUserSecureStore = async () => {
-        await getSecureStore(ID_USER).then((userIdStoreSecure) => {
+    const getSecureStoreDatas = async () => {
+        getSecureStore(ID_USER).then((userIdStoreSecure) => {
             //console.log(userIdStoreSecure)
             if(userIdStoreSecure != null){
-                getUserInDatabase(userIdStoreSecure)
+                getSecureStore(ID_MAIL).then((userMailStoreSecure) => {
+                    if(userMailStoreSecure != null){
+                        getSecureStore(ID_PWD).then((userPwdStoreSecure) => {
+                            if(userPwdStoreSecure != null){
+                                loginUserFireBaseAuth(userIdStoreSecure, userMailStoreSecure, userPwdStoreSecure)
+                            } else {
+                                setLoggin(false)
+                                dispatch(setIsLogin(false));
+                                setIsLoader(false)
+                            }
+                        }).catch((error) => {
+                            //console.error(error.message)
+                            setLoggin(false)
+                            dispatch(setIsLogin(false));
+                            setIsLoader(false)
+                        })   
+                    } else {
+                        setLoggin(false)
+                        dispatch(setIsLogin(false));
+                        setIsLoader(false)
+                    }
+                }).catch((error) => {
+                    //console.error(error.message)
+                    setLoggin(false)
+                    dispatch(setIsLogin(false));
+                    setIsLoader(false)
+                }) 
             } else {
                 setLoggin(false)
                 dispatch(setIsLogin(false));
@@ -98,6 +126,28 @@ const MainScreen = () => {
             dispatch(setIsLogin(false));
             setIsLoader(false)
         }) 
+    }
+
+    const loginUserFireBaseAuth = async (id: string, mail: string, pwd: string) => {
+
+        signInWithEmailAndPassword(auth, mail, pwd)
+            .then(async (userCredential) => {
+
+                const userDataAuth = userCredential.user;
+                //console.log(userDataAuth)
+
+                userDataAuth.getIdToken().then(token => {
+                    addSecureStore(ID_TOKEN, token)
+                })
+
+                getUserInDatabase(id)
+            })
+            .catch((error) => {
+                //console.log(error)
+                setLoggin(false)
+                dispatch(setIsLogin(false));
+                setIsLoader(false)
+            });
     }
 
     /**
@@ -125,10 +175,14 @@ const MainScreen = () => {
      * Function handleLogout
      */
     const handleLogout = async () => {
-        deleteSecureStore(ID_TOKEN)
-        deleteSecureStore(ID_USER)
-        setLoggin(false)
-        dispatch(setIsLogin(false));
+        signOut(auth).then(() => {
+            deleteSecureStore(ID_TOKEN)
+            deleteSecureStore(ID_USER)
+            setLoggin(false)
+            dispatch(setIsLogin(false));
+        }).catch((error) => {
+            console.error(error.message)
+        });
     }
 
     if(isLoader == true){

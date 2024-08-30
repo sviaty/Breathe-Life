@@ -69,11 +69,10 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
 
     let [countCigarette, setCountCigarette] = useState<number>(0);
     const [isLoadCountCigarette, setIsLoadCountCigarette] = useState<boolean>(true);
-
     const [isLoaderGet, setIsLoaderGet] = useState<boolean>(false)
     const [isLoaderUserAdd, setIsLoaderUserAdd] = useState<boolean>(false)
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
-    const [textSnackBar, setTextSnackBar] = useState<string>("")
+    const [isloadGetLast, setIsloadGetLast] = useState<boolean>(true)
 
     let [userCig, setUserCig] = useState<string>( textTranslate.t('counterCigListBrandSelected') );
     let [userCigText, setUserCigText] = useState<string>( textTranslate.t('counterCigListBrandSelected') );
@@ -340,18 +339,22 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
      */
     const getlastCig = () => {
 
+        setIsloadGetLast(true)
         closeInterval()
 
         getUserLastCigaretteByIdUserFireStore(userSelector.userId).then((cigList) => {
 
             if(cigList != null){
+                setIsloadGetLast(false)
                 const d = cigList.dateTime.toDate()
                 startInterval(d)                
             } else {
+                setIsloadGetLast(false)
                 setDiff( textTranslate.t('counterCigListNoSmoke') )
             }
             
         }).catch((error) => {
+            setIsloadGetLast(false)
             //console.log("Error getUserLastCigaretteByIdUserFireStore")
             console.error(error)
         })
@@ -523,8 +526,23 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
                                         </View>  
 
                                         <View style={ CounterStyle.descContainer }>
-                                            <Text style={ CounterStyle.descContenairViewText }>{diff}</Text>
+                                            { isloadGetLast == true ?
+                                            <LoaderComponent 
+                                                text={ textTranslate.t('counterCigLastLoader') } 
+                                                step="" 
+                                                color={Colors.white} 
+                                                size="large"/>
+                                            :
+                                            <View>
+                                                { diff == textTranslate.t('counterCigListNoSmoke') ?
+                                                <Text style={ CounterStyle.descContenairViewText2 }>{diff}</Text>
+                                                :
+                                                <Text style={ CounterStyle.descContenairViewText }>{diff}</Text>
+                                                }
+                                            </View>
+                                        }
                                         </View>
+                                        
                                     
                                     </Surface>
 
@@ -591,7 +609,7 @@ const CounterCigaretteListScreen = ({ navigation }: Props) => {
             <SnackBarComponent 
                 visible={isSnackBar} 
                 setVisible={setIsSnackBar} 
-                message={textSnackBar}
+                message={ textTranslate.t('counterCigAfterAdd') + userCigSelected.cigaretteName}
                 duration={5000} />
             
         </SafeAreaProvider>

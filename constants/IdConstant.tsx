@@ -19,3 +19,6 @@ export const ID_NAVIGATE_USER_NO_LOGIN_SCREEN = "UserNoLoginScreen"
 
 export const ID_USER = "idUser"
 export const ID_TOKEN = "idToken"
+
+export const ID_MAIL = "idMail"
+export const ID_PWD = "idPwd"

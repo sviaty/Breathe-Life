@@ -53,6 +53,7 @@ const SettingPillComponent = () => {
     const [isLoaderGet, setIsLoaderGet] = useState<boolean>(false)
     const [isLoaderUserAdd, setIsLoaderUserAdd] = useState<boolean>(false)
     const [isSnackBar, setIsSnackBar] = useState<boolean>(false)
+    const [isloadGetLast, setIsloadGetLast] = useState<boolean>(true)
  
     let [userPill, setUserPill] = useState<string>( textTranslate.t('counterPillSelected') );
     let [userPillText, setUserPillText] = useState<string>( textTranslate.t('counterPillSelected') );
@@ -263,18 +264,23 @@ const SettingPillComponent = () => {
      */
     const getlastPill = () => {
 
+        setIsloadGetLast(true)
         closeInterval()
 
         getUserLastPillByIdUserFireStore(userSelector.userId).then((pillList) => {
 
             if(pillList != null){
+                setIsloadGetLast(false)        
                 const d = pillList.dateTime.toDate()
-                startInterval(d)                
+                startInterval(d)  
+                      
             } else {
+                setIsloadGetLast(false)           
                 setDiff( textTranslate.t('counterPillNoPillApply') )
             }
             
         }).catch((error) => {
+            setIsloadGetLast(false)   
             //console.log("Error getUserLastPillByIdUserFireStore")
             console.error(error)
         })
@@ -397,8 +403,23 @@ const SettingPillComponent = () => {
                                         <Text style={ CounterStyle.titleText }>{ textTranslate.t('counterPillLast') }</Text>
                                     </View>
 
+                                    
                                     <View style={ CounterStyle.descContainer }>
-                                        <Text style={ CounterStyle.descContenairViewText }>{ diff }</Text>
+                                    { isloadGetLast == true ?
+                                        <LoaderComponent 
+                                            text={ textTranslate.t('counterPillLastLoader') } 
+                                            step="" 
+                                            color={Colors.white} 
+                                            size="large"/>
+                                        :
+                                        <View>
+                                            { diff == textTranslate.t('counterPillNoPillApply') ?
+                                            <Text style={ CounterStyle.descContenairViewText2 }>{diff}</Text>
+                                            :
+                                            <Text style={ CounterStyle.descContenairViewText }>{diff}</Text>
+                                            }
+                                        </View>
+                                    }
                                     </View>
                                 
                                 </Surface>
